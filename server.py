@@ -35,23 +35,24 @@ PRED_LEN        = int(os.environ.get("KRONOS_PRED_LEN", "24"))
 PORT            = int(os.environ.get("KRONOS_PORT", "8080"))
 CACHE_SECONDS   = int(os.environ.get("KRONOS_CACHE", "60"))  # min seconds between recomputes per symbol/tf
 
-# NSE symbols on yfinance.  ^NSEI = Nifty 50, ^NSEBANK = Bank Nifty
+# symbols on yfinance.  ^NSEI = Nifty 50, ^NSEBANK = Bank Nifty, BTC-USD = Bitcoin
 SYMBOL_MAP = {
     "NIFTY":     "^NSEI",
     "BANKNIFTY": "^NSEBANK",
+    "BTC":       "BTC-USD",
 }
 
 # yfinance supports: 1m,2m,5m,15m,30m,60m,90m,1h,1d ... (1m only last 7 days)
 TF_MAP = {
     "1m":  ("1m",  "5d"),
-    "3m":  ("5m",  "5d"),    # yfinance has no 3m; we use 5m as proxy
+    "3m":  ("1m",  "7d"),    # We fetch 1m and resample to 3m
     "5m":  ("5m",  "5d"),
     "15m": ("15m", "1mo"),
     "30m": ("30m", "1mo"),
     "1h":  ("60m", "3mo"),
     "1d":  ("1d",  "2y"),
 }
-TF_MINUTES = {"1m":1,"3m":5,"5m":5,"15m":15,"30m":30,"1h":60,"1d":1440}
+TF_MINUTES = {"1m":1,"3m":3,"5m":5,"15m":15,"30m":30,"1h":60,"1d":1440}
 
 app = Flask(__name__)
 CORS(app)
@@ -85,6 +86,15 @@ def fetch_candles(symbol_key, tf_key):
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = [c[0] for c in df.columns]
     df.columns = [str(c).lower() for c in df.columns]
+
+    if tf_key == "3m":
+        df = df.resample('3min').agg({
+            'open': 'first',
+            'high': 'max',
+            'low': 'min',
+            'close': 'last',
+            'volume': 'sum'
+        })
 
     df = df[["open", "high", "low", "close", "volume"]].copy()
     df = df.dropna()
