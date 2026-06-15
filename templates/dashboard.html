@@ -177,6 +177,9 @@ async function load() {
     const res = await fetch(`${API}/api/signal/${sym}/${tf}`);
     const d = await res.json();
     if (d.error) throw new Error(d.error);
+    if (!d.candles || !d.predicted) {
+      throw new Error(d.detail || d.message || 'Invalid response format from server');
+    }
 
     actualSeries.setData(d.candles);
     predSeries.setData(d.predicted);
