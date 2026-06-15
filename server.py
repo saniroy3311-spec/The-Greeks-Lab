@@ -70,6 +70,8 @@ print(f"[Kronos] Model ready on device={DEVICE}")
 _cache = {}        # key -> (timestamp, result_dict)
 _cache_lock = threading.Lock()
 ACTIVE_COMBINATIONS = {}  # key -> last_request_time
+active_lock = threading.Lock()
+prediction_lock = threading.Lock()
 
 
 def fetch_candles(symbol_key, tf_key):
@@ -104,7 +106,7 @@ def fetch_candles(symbol_key, tf_key):
     return df
 
 
-def run_prediction(symbol_key, tf_key):
+def _run_prediction_inner(symbol_key, tf_key):
     """Run Kronos on the latest candles and build a signal dict."""
     df = fetch_candles(symbol_key, tf_key)
     if len(df) < 50:
@@ -180,6 +182,11 @@ def run_prediction(symbol_key, tf_key):
     }
 
 
+def run_prediction(symbol_key, tf_key):
+    with prediction_lock:
+        return _run_prediction_inner(symbol_key, tf_key)
+
+
 @app.route("/")
 def index():
     return render_template("dashboard.html")
@@ -201,8 +208,10 @@ def background_cache_worker():
             now = time.time()
             
             # Identify active combinations (requested in the last 5 minutes)
+            with active_lock:
+                active_items = list(ACTIVE_COMBINATIONS.items())
             active_keys = [
-                key for key, last_time in ACTIVE_COMBINATIONS.items()
+                key for key, last_time in active_items
                 if (now - last_time) < 300
             ]
             
@@ -254,7 +263,8 @@ def api_signal(symbol, tf):
     now = time.time()
 
     # Record active client interest
-    ACTIVE_COMBINATIONS[key] = now
+    with active_lock:
+        ACTIVE_COMBINATIONS[key] = now
 
     with _cache_lock:
         cached = _cache.get(key)
