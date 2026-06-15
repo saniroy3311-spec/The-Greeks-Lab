@@ -188,7 +188,7 @@ function fmt(n) { return Number(n).toLocaleString('en-IN', {minimumFractionDigit
 
 let timer = null, countdown = 0, countTimer = null;
 
-async function load() {
+async function load(isFirstLoad = false) {
   const sym = $('symbol').value, tf = $('tf').value;
   $('status').textContent = 'Updating…';
   $('err').style.display = 'none';
@@ -202,7 +202,9 @@ async function load() {
 
     actualSeries.setData(d.candles);
     predSeries.setData(d.predicted);
-    chart.timeScale().fitContent();
+    if (isFirstLoad) {
+      chart.timeScale().fitContent();
+    }
 
     const klass = d.direction === 'Long' ? 'up' : d.direction === 'Short' ? 'down' : 'flat';
     $('sig').className = 'signal ' + klass;
@@ -238,10 +240,10 @@ function schedule() {
   }
 }
 
-['symbol','tf'].forEach(id => $(id).addEventListener('change', () => { load(); }));
+['symbol','tf'].forEach(id => $(id).addEventListener('change', () => { load(true); }));
 $('refresh').addEventListener('change', schedule);
 
-load();
+load(true);
 schedule();
 </script>
 </body>
