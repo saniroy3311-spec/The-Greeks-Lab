@@ -191,10 +191,9 @@ def background_cache_worker():
     
     # Core list of combinations to keep warm even if no one is watching
     default_combinations = [
-        ("NIFTY", "5m"),
-        ("BANKNIFTY", "5m"),
-        ("BTC", "5m"),
-        ("BTC", "3m"),
+        ("NIFTY", "1m"), ("NIFTY", "3m"), ("NIFTY", "5m"), ("NIFTY", "15m"), ("NIFTY", "30m"),
+        ("BANKNIFTY", "1m"), ("BANKNIFTY", "3m"), ("BANKNIFTY", "5m"), ("BANKNIFTY", "15m"), ("BANKNIFTY", "30m"),
+        ("BTC", "1m"), ("BTC", "3m"), ("BTC", "5m"), ("BTC", "15m"), ("BTC", "30m"),
     ]
     
     while True:
