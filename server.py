@@ -33,7 +33,7 @@ DEVICE          = os.environ.get("KRONOS_DEVICE", "cpu")   # "cpu" or "cuda:0"
 LOOKBACK        = int(os.environ.get("KRONOS_LOOKBACK", "400"))
 PRED_LEN        = int(os.environ.get("KRONOS_PRED_LEN", "24"))
 PORT            = int(os.environ.get("KRONOS_PORT", "8080"))
-CACHE_SECONDS   = int(os.environ.get("KRONOS_CACHE", "60"))  # min seconds between recomputes per symbol/tf
+CACHE_SECONDS   = int(os.environ.get("KRONOS_CACHE", "10"))  # min seconds between recomputes per symbol/tf
 
 # symbols on yfinance.  ^NSEI = Nifty 50, ^NSEBANK = Bank Nifty, BTC-USD = Bitcoin
 SYMBOL_MAP = {
