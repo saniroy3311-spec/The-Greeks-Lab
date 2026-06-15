@@ -137,7 +137,7 @@
   </div>
 
 <script>
-const API = "";  // same origin; if hosting frontend separately, put http://VPS_IP:8080 here
+const API = window.location.pathname.endsWith('/') ? window.location.pathname.slice(0, -1) : window.location.pathname;
 
 const chart = LightweightCharts.createChart(document.getElementById('chart'), {
   layout: { background: { color: 'transparent' }, textColor: '#8b949e' },
