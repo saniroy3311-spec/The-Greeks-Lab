@@ -69,6 +69,7 @@ print(f"[Kronos] Model ready on device={DEVICE}")
 
 _cache = {}        # key -> (timestamp, result_dict)
 _cache_lock = threading.Lock()
+ACTIVE_COMBINATIONS = {}  # key -> last_request_time
 
 
 def fetch_candles(symbol_key, tf_key):
@@ -184,6 +185,68 @@ def index():
     return render_template("dashboard.html")
 
 
+def background_cache_worker():
+    """Background worker to continuously compute predictions and keep cache fresh."""
+    print("[Kronos] Background cache worker started.")
+    
+    # Core list of combinations to keep warm even if no one is watching
+    default_combinations = [
+        ("NIFTY", "5m"),
+        ("BANKNIFTY", "5m"),
+        ("BTC", "5m"),
+        ("BTC", "3m"),
+    ]
+    
+    while True:
+        try:
+            now = time.time()
+            
+            # Identify active combinations (requested in the last 5 minutes)
+            active_keys = [
+                key for key, last_time in ACTIVE_COMBINATIONS.items()
+                if (now - last_time) < 300
+            ]
+            
+            to_update = []
+            for key in active_keys:
+                sym, tf = key.split(":")
+                to_update.append((sym, tf, True))  # (symbol, tf, is_active)
+                
+            for sym, tf in default_combinations:
+                key = f"{sym}:{tf}"
+                if key not in active_keys:
+                    to_update.append((sym, tf, False))
+            
+            if not to_update:
+                time.sleep(5)
+                continue
+                
+            for sym, tf, is_active in to_update:
+                key = f"{sym}:{tf}"
+                
+                with _cache_lock:
+                    cached = _cache.get(key)
+                
+                # Active combinations updated if older than 10 seconds.
+                # Passive (default) combinations updated if older than 90 seconds.
+                max_age = 10 if is_active else 90
+                
+                if not cached or (time.time() - cached[0]) >= max_age:
+                    try:
+                        result = run_prediction(sym, tf)
+                        with _cache_lock:
+                            _cache[key] = (time.time(), result)
+                    except Exception as e:
+                        print(f"[Background Cache] Error updating {key}: {e}")
+                        
+                # Sleep a short duration to save CPU cycles
+                time.sleep(0.5 if is_active else 2.0)
+                
+        except Exception as e:
+            print(f"[Background Cache] Worker error: {e}")
+            time.sleep(5)
+
+
 @app.route("/api/signal/<symbol>/<tf>")
 def api_signal(symbol, tf):
     symbol = symbol.upper()
@@ -191,11 +254,16 @@ def api_signal(symbol, tf):
     key = f"{symbol}:{tf}"
     now = time.time()
 
+    # Record active client interest
+    ACTIVE_COMBINATIONS[key] = now
+
     with _cache_lock:
         cached = _cache.get(key)
-        if cached and (now - cached[0]) < CACHE_SECONDS:
+        # Serve immediately if present to make switching instant
+        if cached:
             return jsonify(cached[1])
 
+    # Fallback: compute synchronously if not in cache at all
     try:
         result = run_prediction(symbol, tf)
         with _cache_lock:
@@ -214,4 +282,9 @@ def health():
 if __name__ == "__main__":
     print(f"[Kronos] Dashboard:  http://0.0.0.0:{PORT}")
     print(f"[Kronos] API sample: http://0.0.0.0:{PORT}/api/signal/NIFTY/5m")
+    
+    # Start background cache worker
+    bg_thread = threading.Thread(target=background_cache_worker, daemon=True)
+    bg_thread.start()
+    
     app.run(host="0.0.0.0", port=PORT, threaded=True)
