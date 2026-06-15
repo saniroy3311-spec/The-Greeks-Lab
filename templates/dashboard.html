@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kronos Live Signal</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+  :root {
+    --bg: #0e1116; --surface: #161b22; --border: #262d36;
+    --text: #e6edf3; --muted: #8b949e;
+    --up: #1d9e75; --down: #d85a30; --flat: #8b949e;
+    --pred: #ef9f27; --blue: #378add;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); padding: 16px;
+    max-width: 1100px; margin: 0 auto;
+  }
+  .topbar { display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .title { font-size: 18px; font-weight: 600; }
+  .controls { display: flex; gap: 8px; }
+  select {
+    font: inherit; font-size: 13px; padding: 7px 11px; border-radius: 8px;
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border); cursor: pointer;
+  }
+  .live { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--up);
+    animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  .signal {
+    border-radius: 14px; padding: 18px 22px; margin-bottom: 14px;
+    border: 1px solid; transition: all .4s ease;
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+  }
+  .signal.up   { background: rgba(29,158,117,.12); border-color: var(--up); }
+  .signal.down { background: rgba(216,90,48,.12);  border-color: var(--down); }
+  .signal.flat { background: rgba(139,148,158,.10); border-color: var(--flat); }
+  .sig-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+  .sig-dir { font-size: 34px; font-weight: 700; line-height: 1; letter-spacing: -.5px; }
+  .signal.up .sig-dir { color: var(--up); }
+  .signal.down .sig-dir { color: var(--down); }
+  .signal.flat .sig-dir { color: var(--flat); }
+  .sig-sub { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .sig-action { font-size: 22px; font-weight: 600; line-height: 1; }
+  .right { text-align: right; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px; margin-bottom: 14px; }
+  .stat { background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; }
+  .stat .k { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .stat .v { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .chart-card { background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px; }
+  .chart-head { display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px; }
+  .chart-head .t { font-size: 13px; font-weight: 600; }
+  .legend { display: flex; gap: 14px; font-size: 11px; color: var(--muted); }
+  .swatch { display: inline-block; width: 12px; height: 3px; vertical-align: 3px; margin-right: 4px; border-radius: 2px; }
+  #chart { width: 100%; height: 360px; }
+
+  .footer { display: flex; justify-content: space-between; font-size: 11px;
+    color: var(--muted); margin-top: 10px; padding: 0 4px; }
+  .err { background: rgba(216,90,48,.15); border: 1px solid var(--down);
+    color: var(--down); padding: 10px 14px; border-radius: 8px; font-size: 13px;
+    margin-bottom: 14px; display: none; }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="title">Kronos Live Signal</div>
+    <div class="controls">
+      <select id="symbol">
+        <option value="NIFTY">Nifty 50</option>
+        <option value="BANKNIFTY">Bank Nifty</option>
+      </select>
+      <select id="tf">
+        <option value="5m" selected>5 min</option>
+        <option value="15m">15 min</option>
+        <option value="30m">30 min</option>
+        <option value="1h">1 hour</option>
+        <option value="1d">1 day</option>
+      </select>
+      <select id="refresh">
+        <option value="60">Refresh 60s</option>
+        <option value="90">Refresh 90s</option>
+        <option value="120">Refresh 120s</option>
+        <option value="0">Manual</option>
+      </select>
+    </div>
+    <div class="live"><span class="dot" id="dot"></span><span id="status">Loading…</span></div>
+  </div>
+
+  <div class="err" id="err"></div>
+
+  <div class="signal flat" id="sig">
+    <div>
+      <div class="sig-label">Kronos prediction</div>
+      <div class="sig-dir" id="dir">—</div>
+      <div class="sig-sub">Confidence <span id="conf" style="font-weight:600;color:var(--text)">—</span></div>
+    </div>
+    <div class="right">
+      <div class="sig-label">Action</div>
+      <div class="sig-action" id="act">—</div>
+      <div class="sig-sub" id="bias">—</div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="k">Current</div><div class="v" id="s-cur">—</div></div>
+    <div class="stat"><div class="k">Predicted (5 bars)</div><div class="v" id="s-p5">—</div></div>
+    <div class="stat"><div class="k">Predicted (end)</div><div class="v" id="s-pn">—</div></div>
+    <div class="stat"><div class="k">Expected move</div><div class="v" id="s-mv">—</div></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-head">
+      <div class="t">Price + Kronos forecast</div>
+      <div class="legend">
+        <span><span class="swatch" style="background:var(--up)"></span>Actual candles</span>
+        <span><span class="swatch" style="background:var(--pred)"></span>Predicted candles</span>
+      </div>
+    </div>
+    <div id="chart"></div>
+  </div>
+
+  <div class="footer">
+    <span id="updated">Last update: —</span>
+    <span id="meta">Kronos-small · context 400</span>
+  </div>
+
+<script>
+const API = "";  // same origin; if hosting frontend separately, put http://VPS_IP:8080 here
+
+const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+  layout: { background: { color: 'transparent' }, textColor: '#8b949e' },
+  grid: { vertLines: { color: '#1c232c' }, horzLines: { color: '#1c232c' } },
+  timeScale: { timeVisible: true, secondsVisible: false, borderColor: '#262d36' },
+  rightPriceScale: { borderColor: '#262d36' },
+  crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+  height: 360,
+});
+
+const actualSeries = chart.addCandlestickSeries({
+  upColor: '#1d9e75', downColor: '#d85a30',
+  wickUpColor: '#1d9e75', wickDownColor: '#d85a30',
+  borderVisible: false,
+});
+
+const predSeries = chart.addCandlestickSeries({
+  upColor: 'rgba(239,159,39,.9)', downColor: 'rgba(239,159,39,.55)',
+  wickUpColor: '#ef9f27', wickDownColor: '#ef9f27',
+  borderColor: '#ef9f27', borderVisible: true,
+});
+
+window.addEventListener('resize', () =>
+  chart.applyOptions({ width: document.getElementById('chart').clientWidth }));
+chart.applyOptions({ width: document.getElementById('chart').clientWidth });
+
+const $ = id => document.getElementById(id);
+function fmt(n) { return Number(n).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+let timer = null, countdown = 0, countTimer = null;
+
+async function load() {
+  const sym = $('symbol').value, tf = $('tf').value;
+  $('status').textContent = 'Updating…';
+  $('err').style.display = 'none';
+  try {
+    const res = await fetch(`${API}/api/signal/${sym}/${tf}`);
+    const d = await res.json();
+    if (d.error) throw new Error(d.error);
+
+    actualSeries.setData(d.candles);
+    predSeries.setData(d.predicted);
+    chart.timeScale().fitContent();
+
+    const klass = d.direction === 'Long' ? 'up' : d.direction === 'Short' ? 'down' : 'flat';
+    $('sig').className = 'signal ' + klass;
+    $('dir').textContent = d.direction;
+    $('conf').textContent = d.confidence + '%';
+    $('act').textContent = d.action;
+    $('bias').textContent = d.bias;
+    $('s-cur').textContent = fmt(d.current);
+    $('s-p5').textContent = fmt(d.pred_5);
+    $('s-pn').textContent = fmt(d.pred_n);
+    $('s-mv').textContent = (d.move >= 0 ? '+' : '') + fmt(d.move) + '  (' + d.move_pct + '%)';
+    $('updated').textContent = 'Last update: ' + d.updated;
+    $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · horizon ${d.pred_len}`;
+    $('status').textContent = 'Live';
+  } catch (e) {
+    $('err').textContent = 'Error: ' + e.message + ' — is the market open and the server reachable?';
+    $('err').style.display = 'block';
+    $('status').textContent = 'Error';
+  }
+}
+
+function schedule() {
+  if (timer) clearInterval(timer);
+  if (countTimer) clearInterval(countTimer);
+  const secs = parseInt($('refresh').value, 10);
+  if (secs > 0) {
+    countdown = secs;
+    countTimer = setInterval(() => {
+      countdown--;
+      if (countdown <= 0) countdown = secs;
+    }, 1000);
+    timer = setInterval(load, secs * 1000);
+  }
+}
+
+['symbol','tf'].forEach(id => $(id).addEventListener('change', () => { load(); }));
+$('refresh').addEventListener('change', schedule);
+
+load();
+schedule();
+</script>
+</body>
+</html>

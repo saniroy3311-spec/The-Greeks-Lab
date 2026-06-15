@@ -1,0 +1,22 @@
+[Unit]
+Description=Kronos Live Trading Dashboard
+After=network.target
+
+[Service]
+Type=simple
+User=kronos
+WorkingDirectory=/opt/kronos
+Environment="KRONOS_MODEL=NeoQuasar/Kronos-small"
+Environment="KRONOS_TOKENIZER=NeoQuasar/Kronos-Tokenizer-base"
+Environment="KRONOS_DEVICE=cpu"
+Environment="KRONOS_PORT=8080"
+Environment="KRONOS_PRED_LEN=24"
+Environment="KRONOS_CACHE=60"
+ExecStart=/opt/kronos/venv/bin/python server.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
