@@ -48,9 +48,10 @@ sudo -u "$SERVICE_USER" bash -c "
     cd $APP_DIR
     python3 -m venv venv
     venv/bin/pip install --quiet --upgrade pip
+    venv/bin/pip install --quiet torch --index-url https://download.pytorch.org/whl/cpu
     venv/bin/pip install --quiet -r requirements.txt
 "
-echo "  Python env ready (torch + yfinance + flask installed)"
+echo "  Python env ready (torch CPU + yfinance + flask installed)"
 
 # ── 5. systemd service (kronos only — does not touch other services) ─────────
 echo "[5/5] Installing systemd service..."
