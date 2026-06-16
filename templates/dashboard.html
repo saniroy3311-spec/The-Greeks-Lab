@@ -209,15 +209,13 @@
     }
     .scalper-badges-panel {
       display: flex;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      padding-bottom: 6px;
+      flex-wrap: wrap;
       gap: 6px;
-      -webkit-overflow-scrolling: touch;
+      justify-content: center;
+      padding-bottom: 6px;
     }
     .scalper-badge {
-      flex-shrink: 0;
-      padding: 6px 12px;
+      padding: 6px 10px;
       font-size: 11px;
     }
     .scalper-table th, .scalper-table td {
@@ -568,18 +566,21 @@ function initScalperChart() {
     upColor: '#26a69a', downColor: '#ef5350',
     wickUpColor: '#26a69a', wickDownColor: '#ef5350',
     borderVisible: false,
+    priceLineVisible: false,
   });
 
   ema9Series = scalperChart.addLineSeries({
     color: '#2962FF',
     lineWidth: 2,
     title: '9 EMA',
+    priceLineVisible: false,
   });
 
   ema15Series = scalperChart.addLineSeries({
     color: '#FF6D00',
     lineWidth: 2,
     title: '15 EMA',
+    priceLineVisible: false,
   });
 
   entryLineSeries = scalperChart.addLineSeries({
