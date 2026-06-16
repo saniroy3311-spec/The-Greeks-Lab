@@ -27,9 +27,7 @@
     background: var(--surface); color: var(--text);
     border: 1px solid var(--border); cursor: pointer;
   }
-  .live { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--up);
-    animation: pulse 2s ease-in-out infinite; }
+  .live { display: none; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
   .signal {
@@ -409,6 +407,7 @@ const actualSeries = chart.addCandlestickSeries({
   upColor: '#1d9e75', downColor: '#d85a30',
   wickUpColor: '#1d9e75', wickDownColor: '#d85a30',
   borderVisible: false,
+  lastPriceAnimation: LightweightCharts.LastPriceAnimationMode.OnDataUpdate,
 });
 
 const predSeries = chart.addCandlestickSeries({
@@ -443,6 +442,18 @@ async function load(isFirstLoad = false) {
     if (d.error) throw new Error(d.error);
     if (!d.candles || !d.predicted) {
       throw new Error(d.detail || d.message || 'Invalid response format from server');
+    }
+
+    // Check if server data is stale compared to last closed websocket candle
+    if (sym === 'BTC' && wsLastClosedTime !== null && d.candles.length > 0) {
+      const serverLastCandleTime = d.candles[d.candles.length - 1].time;
+      if (serverLastCandleTime < wsLastClosedTime) {
+        console.log(`[BTC Live] Server data is stale (last: ${serverLastCandleTime} vs expected: ${wsLastClosedTime}). Retrying in 1.5s...`);
+        setTimeout(() => {
+          if (activeTab === 'live-signal' && $('symbol').value === 'BTC') load();
+        }, 1500);
+        return;
+      }
     }
 
     actualSeries.setData(d.candles);
@@ -567,7 +578,8 @@ function initScalperChart() {
     upColor: '#26a69a', downColor: '#ef5350',
     wickUpColor: '#26a69a', wickDownColor: '#ef5350',
     borderVisible: false,
-    priceLineVisible: false,
+    priceLineVisible: true,
+    lastPriceAnimation: LightweightCharts.LastPriceAnimationMode.OnDataUpdate,
   });
 
   ema9Series = scalperChart.addLineSeries({
@@ -637,6 +649,18 @@ async function loadScalper(isFirstLoad = false) {
     const res = await fetch(`${API}/api/scalper/${sym}/${tf}`);
     const d = await res.json();
     if (d.error) throw new Error(d.error);
+
+    // Check if server data is stale compared to last closed websocket candle
+    if (sym === 'BTC' && wsLastClosedTime !== null && d.candles.length > 0) {
+      const serverLastCandleTime = d.candles[d.candles.length - 1].time;
+      if (serverLastCandleTime < wsLastClosedTime) {
+        console.log(`[BTC Scalper] Server data is stale (last: ${serverLastCandleTime} vs expected: ${wsLastClosedTime}). Retrying in 1.5s...`);
+        setTimeout(() => {
+          if (activeTab === 'scalper' && $('symbol').value === 'BTC') loadScalper();
+        }, 1500);
+        return;
+      }
+    }
     
     candlestickSeries.setData(d.candles);
     ema9Series.setData(d.ema9);
@@ -784,6 +808,11 @@ function schedule() {
     if (countdown <= 0) countdown = secs;
   }, 1000);
   timer = setInterval(() => {
+    const sym = $('symbol').value;
+    if (sym === 'BTC') {
+      // Skip polling for BTC, since it relies on the websocket live feed and updates on candle close
+      return;
+    }
     if (activeTab === 'live-signal') {
       load();
     } else {
@@ -796,6 +825,7 @@ let btcSocket = null;
 let lastClosedEma9 = null;
 let lastClosedEma15 = null;
 let lastClosedTime = null;
+let wsLastClosedTime = null;
 
 function connectBtcWebSocket(tf, isScalper = false) {
   const symbol = $('symbol').value;
@@ -834,6 +864,10 @@ function connectBtcWebSocket(tf, isScalper = false) {
     
     const candle = { time: t, open: o, high: h, low: l, close: c };
     
+    if (isClosed) {
+      wsLastClosedTime = t;
+    }
+    
     if (isScalper) {
       if (candlestickSeries) {
         candlestickSeries.update(candle);
@@ -842,14 +876,18 @@ function connectBtcWebSocket(tf, isScalper = false) {
         updateShadedBoxes();
       }
       if (isClosed) {
-        setTimeout(() => loadScalper(), 1000);
+        setTimeout(() => {
+          if ($('symbol').value === 'BTC') loadScalper();
+        }, 1000);
       }
     } else {
       if (actualSeries) {
         actualSeries.update(candle);
       }
       if (isClosed) {
-        setTimeout(() => load(), 1000);
+        setTimeout(() => {
+          if ($('symbol').value === 'BTC') load();
+        }, 1000);
       }
     }
   };
@@ -903,6 +941,7 @@ function updateLiveTradeRealtime(candle) {
 }
 
 ['symbol','tf'].forEach(id => $(id).addEventListener('change', () => {
+  wsLastClosedTime = null;
   if (activeTab === 'live-signal') {
     load(true);
   } else {
