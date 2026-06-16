@@ -321,7 +321,7 @@ function initScalperChart() {
   
   scalperChart = LightweightCharts.createChart(document.getElementById('tv-chart'), {
     layout: { 
-      background: { type: LightweightCharts.ColorType.Solid, color: '#ffffff' }, 
+      background: { color: '#ffffff' }, 
       textColor: '#333333' 
     },
     grid: { 
@@ -375,12 +375,12 @@ function initScalperChart() {
 }
 
 async function loadScalper(isFirstLoad = false) {
-  initScalperChart();
   const sym = $('symbol').value, tf = $('tf').value;
   $('status').textContent = 'Updating…';
   $('err').style.display = 'none';
   
   try {
+    initScalperChart();
     const res = await fetch(`${API}/api/scalper/${sym}/${tf}`);
     const d = await res.json();
     if (d.error) throw new Error(d.error);
@@ -421,11 +421,12 @@ async function loadScalper(isFirstLoad = false) {
     const infoBar = $('scalper-info-bar');
     if (d.active_trade && d.active_trade.active) {
       const trade = d.active_trade;
+      const lineStyleVal = (window.LightweightCharts && LightweightCharts.LineStyle) ? LightweightCharts.LineStyle.Dashed : 2;
       entryLine = candlestickSeries.createPriceLine({
         price: trade.entryPrice,
         color: '#2962FF',
         lineWidth: 2,
-        lineStyle: LightweightCharts.LineStyle.Dashed,
+        lineStyle: lineStyleVal,
         axisLabelVisible: true,
         title: 'ENTRY',
       });
@@ -433,7 +434,7 @@ async function loadScalper(isFirstLoad = false) {
         price: trade.slPrice,
         color: '#ef5350',
         lineWidth: 2,
-        lineStyle: LightweightCharts.LineStyle.Dashed,
+        lineStyle: lineStyleVal,
         axisLabelVisible: true,
         title: 'SL',
       });
@@ -441,7 +442,7 @@ async function loadScalper(isFirstLoad = false) {
         price: trade.tpPrice,
         color: '#26a69a',
         lineWidth: 2,
-        lineStyle: LightweightCharts.LineStyle.Dashed,
+        lineStyle: lineStyleVal,
         axisLabelVisible: true,
         title: 'TP',
       });
