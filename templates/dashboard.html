@@ -482,9 +482,9 @@ let scalperChart = null;
 let candlestickSeries = null;
 let ema9Series = null;
 let ema15Series = null;
-let entryLine = null;
-let slLine = null;
-let tpLine = null;
+let entryLineSeries = null;
+let slLineSeries = null;
+let tpLineSeries = null;
 let currentTrade = null;
 
 function updateShadedBoxes() {
@@ -586,6 +586,33 @@ function initScalperChart() {
     title: '15 EMA',
   });
 
+  entryLineSeries = scalperChart.addLineSeries({
+    color: '#2962FF',
+    lineWidth: 2,
+    priceLineVisible: false,
+    crosshairMarkerVisible: false,
+    lastValueVisible: true,
+    title: 'ENTRY',
+  });
+
+  slLineSeries = scalperChart.addLineSeries({
+    color: '#ef5350',
+    lineWidth: 2,
+    priceLineVisible: false,
+    crosshairMarkerVisible: false,
+    lastValueVisible: true,
+    title: 'SL',
+  });
+
+  tpLineSeries = scalperChart.addLineSeries({
+    color: '#26a69a',
+    lineWidth: 2,
+    priceLineVisible: false,
+    crosshairMarkerVisible: false,
+    lastValueVisible: true,
+    title: 'TP',
+  });
+
   window.addEventListener('resize', () => {
     if (scalperChart) {
       scalperChart.applyOptions({ width: document.getElementById('tv-chart').clientWidth });
@@ -639,44 +666,34 @@ async function loadScalper(isFirstLoad = false) {
       }
     });
     
-    if (entryLine) { candlestickSeries.removePriceLine(entryLine); entryLine = null; }
-    if (slLine) { candlestickSeries.removePriceLine(slLine); slLine = null; }
-    if (tpLine) { candlestickSeries.removePriceLine(tpLine); tpLine = null; }
-    
     const infoBar = $('scalper-info-bar');
     currentTrade = d.active_trade;
     
     if (d.active_trade && d.active_trade.active) {
       const trade = d.active_trade;
-      const lineStyleVal = (window.LightweightCharts && LightweightCharts.LineStyle) ? LightweightCharts.LineStyle.Solid : 0;
-      entryLine = candlestickSeries.createPriceLine({
-        price: trade.entryPrice,
-        color: '#2962FF',
-        lineWidth: 2,
-        lineStyle: lineStyleVal,
-        axisLabelVisible: true,
-        title: 'ENTRY',
+      
+      const entryLineData = [];
+      const slLineData = [];
+      const tpLineData = [];
+      
+      d.candles.forEach(candle => {
+        if (candle.time >= trade.entryTime) {
+          entryLineData.push({ time: candle.time, value: trade.entryPrice });
+          slLineData.push({ time: candle.time, value: trade.slPrice });
+          tpLineData.push({ time: candle.time, value: trade.tpPrice });
+        }
       });
-      slLine = candlestickSeries.createPriceLine({
-        price: trade.slPrice,
-        color: '#ef5350',
-        lineWidth: 2,
-        lineStyle: lineStyleVal,
-        axisLabelVisible: true,
-        title: 'SL',
-      });
-      tpLine = candlestickSeries.createPriceLine({
-        price: trade.tpPrice,
-        color: '#26a69a',
-        lineWidth: 2,
-        lineStyle: lineStyleVal,
-        axisLabelVisible: true,
-        title: 'TP',
-      });
+      
+      if (entryLineSeries) entryLineSeries.setData(entryLineData);
+      if (slLineSeries) slLineSeries.setData(slLineData);
+      if (tpLineSeries) tpLineSeries.setData(tpLineData);
       
       $('scalper-info-text').innerHTML = `<strong>Active Trade:</strong> ${trade.type} position entered at ${trade.entryPrice}. SL: ${trade.slPrice} | TP: ${trade.tpPrice} (1:2 Risk:Reward)`;
       infoBar.style.display = 'block';
     } else {
+      if (entryLineSeries) entryLineSeries.setData([]);
+      if (slLineSeries) slLineSeries.setData([]);
+      if (tpLineSeries) tpLineSeries.setData([]);
       infoBar.style.display = 'none';
     }
     
