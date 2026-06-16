@@ -427,9 +427,15 @@ const predSeries = chart.addCandlestickSeries({
 });
 
 window.addEventListener('resize', () => {
-  chart.applyOptions({ width: document.getElementById('chart').clientWidth });
+  const chartContainer = document.getElementById('chart');
+  if (chart && chartContainer) {
+    chart.resize(chartContainer.clientWidth, chartContainer.clientHeight);
+  }
 });
-chart.applyOptions({ width: document.getElementById('chart').clientWidth });
+const chartContainer = document.getElementById('chart');
+if (chart && chartContainer) {
+  chart.resize(chartContainer.clientWidth, chartContainer.clientHeight);
+}
 
 const $ = id => document.getElementById(id);
 function fmt(n) { return Number(n).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}); }
@@ -614,13 +620,16 @@ function initScalperChart() {
     title: 'TP',
   });
 
+  const tvContainer = document.getElementById('tv-chart-container');
   window.addEventListener('resize', () => {
-    if (scalperChart) {
-      scalperChart.applyOptions({ width: document.getElementById('tv-chart').clientWidth });
+    if (scalperChart && tvContainer) {
+      scalperChart.resize(tvContainer.clientWidth, tvContainer.clientHeight);
       updateShadedBoxes();
     }
   });
-  scalperChart.applyOptions({ width: document.getElementById('tv-chart').clientWidth });
+  if (scalperChart && tvContainer) {
+    scalperChart.resize(tvContainer.clientWidth, tvContainer.clientHeight);
+  }
 
   // Update box coordinates on zoom, scroll, or hover
   scalperChart.timeScale().subscribeVisibleTimeRangeChange(updateShadedBoxes);
