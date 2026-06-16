@@ -480,7 +480,7 @@ async function load(isFirstLoad = false) {
     $('updated').textContent = 'Last update: ' + d.updated;
     $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · horizon ${d.pred_len}`;
     $('status').textContent = 'Live';
-    connectBtcWebSocket(tf, false);
+    connectBtcWebSocket(tf);
   } catch (e) {
     $('err').textContent = 'Error: ' + e.message + ' — is the market open and the server reachable?';
     $('err').style.display = 'block';
@@ -794,7 +794,7 @@ async function loadScalper(isFirstLoad = false) {
       const lastE15 = d.ema15[d.ema15.length - 1];
       lastClosedEma15 = lastE15.value;
     }
-    connectBtcWebSocket(tf, true);
+    connectBtcWebSocket(tf);
 
     $('updated').textContent = 'Last update: ' + d.updated;
     $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · EMA 9/15`;
@@ -845,7 +845,7 @@ const TF_DURATIONS = {
   "1d": 86400
 };
 
-function connectBtcWebSocket(tf, isScalper = false) {
+function connectBtcWebSocket(tf) {
   const symbol = $('symbol').value;
   
   if (symbol !== 'BTC') {
@@ -887,7 +887,7 @@ function connectBtcWebSocket(tf, isScalper = false) {
       wsLastClosedTime = t;
     }
     
-    if (isScalper) {
+    if (activeTab === 'scalper') {
       if (candlestickSeries) {
         candlestickSeries.update(candle);
         updateLiveEMAs(candle);
