@@ -327,9 +327,11 @@ def api_scalper(symbol, tf):
         df['emaGap_abs'] = df['emaGap'].abs()
         df['emaGap_abs_prev'] = df['emaGap_abs'].shift(1)
         
+        # Filter noise by requiring a minimum EMA gap threshold (e.g. 0.02% of close price)
+        df['threshold'] = df['close'] * 0.0002
         df['isExpanding'] = df['emaGap_abs'] > df['emaGap_abs_prev']
-        df['upTrend'] = (df['ema9'] > df['ema15']) & df['isExpanding']
-        df['downTrend'] = (df['ema9'] < df['ema15']) & df['isExpanding']
+        df['upTrend'] = (df['ema9'] > df['ema15']) & df['isExpanding'] & (df['emaGap_abs'] > df['threshold'])
+        df['downTrend'] = (df['ema9'] < df['ema15']) & df['isExpanding'] & (df['emaGap_abs'] > df['threshold'])
         
         df['longTrigger'] = df['upTrend'] & (~df['upTrend'].shift(1).fillna(False))
         df['shortTrigger'] = df['downTrend'] & (~df['downTrend'].shift(1).fillna(False))
