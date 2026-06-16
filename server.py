@@ -40,6 +40,7 @@ SYMBOL_MAP = {
     "NIFTY":     "^NSEI",
     "BANKNIFTY": "^NSEBANK",
     "BTC":       "BTC-USD",
+    "GOLD":      "GC=F",
 }
 
 # yfinance supports: 1m,2m,5m,15m,30m,60m,90m,1h,1d ... (1m only last 7 days)
@@ -235,6 +236,7 @@ def background_cache_worker():
         ("NIFTY", "1m"), ("NIFTY", "3m"), ("NIFTY", "5m"), ("NIFTY", "15m"), ("NIFTY", "30m"),
         ("BANKNIFTY", "1m"), ("BANKNIFTY", "3m"), ("BANKNIFTY", "5m"), ("BANKNIFTY", "15m"), ("BANKNIFTY", "30m"),
         ("BTC", "1m"), ("BTC", "3m"), ("BTC", "5m"), ("BTC", "15m"), ("BTC", "30m"),
+        ("GOLD", "5m"), ("GOLD", "15m"), ("GOLD", "30m"),
     ]
     
     while True:
