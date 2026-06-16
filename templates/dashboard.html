@@ -55,7 +55,7 @@
   .stat .v { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
 
   .chart-card { background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; padding: 14px; }
+    border-radius: 12px; padding: 14px; position: relative; }
   .chart-head { display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 10px; }
   .chart-head .t { font-size: 13px; font-weight: 600; }
@@ -293,6 +293,7 @@
         </div>
       </div>
       <div id="chart"></div>
+      <div id="countdown-overlay-live" style="position: absolute; right: 70px; top: 55px; z-index: 10; background: rgba(55, 138, 221, 0.95); color: #ffffff; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-variant-numeric: tabular-nums; font-weight: bold; font-family: monospace; pointer-events: none; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: none;">00:00</div>
     </div>
   </div>
 
@@ -323,6 +324,7 @@
         <div id="tv-chart"></div>
         <div id="scalper-target-box" style="position: absolute; display: none; background: rgba(38, 166, 154, 0.08); pointer-events: none; border-top: 1px solid rgba(38, 166, 154, 0.4); border-bottom: 1px solid rgba(38, 166, 154, 0.4); z-index: 5;"></div>
         <div id="scalper-stop-box" style="position: absolute; display: none; background: rgba(239, 83, 80, 0.08); pointer-events: none; border-top: 1px solid rgba(239, 83, 80, 0.4); border-bottom: 1px solid rgba(239, 83, 80, 0.4); z-index: 5;"></div>
+        <div id="countdown-overlay-scalper" style="position: absolute; right: 70px; top: 15px; z-index: 10; background: rgba(239, 83, 80, 0.95); color: #ffffff; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-variant-numeric: tabular-nums; font-weight: bold; font-family: monospace; pointer-events: none; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: none;">00:00</div>
       </div>
     </div>
 
@@ -458,6 +460,9 @@ async function load(isFirstLoad = false) {
 
     actualSeries.setData(d.candles);
     predSeries.setData(d.predicted);
+    if (d.candles && d.candles.length > 0) {
+      activeCandleOpenTime = d.candles[d.candles.length - 1].time;
+    }
     if (isFirstLoad) {
       chart.timeScale().fitContent();
     }
@@ -663,6 +668,9 @@ async function loadScalper(isFirstLoad = false) {
     }
     
     candlestickSeries.setData(d.candles);
+    if (d.candles && d.candles.length > 0) {
+      activeCandleOpenTime = d.candles[d.candles.length - 1].time;
+    }
     ema9Series.setData(d.ema9);
     ema15Series.setData(d.ema15);
     candlestickSeries.setMarkers(d.markers);
@@ -826,6 +834,16 @@ let lastClosedEma9 = null;
 let lastClosedEma15 = null;
 let lastClosedTime = null;
 let wsLastClosedTime = null;
+let activeCandleOpenTime = null;
+const TF_DURATIONS = {
+  "1m": 60,
+  "3m": 180,
+  "5m": 300,
+  "15m": 900,
+  "30m": 1800,
+  "1h": 3600,
+  "1d": 86400
+};
 
 function connectBtcWebSocket(tf, isScalper = false) {
   const symbol = $('symbol').value;
@@ -863,6 +881,7 @@ function connectBtcWebSocket(tf, isScalper = false) {
     const isClosed = k.x;
     
     const candle = { time: t, open: o, high: h, low: l, close: c };
+    activeCandleOpenTime = t;
     
     if (isClosed) {
       wsLastClosedTime = t;
@@ -942,6 +961,7 @@ function updateLiveTradeRealtime(candle) {
 
 ['symbol','tf'].forEach(id => $(id).addEventListener('change', () => {
   wsLastClosedTime = null;
+  activeCandleOpenTime = null;
   if (activeTab === 'live-signal') {
     load(true);
   } else {
@@ -951,8 +971,61 @@ function updateLiveTradeRealtime(candle) {
 
 
 
+function startCountdownTimer() {
+  setInterval(() => {
+    if (activeCandleOpenTime === null) {
+      const elLive = $('countdown-overlay-live');
+      const elScalper = $('countdown-overlay-scalper');
+      if (elLive) elLive.style.display = 'none';
+      if (elScalper) elScalper.style.display = 'none';
+      return;
+    }
+    
+    const tf = $('tf').value;
+    const duration = TF_DURATIONS[tf] || 300;
+    
+    const now = Math.floor(Date.now() / 1000);
+    const closeTime = activeCandleOpenTime + duration;
+    const remaining = closeTime - now;
+    
+    const overlayId = activeTab === 'live-signal' ? 'countdown-overlay-live' : 'countdown-overlay-scalper';
+    const otherOverlayId = activeTab === 'live-signal' ? 'countdown-overlay-scalper' : 'countdown-overlay-live';
+    
+    const otherEl = $(otherOverlayId);
+    if (otherEl) otherEl.style.display = 'none';
+    
+    if (remaining > 0) {
+      let timeStr = "";
+      if (duration >= 86400) {
+        const hours = Math.floor(remaining / 3600);
+        const minutes = Math.floor((remaining % 3600) / 60);
+        timeStr = `${hours}h ${minutes}m`;
+      } else if (duration >= 3600) {
+        const hours = Math.floor(remaining / 3600);
+        const minutes = Math.floor((remaining % 3600) / 60);
+        const seconds = remaining % 60;
+        timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      } else {
+        const minutes = Math.floor(remaining / 60);
+        const seconds = remaining % 60;
+        timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+      
+      const el = $(overlayId);
+      if (el) {
+        el.textContent = timeStr;
+        el.style.display = 'block';
+      }
+    } else {
+      const el = $(overlayId);
+      if (el) el.style.display = 'none';
+    }
+  }, 1000);
+}
+
 load(true);
 schedule();
+startCountdownTimer();
 </script>
 </body>
 </html>
