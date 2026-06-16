@@ -95,7 +95,8 @@
   .scalper-chart-head .t { font-size: 13px; font-weight: 600; }
   .scalper-legend { display: flex; gap: 14px; font-size: 11px; color: #666666; }
   .scalper-swatch { display: inline-block; width: 12px; height: 3px; vertical-align: 3px; margin-right: 4px; border-radius: 2px; }
-  #tv-chart { width: 100%; height: 400px; border-radius: 8px; overflow: hidden; }
+  #tv-chart-container { position: relative; width: 100%; height: 400px; border-radius: 8px; overflow: hidden; }
+  #tv-chart { width: 100%; height: 100%; }
 </style>
 </head>
 <body>
@@ -194,7 +195,15 @@
           <span><span class="scalper-swatch" style="background:#FF6D00"></span>15 EMA</span>
         </div>
       </div>
-      <div id="tv-chart"></div>
+      <div id="tv-chart-container">
+        <div id="tv-chart"></div>
+        <div id="scalper-target-box" style="position: absolute; display: none; background: rgba(38, 166, 154, 0.08); pointer-events: none; border-top: 1px solid rgba(38, 166, 154, 0.4); border-bottom: 1px solid rgba(38, 166, 154, 0.4); z-index: 5;">
+          <span style="position: absolute; right: 70px; top: 6px; font-size: 10px; font-weight: bold; color: #1d9e75; background: rgba(255,255,255,0.85); padding: 2px 4px; border-radius: 4px; border: 1px solid rgba(38, 166, 154, 0.3);">TARGET (TP)</span>
+        </div>
+        <div id="scalper-stop-box" style="position: absolute; display: none; background: rgba(239, 83, 80, 0.08); pointer-events: none; border-top: 1px solid rgba(239, 83, 80, 0.4); border-bottom: 1px solid rgba(239, 83, 80, 0.4); z-index: 5;">
+          <span style="position: absolute; right: 70px; bottom: 6px; font-size: 10px; font-weight: bold; color: #ef5350; background: rgba(255,255,255,0.85); padding: 2px 4px; border-radius: 4px; border: 1px solid rgba(239, 83, 80, 0.3);">STOP LOSS (SL)</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -315,6 +324,56 @@ let ema15Series = null;
 let entryLine = null;
 let slLine = null;
 let tpLine = null;
+let currentTrade = null;
+
+function updateShadedBoxes() {
+  const targetBox = document.getElementById('scalper-target-box');
+  const stopBox = document.getElementById('scalper-stop-box');
+  
+  if (!currentTrade || !currentTrade.active || !scalperChart || !candlestickSeries) {
+    targetBox.style.display = 'none';
+    stopBox.style.display = 'none';
+    return;
+  }
+  
+  const yEntry = candlestickSeries.priceToCoordinate(currentTrade.entryPrice);
+  const ySL = candlestickSeries.priceToCoordinate(currentTrade.slPrice);
+  const yTP = candlestickSeries.priceToCoordinate(currentTrade.tpPrice);
+  const xStart = scalperChart.timeScale().timeToCoordinate(currentTrade.entryTime);
+  
+  if (yEntry === null || ySL === null || yTP === null) {
+    targetBox.style.display = 'none';
+    stopBox.style.display = 'none';
+    return;
+  }
+  
+  const container = document.getElementById('tv-chart-container');
+  const containerWidth = container.clientWidth;
+  const rightEdge = containerWidth - 62; // 62px approximate width of the price scale on the right
+  
+  const left = xStart !== null ? Math.max(0, xStart) : 0;
+  const width = Math.max(0, rightEdge - left);
+  
+  // Target Box (between Entry and TP)
+  const targetTop = Math.min(yEntry, yTP);
+  const targetHeight = Math.abs(yEntry - yTP);
+  
+  targetBox.style.left = left + 'px';
+  targetBox.style.width = width + 'px';
+  targetBox.style.top = targetTop + 'px';
+  targetBox.style.height = targetHeight + 'px';
+  targetBox.style.display = 'block';
+  
+  // Stop Box (between Entry and SL)
+  const stopTop = Math.min(yEntry, ySL);
+  const stopHeight = Math.abs(yEntry - ySL);
+  
+  stopBox.style.left = left + 'px';
+  stopBox.style.width = width + 'px';
+  stopBox.style.top = stopTop + 'px';
+  stopBox.style.height = stopHeight + 'px';
+  stopBox.style.display = 'block';
+}
 
 function initScalperChart() {
   if (scalperChart) return;
@@ -369,9 +428,14 @@ function initScalperChart() {
   window.addEventListener('resize', () => {
     if (scalperChart) {
       scalperChart.applyOptions({ width: document.getElementById('tv-chart').clientWidth });
+      updateShadedBoxes();
     }
   });
   scalperChart.applyOptions({ width: document.getElementById('tv-chart').clientWidth });
+
+  // Update box coordinates on zoom, scroll, or hover
+  scalperChart.timeScale().subscribeVisibleTimeRangeChange(updateShadedBoxes);
+  scalperChart.subscribeCrosshairMove(updateShadedBoxes);
 }
 
 async function loadScalper(isFirstLoad = false) {
@@ -419,6 +483,8 @@ async function loadScalper(isFirstLoad = false) {
     if (tpLine) { candlestickSeries.removePriceLine(tpLine); tpLine = null; }
     
     const infoBar = $('scalper-info-bar');
+    currentTrade = d.active_trade;
+    
     if (d.active_trade && d.active_trade.active) {
       const trade = d.active_trade;
       const lineStyleVal = (window.LightweightCharts && LightweightCharts.LineStyle) ? LightweightCharts.LineStyle.Dashed : 2;
@@ -452,6 +518,9 @@ async function loadScalper(isFirstLoad = false) {
     } else {
       infoBar.style.display = 'none';
     }
+    
+    // Draw the shaded risk-reward boxes
+    setTimeout(updateShadedBoxes, 50);
     
     $('updated').textContent = 'Last update: ' + d.updated;
     $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · EMA 9/15`;
