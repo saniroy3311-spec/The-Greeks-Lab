@@ -75,7 +75,41 @@ prediction_lock = threading.Lock()
 
 
 def fetch_candles(symbol_key, tf_key):
-    """Pull live OHLCV candles from yfinance and return a clean DataFrame."""
+    """Pull live OHLCV candles and return a clean DataFrame."""
+    if symbol_key == "BTC":
+        try:
+            import requests
+            # Map intervals to Binance formats
+            binance_tf = tf_key  # 1m, 3m, 5m, 15m, 30m, 1h, 1d are identical
+            url = f"https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval={binance_tf}&limit={LOOKBACK}"
+            
+            headers = {"User-Agent": "Mozilla/5.0"}
+            r = requests.get(url, headers=headers, timeout=5)
+            r.raise_for_status()
+            data = r.json()
+            
+            df = pd.DataFrame(data, columns=[
+                "open_time", "open", "high", "low", "close", "volume",
+                "close_time", "quote_volume", "count", "taker_buy_base", "taker_buy_quote", "ignore"
+            ])
+            
+            df["open"] = df["open"].astype(float)
+            df["high"] = df["high"].astype(float)
+            df["low"] = df["low"].astype(float)
+            df["close"] = df["close"].astype(float)
+            df["volume"] = df["volume"].astype(float)
+            
+            df.index = pd.to_datetime(df["open_time"], unit="ms")
+            df = df[["open", "high", "low", "close", "volume"]].copy()
+            df = df.dropna()
+            df = df.tail(LOOKBACK)
+            return df
+        except Exception as e:
+            print(f"[Binance Fetch Error] {e}. Falling back to yfinance.")
+            # Fallback to yfinance if Binance has any issues
+            pass
+
+    # Fallback / Default: yfinance
     import yfinance as yf
     ticker = SYMBOL_MAP.get(symbol_key, "^NSEI")
     interval, period = TF_MAP.get(tf_key, ("5m", "5d"))
