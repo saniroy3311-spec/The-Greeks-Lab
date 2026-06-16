@@ -288,6 +288,189 @@ def health():
     return jsonify({"status": "ok", "model": MODEL_NAME, "device": DEVICE})
 
 
+@app.route("/api/scalper/<symbol>/<tf>")
+def api_scalper(symbol, tf):
+    symbol = symbol.upper()
+    tf = tf.lower()
+    key = f"{symbol}:{tf}"
+    now = time.time()
+
+    # Record active client interest to keep background cache warm
+    with active_lock:
+        ACTIVE_COMBINATIONS[key] = now
+
+    with _cache_lock:
+        cached = _cache.get(key)
+
+    if not cached:
+        try:
+            result = run_prediction(symbol, tf)
+            with _cache_lock:
+                _cache[key] = (now, result)
+            cached_result = result
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+    else:
+        cached_result = cached[1]
+
+    try:
+        candles = cached_result["candles"]
+        if len(candles) < 20:
+            return jsonify({"error": "Insufficient history"}), 400
+
+        df = pd.DataFrame(candles)
+        df['ema9'] = df['close'].ewm(span=9, adjust=False).mean()
+        df['ema15'] = df['close'].ewm(span=15, adjust=False).mean()
+        
+        df['emaGap'] = df['ema9'] - df['ema15']
+        df['emaGap_abs'] = df['emaGap'].abs()
+        df['emaGap_abs_prev'] = df['emaGap_abs'].shift(1)
+        
+        df['isExpanding'] = df['emaGap_abs'] > df['emaGap_abs_prev']
+        df['upTrend'] = (df['ema9'] > df['ema15']) & df['isExpanding']
+        df['downTrend'] = (df['ema9'] < df['ema15']) & df['isExpanding']
+        
+        df['longTrigger'] = df['upTrend'] & (~df['upTrend'].shift(1).fillna(False))
+        df['shortTrigger'] = df['downTrend'] & (~df['downTrend'].shift(1).fillna(False))
+
+        # Build markers for TradingView Lightweight Charts
+        markers = []
+        for _, row in df.iterrows():
+            if row['longTrigger']:
+                markers.append({
+                    "time": int(row['time']),
+                    "position": "belowBar",
+                    "color": "#2962FF",  # Distinct blue for long triggers
+                    "shape": "arrowUp",
+                    "text": "Long Trigger"
+                })
+            elif row['shortTrigger']:
+                markers.append({
+                    "time": int(row['time']),
+                    "position": "aboveBar",
+                    "color": "#FF6D00",  # Distinct orange for short triggers
+                    "shape": "arrowDown",
+                    "text": "Short Trigger"
+                })
+
+        state = "Awaiting Setup"
+        active_trade = None
+        
+        kronos_dir = cached_result["direction"]
+        kronos_pred = "BUY" if kronos_dir == "Long" else ("SELL" if kronos_dir == "Short" else "FLAT")
+
+        for i in range(15, len(df)):
+            row = df.iloc[i]
+            ts = int(row['time'])
+            h = float(row['high'])
+            l = float(row['low'])
+            c = float(row['close'])
+            
+            is_latest_bar = (i == len(df) - 1)
+            
+            # Exit evaluation
+            if state == "In Position: Long":
+                if l <= active_trade["slPrice"]:
+                    active_trade["exitPrice"] = active_trade["slPrice"]
+                    active_trade["exitTime"] = ts
+                    active_trade["active"] = False
+                    state = "Awaiting Setup"
+                    active_trade = None
+                elif h >= active_trade["tpPrice"]:
+                    active_trade["exitPrice"] = active_trade["tpPrice"]
+                    active_trade["exitTime"] = ts
+                    active_trade["active"] = False
+                    state = "Awaiting Setup"
+                    active_trade = None
+            elif state == "In Position: Short":
+                if h >= active_trade["slPrice"]:
+                    active_trade["exitPrice"] = active_trade["slPrice"]
+                    active_trade["exitTime"] = ts
+                    active_trade["active"] = False
+                    state = "Awaiting Setup"
+                    active_trade = None
+                elif l <= active_trade["tpPrice"]:
+                    active_trade["exitPrice"] = active_trade["tpPrice"]
+                    active_trade["exitTime"] = ts
+                    active_trade["active"] = False
+                    state = "Awaiting Setup"
+                    active_trade = None
+
+            # Entry evaluation
+            if state in ["Awaiting Setup", "Long Trigger Formed", "Short Trigger Formed"]:
+                is_long_trig = bool(row['longTrigger'])
+                is_short_trig = bool(row['shortTrigger'])
+                
+                if is_latest_bar:
+                    current_kronos_pred = kronos_pred
+                else:
+                    current_kronos_pred = "BUY" if is_long_trig else ("SELL" if is_short_trig else "FLAT")
+                
+                if is_long_trig:
+                    if current_kronos_pred == "BUY":
+                        risk = c - l
+                        if risk <= 0:
+                            risk = c * 0.001
+                        active_trade = {
+                            "type": "Long",
+                            "entryPrice": round(c, 2),
+                            "entryTime": ts,
+                            "slPrice": round(l, 2),
+                            "tpPrice": round(c + 2 * risk, 2),
+                            "active": True
+                        }
+                        state = "In Position: Long"
+                    else:
+                        state = "Long Trigger Formed"
+                elif is_short_trig:
+                    if current_kronos_pred == "SELL":
+                        risk = h - c
+                        if risk <= 0:
+                            risk = c * 0.001
+                        active_trade = {
+                            "type": "Short",
+                            "entryPrice": round(c, 2),
+                            "entryTime": ts,
+                            "slPrice": round(h, 2),
+                            "tpPrice": round(c - 2 * risk, 2),
+                            "active": True
+                        }
+                        state = "In Position: Short"
+                    else:
+                        state = "Short Trigger Formed"
+                else:
+                    if state in ["Long Trigger Formed", "Short Trigger Formed"]:
+                        state = "Awaiting Setup"
+
+        # Prepare EMAs output
+        ema9_data = []
+        ema15_data = []
+        for t, e9, e15 in zip(df['time'], df['ema9'], df['ema15']):
+            if not pd.isna(e9):
+                ema9_data.append({"time": int(t), "value": round(float(e9), 2)})
+            if not pd.isna(e15):
+                ema15_data.append({"time": int(t), "value": round(float(e15), 2)})
+
+        return jsonify({
+            "symbol": symbol,
+            "timeframe": tf,
+            "candles": candles,
+            "ema9": ema9_data,
+            "ema15": ema15_data,
+            "markers": markers,
+            "state": state,
+            "active_trade": active_trade,
+            "kronos_prediction": kronos_dir,
+            "updated": time.strftime("%H:%M:%S")
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
+
 if __name__ == "__main__":
     print(f"[Kronos] Dashboard:  http://0.0.0.0:{PORT}")
     print(f"[Kronos] API sample: http://0.0.0.0:{PORT}/api/signal/NIFTY/5m")
