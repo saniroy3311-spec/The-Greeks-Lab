@@ -446,6 +446,12 @@ async function load(isFirstLoad = false) {
       throw new Error(d.detail || d.message || 'Invalid response format from server');
     }
 
+    // Race condition guard: if the user changed symbol/tf during fetch, ignore this stale response
+    if ($('symbol').value !== sym || $('tf').value !== tf) {
+      console.log(`[BTC Live] Stale response ignored for ${sym} ${tf}`);
+      return;
+    }
+
     // Check if server data is stale compared to last closed websocket candle
     if (sym === 'BTC' && wsLastClosedTime !== null && d.candles.length > 0) {
       const serverLastCandleTime = d.candles[d.candles.length - 1].time;
@@ -655,6 +661,12 @@ async function loadScalper(isFirstLoad = false) {
     const d = await res.json();
     if (d.error) throw new Error(d.error);
 
+    // Race condition guard: if the user changed symbol/tf during fetch, ignore this stale response
+    if ($('symbol').value !== sym || $('tf').value !== tf) {
+      console.log(`[BTC Scalper] Stale response ignored for ${sym} ${tf}`);
+      return;
+    }
+
     // Check if server data is stale compared to last closed websocket candle
     if (sym === 'BTC' && wsLastClosedTime !== null && d.candles.length > 0) {
       const serverLastCandleTime = d.candles[d.candles.length - 1].time;
@@ -850,8 +862,12 @@ function connectBtcWebSocket(tf) {
   
   if (symbol !== 'BTC') {
     if (btcSocket) {
-      btcSocket.close();
+      const socketToClose = btcSocket;
       btcSocket = null;
+      socketToClose.onmessage = null;
+      socketToClose.onclose = null;
+      socketToClose.onerror = null;
+      socketToClose.close();
     }
     return;
   }
@@ -859,17 +875,25 @@ function connectBtcWebSocket(tf) {
   const binanceTf = tf.toLowerCase();
   const wsUrl = `wss://fstream.binance.com/ws/btcusdt@kline_${binanceTf}`;
   
-  if (btcSocket && btcSocket.url === wsUrl && btcSocket.readyState === WebSocket.OPEN) {
+  // If socket is already open or connecting to the correct URL, return early
+  if (btcSocket && btcSocket.url === wsUrl && 
+      (btcSocket.readyState === WebSocket.OPEN || btcSocket.readyState === WebSocket.CONNECTING)) {
     return;
   }
   
   if (btcSocket) {
-    btcSocket.close();
+    const socketToClose = btcSocket;
+    btcSocket = null;
+    socketToClose.onmessage = null;
+    socketToClose.onclose = null;
+    socketToClose.onerror = null;
+    socketToClose.close();
   }
   
-  btcSocket = new WebSocket(wsUrl);
+  const btcSocketInstance = new WebSocket(wsUrl);
+  btcSocket = btcSocketInstance;
   
-  btcSocket.onmessage = (event) => {
+  btcSocketInstance.onmessage = (event) => {
     const msg = JSON.parse(event.data);
     const k = msg.k;
     
@@ -909,6 +933,25 @@ function connectBtcWebSocket(tf) {
         }, 1000);
       }
     }
+  };
+
+  btcSocketInstance.onclose = (event) => {
+    console.log("WebSocket disconnected:", event);
+    // Auto-reconnect if the symbol is still BTC and the closed socket was the active one
+    if ($('symbol').value === 'BTC' && btcSocket === btcSocketInstance) {
+      console.log("Attempting WebSocket reconnect in 3 seconds...");
+      btcSocket = null;
+      setTimeout(() => {
+        if ($('symbol').value === 'BTC') {
+          connectBtcWebSocket(tf);
+        }
+      }, 3000);
+    }
+  };
+
+  btcSocketInstance.onerror = (err) => {
+    console.error("WebSocket error observed:", err);
+    btcSocketInstance.close();
   };
 }
 
