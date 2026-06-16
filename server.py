@@ -392,6 +392,7 @@ def api_scalper(symbol, tf):
 
         state = "Awaiting Setup"
         active_trade = None
+        trades_history = []
         
         kronos_dir = cached_result["direction"]
         kronos_pred = "BUY" if kronos_dir == "Long" else ("SELL" if kronos_dir == "Short" else "FLAT")
@@ -411,12 +412,18 @@ def api_scalper(symbol, tf):
                     active_trade["exitPrice"] = active_trade["slPrice"]
                     active_trade["exitTime"] = ts
                     active_trade["active"] = False
+                    active_trade["points"] = round(active_trade["exitPrice"] - active_trade["entryPrice"], 2)
+                    active_trade["result"] = "Loss"
+                    trades_history.append(active_trade)
                     state = "Awaiting Setup"
                     active_trade = None
                 elif h >= active_trade["tpPrice"]:
                     active_trade["exitPrice"] = active_trade["tpPrice"]
                     active_trade["exitTime"] = ts
                     active_trade["active"] = False
+                    active_trade["points"] = round(active_trade["exitPrice"] - active_trade["entryPrice"], 2)
+                    active_trade["result"] = "Profit"
+                    trades_history.append(active_trade)
                     state = "Awaiting Setup"
                     active_trade = None
             elif state == "In Position: Short":
@@ -424,12 +431,18 @@ def api_scalper(symbol, tf):
                     active_trade["exitPrice"] = active_trade["slPrice"]
                     active_trade["exitTime"] = ts
                     active_trade["active"] = False
+                    active_trade["points"] = round(active_trade["entryPrice"] - active_trade["exitPrice"], 2)
+                    active_trade["result"] = "Loss"
+                    trades_history.append(active_trade)
                     state = "Awaiting Setup"
                     active_trade = None
                 elif l <= active_trade["tpPrice"]:
                     active_trade["exitPrice"] = active_trade["tpPrice"]
                     active_trade["exitTime"] = ts
                     active_trade["active"] = False
+                    active_trade["points"] = round(active_trade["entryPrice"] - active_trade["exitPrice"], 2)
+                    active_trade["result"] = "Profit"
+                    trades_history.append(active_trade)
                     state = "Awaiting Setup"
                     active_trade = None
 
@@ -497,6 +510,7 @@ def api_scalper(symbol, tf):
             "markers": markers,
             "state": state,
             "active_trade": active_trade,
+            "trades_history": trades_history[::-1],
             "kronos_prediction": kronos_dir,
             "updated": time.strftime("%H:%M:%S")
         })
