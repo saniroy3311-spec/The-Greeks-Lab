@@ -251,16 +251,7 @@
         <option value="1h">1 hour</option>
         <option value="1d">1 day</option>
       </select>
-      <select id="refresh">
-        <option value="1">Tick-by-Tick</option>
-        <option value="5">Refresh 5s</option>
-        <option value="10">Refresh 10s</option>
-        <option value="30" selected>Refresh 30s</option>
-        <option value="60">Refresh 60s</option>
-        <option value="90">Refresh 90s</option>
-        <option value="120">Refresh 120s</option>
-        <option value="0">Manual</option>
-      </select>
+
     </div>
     <div class="live"><span class="dot" id="dot"></span><span id="status">Loading…</span></div>
   </div>
@@ -786,21 +777,19 @@ async function loadScalper(isFirstLoad = false) {
 function schedule() {
   if (timer) clearInterval(timer);
   if (countTimer) clearInterval(countTimer);
-  const secs = parseInt($('refresh').value, 10);
-  if (secs > 0) {
-    countdown = secs;
-    countTimer = setInterval(() => {
-      countdown--;
-      if (countdown <= 0) countdown = secs;
-    }, 1000);
-    timer = setInterval(() => {
-      if (activeTab === 'live-signal') {
-        load();
-      } else {
-        loadScalper();
-      }
-    }, secs * 1000);
-  }
+  const secs = 1; // Tick-by-Tick default
+  countdown = secs;
+  countTimer = setInterval(() => {
+    countdown--;
+    if (countdown <= 0) countdown = secs;
+  }, 1000);
+  timer = setInterval(() => {
+    if (activeTab === 'live-signal') {
+      load();
+    } else {
+      loadScalper();
+    }
+  }, secs * 1000);
 }
 
 let btcSocket = null;
@@ -921,7 +910,7 @@ function updateLiveTradeRealtime(candle) {
   }
 }));
 
-$('refresh').addEventListener('change', schedule);
+
 
 load(true);
 schedule();
