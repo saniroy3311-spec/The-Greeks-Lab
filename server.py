@@ -82,7 +82,7 @@ def fetch_candles(symbol_key, tf_key):
             import requests
             # Map intervals to Binance formats
             binance_tf = tf_key  # 1m, 3m, 5m, 15m, 30m, 1h, 1d are identical
-            url = f"https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval={binance_tf}&limit={LOOKBACK}"
+            url = f"https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval={binance_tf}&limit={LOOKBACK}"
             
             headers = {"User-Agent": "Mozilla/5.0"}
             r = requests.get(url, headers=headers, timeout=5)

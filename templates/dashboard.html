@@ -839,7 +839,7 @@ function connectBtcWebSocket(tf, isScalper = false) {
   }
   
   const binanceTf = tf.toLowerCase();
-  const wsUrl = `wss://stream.binance.com:9443/ws/btcusdt@kline_${binanceTf}`;
+  const wsUrl = `wss://fstream.binance.com/ws/btcusdt@kline_${binanceTf}`;
   
   if (btcSocket && btcSocket.url === wsUrl && btcSocket.readyState === WebSocket.OPEN) {
     return;
