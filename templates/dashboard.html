@@ -252,6 +252,8 @@
         <option value="1d">1 day</option>
       </select>
       <select id="refresh">
+        <option value="1">Tick-by-Tick</option>
+        <option value="5">Refresh 5s</option>
         <option value="10">Refresh 10s</option>
         <option value="30" selected>Refresh 30s</option>
         <option value="60">Refresh 60s</option>
@@ -465,6 +467,7 @@ async function load(isFirstLoad = false) {
     $('updated').textContent = 'Last update: ' + d.updated;
     $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · horizon ${d.pred_len}`;
     $('status').textContent = 'Live';
+    connectBtcWebSocket(tf, false);
   } catch (e) {
     $('err').textContent = 'Error: ' + e.message + ' — is the market open and the server reachable?';
     $('err').style.display = 'block';
@@ -750,6 +753,17 @@ async function loadScalper(isFirstLoad = false) {
       }
     }
 
+    if (d.ema9 && d.ema9.length > 0) {
+      const lastE9 = d.ema9[d.ema9.length - 1];
+      lastClosedEma9 = lastE9.value;
+      lastClosedTime = lastE9.time;
+    }
+    if (d.ema15 && d.ema15.length > 0) {
+      const lastE15 = d.ema15[d.ema15.length - 1];
+      lastClosedEma15 = lastE15.value;
+    }
+    connectBtcWebSocket(tf, true);
+
     $('updated').textContent = 'Last update: ' + d.updated;
     $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · EMA 9/15`;
     $('status').textContent = 'Live';
@@ -777,6 +791,116 @@ function schedule() {
         loadScalper();
       }
     }, secs * 1000);
+  }
+}
+
+let btcSocket = null;
+let lastClosedEma9 = null;
+let lastClosedEma15 = null;
+let lastClosedTime = null;
+
+function connectBtcWebSocket(tf, isScalper = false) {
+  const symbol = $('symbol').value;
+  
+  if (symbol !== 'BTC') {
+    if (btcSocket) {
+      btcSocket.close();
+      btcSocket = null;
+    }
+    return;
+  }
+  
+  const binanceTf = tf.toLowerCase();
+  const wsUrl = `wss://stream.binance.com:9443/ws/btcusdt@kline_${binanceTf}`;
+  
+  if (btcSocket && btcSocket.url === wsUrl && btcSocket.readyState === WebSocket.OPEN) {
+    return;
+  }
+  
+  if (btcSocket) {
+    btcSocket.close();
+  }
+  
+  btcSocket = new WebSocket(wsUrl);
+  
+  btcSocket.onmessage = (event) => {
+    const msg = JSON.parse(event.data);
+    const k = msg.k;
+    
+    const t = Math.floor(k.t / 1000);
+    const o = parseFloat(k.o);
+    const h = parseFloat(k.h);
+    const l = parseFloat(k.l);
+    const c = parseFloat(k.c);
+    const isClosed = k.x;
+    
+    const candle = { time: t, open: o, high: h, low: l, close: c };
+    
+    if (isScalper) {
+      if (candlestickSeries) {
+        candlestickSeries.update(candle);
+        updateLiveEMAs(candle);
+        updateLiveTradeRealtime(candle);
+        updateShadedBoxes();
+      }
+      if (isClosed) {
+        setTimeout(() => loadScalper(), 1000);
+      }
+    } else {
+      if (actualSeries) {
+        actualSeries.update(candle);
+      }
+      if (isClosed) {
+        setTimeout(() => load(), 1000);
+      }
+    }
+  };
+}
+
+function updateLiveEMAs(candle) {
+  if (lastClosedEma9 === null || lastClosedEma15 === null) return;
+  
+  const mult9 = 2 / (9 + 1);
+  const mult15 = 2 / (15 + 1);
+  
+  const liveEma9 = (candle.close - lastClosedEma9) * mult9 + lastClosedEma9;
+  const liveEma15 = (candle.close - lastClosedEma15) * mult15 + lastClosedEma15;
+  
+  if (ema9Series) ema9Series.update({ time: candle.time, value: parseFloat(liveEma9.toFixed(2)) });
+  if (ema15Series) ema15Series.update({ time: candle.time, value: parseFloat(liveEma15.toFixed(2)) });
+}
+
+function updateLiveTradeRealtime(candle) {
+  if (currentTrade && currentTrade.active) {
+    if (entryLineSeries) entryLineSeries.update({ time: candle.time, value: currentTrade.entryPrice });
+    if (slLineSeries) slLineSeries.update({ time: candle.time, value: currentTrade.slPrice });
+    if (tpLineSeries) tpLineSeries.update({ time: candle.time, value: currentTrade.tpPrice });
+    
+    let hit = false;
+    let result = "";
+    
+    if (currentTrade.type === 'Long') {
+      if (candle.low <= currentTrade.slPrice) {
+        hit = true;
+        result = "SL Hit (Loss)";
+      } else if (candle.high >= currentTrade.tpPrice) {
+        hit = true;
+        result = "TP Hit (Profit)";
+      }
+    } else if (currentTrade.type === 'Short') {
+      if (candle.high >= currentTrade.slPrice) {
+        hit = true;
+        result = "SL Hit (Loss)";
+      } else if (candle.low <= currentTrade.tpPrice) {
+        hit = true;
+        result = "TP Hit (Profit)";
+      }
+    }
+    
+    if (hit) {
+      $('scalper-info-text').innerHTML = `<strong>Trade update:</strong> ${currentTrade.type} position has hit ${result} at current price ${candle.close}. Syncing...`;
+      setTimeout(() => loadScalper(), 1000);
+    }
   }
 }
 
