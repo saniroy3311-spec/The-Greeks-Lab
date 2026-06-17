@@ -1113,7 +1113,7 @@
   /* View Mode Height Calculations */
   body.view-fullscreen .tab-content {
     display: none;
-    height: calc(100vh - 92px);
+    height: calc(100vh - 52px);
     overflow: hidden;
   }
   body.view-fullscreen .tab-content.active {
@@ -1141,7 +1141,7 @@
 
   body.view-split .tab-content {
     display: none;
-    height: calc(100vh - 92px);
+    height: calc(100vh - 52px);
     overflow: hidden;
   }
   body.view-split .tab-content.active {
@@ -1173,7 +1173,7 @@
 
   body.view-compact .tab-content {
     display: none;
-    height: calc(100vh - 92px);
+    height: calc(100vh - 52px);
     overflow: hidden;
   }
   body.view-compact .tab-content.active {
@@ -1389,9 +1389,123 @@
       background: var(--surface) !important;
     }
   }
+
+  /* Sidebar Slide-Out Drawer Panel */
+  .sidebar-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.04);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-260px);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  body.dark-theme .sidebar-drawer {
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
+  }
+  .sidebar-drawer.active {
+    transform: translateX(0);
+  }
+  .sidebar-header {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    transition: color 0.2s;
+  }
+  .sidebar-close-btn:hover {
+    color: var(--text);
+  }
+  .sidebar-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .sidebar-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .sidebar-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sidebar-menu-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .sidebar-menu-item:hover {
+    background: rgba(0, 0, 0, 0.03);
+  }
+  body.dark-theme .sidebar-menu-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .sidebar-menu-item.active {
+    background: rgba(41, 98, 255, 0.08);
+    color: var(--blue);
+    font-weight: 600;
+  }
+  .sidebar-menu-item.active svg {
+    stroke: var(--blue);
+  }
 </style>
 </head>
 <body>
+  <!-- Sidebar Slide Drawer -->
+  <div id="sidebar-drawer" class="sidebar-drawer">
+    <div class="sidebar-header">
+      <div class="logo-section">
+        <span class="logo-icon" style="color: #2962FF; font-weight: 800; font-size: 18px; margin-right: 4px;">Δ</span>
+        <span class="logo-text">GreeksLab</span>
+      </div>
+      <button class="sidebar-close-btn" onclick="toggleSidebarDrawer(event)">✕</button>
+    </div>
+    <div class="sidebar-content">
+      <div class="sidebar-section-title">Workspaces</div>
+      <div class="sidebar-menu-list">
+        <button class="sidebar-menu-item active" id="menu-live-signal" onclick="handleMenuSwitchTab('live-signal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="margin-right: 8px; vertical-align: middle;"><path d="M2 12h20"></path><path d="M20 12v8H4v-8"></path><path d="M4 12V4h16v8"></path></svg>
+          <span style="vertical-align: middle;">Live Forecast</span>
+        </button>
+        <button class="sidebar-menu-item" id="menu-scalper" onclick="handleMenuSwitchTab('scalper')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="margin-right: 8px; vertical-align: middle;"><path d="M3 3v18h18"></path><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path></svg>
+          <span style="vertical-align: middle;">EMA/Kronos Scalper</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Modals Overlay Library -->
   <!-- Settings Modal -->
@@ -1510,6 +1624,9 @@
   </div>
 
   <div class="candl-topbar">
+    <button class="top-btn-icon" id="hamburger-menu-btn" onclick="toggleSidebarDrawer(event)" title="Menu" style="margin-right: 4px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
     <div class="logo-section">
       <span class="logo-icon" style="color: #2962FF; font-weight: 800; font-size: 18px; margin-right: 4px;">Δ</span>
       <span class="logo-text">GreeksLab</span>
@@ -1594,12 +1711,6 @@
   </div>
 
   <div class="err" id="err"></div>
-
-  <!-- Tab Buttons -->
-  <div class="tab-container">
-    <button class="tab-btn active" onclick="switchTab('live-signal')">Live Forecast</button>
-    <button class="tab-btn" onclick="switchTab('scalper')">EMA/Kronos Scalper</button>
-  </div>
 
   <!-- Tab 1: Live Forecast (Existing Content) -->
   <div id="tab-live-signal" class="tab-content active">
@@ -1945,6 +2056,19 @@ function switchTab(tabId) {
   document.getElementById('tab-' + tabId).classList.add('active');
   const btn = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
   if (btn) btn.classList.add('active');
+  
+  // Sync sidebar menu states
+  const menuBtnLive = $('menu-live-signal');
+  const menuBtnScalper = $('menu-scalper');
+  if (menuBtnLive && menuBtnScalper) {
+    if (tabId === 'live-signal') {
+      menuBtnLive.classList.add('active');
+      menuBtnScalper.classList.remove('active');
+    } else {
+      menuBtnScalper.classList.add('active');
+      menuBtnLive.classList.remove('active');
+    }
+  }
   
   // Resize engines to fit container size after switching tabs
   if (activeTab === 'live-signal') {
@@ -3533,6 +3657,33 @@ function closeMobileSheet() {
   const sheet = $('mobile-bottom-sheet');
   if (sheet) sheet.classList.remove('active');
 }
+
+// Sidebar Drawer Control
+function toggleSidebarDrawer(event) {
+  if (event) event.stopPropagation();
+  const drawer = $('sidebar-drawer');
+  if (drawer) {
+    drawer.classList.toggle('active');
+  }
+}
+window.toggleSidebarDrawer = toggleSidebarDrawer;
+
+function handleMenuSwitchTab(tabId) {
+  switchTab(tabId);
+  const drawer = $('sidebar-drawer');
+  if (drawer) drawer.classList.remove('active');
+}
+window.handleMenuSwitchTab = handleMenuSwitchTab;
+
+// Close sidebar drawer when clicking outside
+window.addEventListener('click', (e) => {
+  const drawer = $('sidebar-drawer');
+  const btn = $('hamburger-menu-btn');
+  if (drawer && drawer.classList.contains('active') && !drawer.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+    drawer.classList.remove('active');
+  }
+});
+
 window.closeMobileSheet = closeMobileSheet;
 
 applySavedTheme();
