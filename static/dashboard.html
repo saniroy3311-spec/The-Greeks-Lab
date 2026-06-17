@@ -2420,17 +2420,15 @@
                 <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
                   <thead>
                     <tr style="border-bottom: 1px solid var(--border); color: var(--muted); text-align: left;">
-                      <th style="padding: 4px 4px; font-weight: 500;">Candle</th>
-                      <th style="padding: 4px 4px; font-weight: 500; text-align: right;">Open</th>
-                      <th style="padding: 4px 4px; font-weight: 500; text-align: right;">High</th>
-                      <th style="padding: 4px 4px; font-weight: 500; text-align: right;">Low</th>
-                      <th style="padding: 4px 4px; font-weight: 500; text-align: right;">Close</th>
-                      <th style="padding: 4px 4px; font-weight: 500; text-align: center;">Dir</th>
+                      <th style="padding: 4px 6px; font-weight: 500;">Candle</th>
+                      <th style="padding: 4px 6px; font-weight: 500; text-align: right;">Target Price</th>
+                      <th style="padding: 4px 6px; font-weight: 500; text-align: right;">Change</th>
+                      <th style="padding: 4px 6px; font-weight: 500; text-align: center;">Trend</th>
                     </tr>
                   </thead>
                   <tbody id="predictions-table-body" class="tnum">
                     <tr>
-                      <td colspan="6" style="text-align: center; color: var(--muted); padding: 8px 0;">No predictions available</td>
+                      <td colspan="4" style="text-align: center; color: var(--muted); padding: 8px 0;">No predictions available</td>
                     </tr>
                   </tbody>
                 </table>
@@ -3189,6 +3187,7 @@ async function load(isFirstLoad = false) {
       volume: c.volume || 0
     }));
 
+    window.currentPrice = d.current;
     window.lastPredictions = d.predicted || [];
     const cleanPredicted = window.lastPredictions.map(p => ({
       time: p.time * 1000,
@@ -3794,25 +3793,28 @@ function renderPredictionsTable(predicted) {
     document.querySelectorAll('#predictions-table-body').forEach(tbody => {
       tbody.innerHTML = `
         <tr>
-          <td colspan="6" style="text-align: center; color: var(--muted); padding: 8px 0;">No predictions available</td>
+          <td colspan="4" style="text-align: center; color: var(--muted); padding: 8px 0;">No predictions available</td>
         </tr>
       `;
     });
     return;
   }
   
+  const baseline = window.currentPrice || (predicted.length > 0 ? predicted[0].open : 0);
   const next5 = predicted.slice(0, 5);
   const rowsHtml = next5.map((c, idx) => {
     const isUp = c.close >= c.open;
     const arrow = isUp ? '<span style="color: var(--up);">↗</span>' : '<span style="color: var(--down);">↘</span>';
+    const diffPct = baseline ? ((c.close - baseline) / baseline) * 100 : 0;
+    const changeClass = diffPct >= 0 ? 'text-up' : 'text-down';
+    const changeText = (diffPct >= 0 ? '+' : '') + diffPct.toFixed(2) + '%';
+    
     return `
       <tr style="border-bottom: 1px dotted var(--border);">
-        <td style="padding: 4px 4px; color: var(--muted);">+${idx + 1}</td>
-        <td class="tnum" style="padding: 4px 4px; text-align: right;">${fmt(c.open)}</td>
-        <td class="tnum" style="padding: 4px 4px; text-align: right;">${fmt(c.high)}</td>
-        <td class="tnum" style="padding: 4px 4px; text-align: right;">${fmt(c.low)}</td>
-        <td class="tnum" style="padding: 4px 4px; text-align: right; font-weight: 500;">${fmt(c.close)}</td>
-        <td style="padding: 4px 4px; text-align: center; font-weight: bold;">${arrow}</td>
+        <td style="padding: 6px; color: var(--muted);">+${idx + 1}</td>
+        <td class="tnum" style="padding: 6px; text-align: right; font-weight: 500;">${fmt(c.close)}</td>
+        <td class="tnum ${changeClass}" style="padding: 6px; text-align: right; font-weight: 500;">${changeText}</td>
+        <td style="padding: 6px; text-align: center; font-weight: bold;">${arrow}</td>
       </tr>
     `;
   }).join('');
