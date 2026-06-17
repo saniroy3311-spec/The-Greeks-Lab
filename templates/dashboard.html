@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Greeks</title>
@@ -15,7 +18,23 @@
 </script>
 <style>
   :root {
+    --bg: #F5F6F8;
+    --chart-bg: #FFFFFF;
+    --surface: #FFFFFF;
+    --border: #E0E3EB;
+    --text: #111827;
+    --muted: #9CA3AF;
+    --up: #26a69a;
+    --down: #ef5350;
+    --flat: #70757a;
+    --pred: #ef9f27;
+    --blue: #2962FF;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  body.dark-theme {
     --bg: #0b1220;
+    --chart-bg: #131a2e;
     --surface: #131a2e;
     --border: #22293f;
     --text: #ffffff;
@@ -25,471 +44,734 @@
     --flat: #848e9c;
     --pred: #ef9f27;
     --blue: #2962FF;
-  }
-  body.light-theme {
-    --bg: #ffffff;
-    --surface: #f8f9fa;
-    --border: #e0e3eb;
-    --text: #131722;
-    --muted: #70757a;
-    --up: #26a69a;
-    --down: #ef5350;
-    --flat: #70757a;
-    --pred: #ef9f27;
-    --blue: #2962FF;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg); color: var(--text); padding: 16px;
-    max-width: 1100px; margin: 0 auto;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
-  .topbar { display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-  .title { font-size: 18px; font-weight: 600; }
-  .controls { display: flex; gap: 8px; }
-  select {
-    font: inherit; font-size: 13px; padding: 7px 11px; border-radius: 8px;
-    background: var(--surface); color: var(--text);
-    border: 1px solid var(--border); cursor: pointer;
+  
+  /* Google fonts pre-imports will be loaded in head */
+
+  /* Tabular numbers formatting */
+  .tnum, td, .stat .v, .sig-dir, .sig-sub span, .echoes-stat .val, 
+  #countdown-overlay-live, #countdown-overlay-scalper, .overlay-stat .v {
+    font-family: 'JetBrains Mono', monospace;
+    font-feature-settings: "tnum", "kern";
   }
-  .live { display: none; }
+
+  /* Top Navigation Bar */
+  .candl-topbar {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    gap: 12px;
+    font-size: 13px;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+  .divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+  }
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+  }
+  .logo-icon {
+    font-size: 16px;
+  }
+  .search-select {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    outline: none;
+    padding: 4px 8px;
+  }
+  .search-select option {
+    background: var(--surface);
+    color: var(--text);
+  }
+  .timeframe-buttons {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .timeframe-buttons::-webkit-scrollbar {
+    display: none;
+  }
+  .tf-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .tf-btn:hover {
+    color: var(--text);
+    background: rgba(0, 0, 0, 0.05);
+  }
+  body.dark-theme .tf-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .tf-btn.active {
+    background: var(--blue);
+    color: #ffffff !important;
+  }
+  .top-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .top-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  body.dark-theme .top-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .top-btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    padding: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .top-btn-icon:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  body.dark-theme .top-btn-icon:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .right-section {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .live-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .live-status-indicator .dot {
+    width: 6px;
+    height: 6px;
+    background: #555;
+    border-radius: 50%;
+  }
+  .live-status-indicator .dot.active {
+    background: var(--up);
+    box-shadow: 0 0 8px var(--up);
+    animation: pulse 2s infinite;
+  }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-  .signal {
-    border-radius: 14px; padding: 18px 22px; margin-bottom: 14px;
-    border: 1px solid; transition: all .4s ease;
-    display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+  /* Tab Container (Underline-only active styling) */
+  .tab-container {
+    display: flex;
+    gap: 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    height: 40px;
+    align-items: stretch;
+    flex-shrink: 0;
   }
-  .signal.up   { background: rgba(29,158,117,.12); border-color: var(--up); }
-  .signal.down { background: rgba(216,90,48,.12);  border-color: var(--down); }
-  .signal.flat { background: rgba(139,148,158,.10); border-color: var(--flat); }
-  .sig-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
-  .sig-dir { font-size: 34px; font-weight: 700; line-height: 1; letter-spacing: -.5px; }
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 0 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+  }
+  .tab-btn:hover {
+    color: var(--text);
+  }
+  .tab-btn.active {
+    color: var(--blue);
+    border-bottom-color: var(--blue);
+  }
+  .tab-content {
+    display: none;
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .tab-content.active {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Workspace layout & Viewport wrappers */
+  .chart-card, .scalper-chart-card {
+    background: var(--chart-bg);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .chart-head, .scalper-chart-head {
+    height: 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    flex-shrink: 0;
+  }
+  .chart-head .t, .scalper-chart-head .t {
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .legend, .scalper-legend {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .swatch, .scalper-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 3px;
+    vertical-align: middle;
+    margin-right: 4px;
+    border-radius: 1px;
+  }
+  .chart-viewport-wrapper {
+    position: relative;
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+  }
+  #chart, #tv-chart {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Side Drawing Toolbar */
+  .drawing-toolbar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 36px;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 6px 0;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.02);
+  }
+  body.dark-theme .drawing-toolbar {
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+  }
+  .drawing-toolbar button {
+    width: 36px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    opacity: 0.8;
+  }
+  .drawing-toolbar button svg {
+    width: 16px;
+    height: 16px;
+  }
+  .drawing-toolbar button:hover {
+    background: rgba(0, 0, 0, 0.05);
+    opacity: 1;
+  }
+  body.dark-theme .drawing-toolbar button:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .drawing-toolbar button.active {
+    background: var(--blue);
+    color: #ffffff !important;
+    opacity: 1;
+  }
+  .drawing-toolbar button.active svg {
+    stroke: #ffffff;
+  }
+
+  /* Floating Overlay cards (Bloomberg/TradingView HUD Style) */
+  .chart-overlays-container {
+    position: absolute;
+    top: 12px;
+    left: 48px;
+    z-index: 15;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 320px;
+    max-height: calc(100% - 24px);
+    overflow-y: auto;
+    pointer-events: none;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    scrollbar-width: none;
+  }
+  .chart-overlays-container::-webkit-scrollbar {
+    display: none;
+  }
+  .chart-overlays-container.collapsed {
+    transform: translateX(-332px);
+  }
+  .chart-overlays-container * {
+    pointer-events: auto;
+  }
+  
+  /* Collapse Toggle Tab on overlays */
+  .overlays-collapse-btn {
+    position: absolute;
+    right: -24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 38px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: none;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+    color: var(--muted);
+    transition: color 0.2s;
+    z-index: 5;
+  }
+  .overlays-collapse-btn:hover {
+    color: var(--text);
+  }
+  .chart-overlays-container.collapsed .overlays-collapse-btn svg {
+    transform: rotate(180deg);
+  }
+  .overlays-collapse-btn svg {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.3s;
+  }
+
+  .overlay-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: var(--card-shadow);
+  }
+  body.dark-theme .overlay-card {
+    background: rgba(19, 26, 46, 0.95);
+  }
+  .overlay-card-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Signal Panel Overlay */
+  .signal {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-left: 4px solid var(--flat);
+  }
+  .signal.up { border-left-color: var(--up); }
+  .signal.down { border-left-color: var(--down); }
+  .signal.flat { border-left-color: var(--flat); }
+  
+  .sig-flex-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .sig-label {
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 2px;
+  }
+  .sig-dir {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
   .signal.up .sig-dir { color: var(--up); }
   .signal.down .sig-dir { color: var(--down); }
   .signal.flat .sig-dir { color: var(--flat); }
-  .sig-sub { font-size: 13px; color: var(--muted); margin-top: 8px; }
-  .sig-action { font-size: 22px; font-weight: 600; line-height: 1; }
-  .right { text-align: right; }
+  
+  .sig-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .sig-action {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.1;
+  }
 
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 12px; margin-bottom: 14px; }
-  .stat { background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px 14px; }
-  .stat .k { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
-  .stat .v { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  /* Echoes Panel Overlay */
+  .echoes-card {
+    border-left: 4px solid var(--flat);
+  }
+  .echoes-card.bullish { border-left-color: var(--up); }
+  .echoes-card.bearish { border-left-color: var(--down); }
+  .echoes-card.neutral { border-left-color: var(--flat); }
 
-  .chart-card { background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; padding: 14px; position: relative; }
-  .chart-head { display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 10px; }
-  .chart-head .t { font-size: 13px; font-weight: 600; }
-  .legend { display: flex; gap: 14px; font-size: 11px; color: var(--muted); }
-  .swatch { display: inline-block; width: 12px; height: 3px; vertical-align: 3px; margin-right: 4px; border-radius: 2px; }
-  #chart { width: 100%; height: 360px; }
+  .echoes-status {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .echoes-card.bullish .echoes-status { color: var(--up); }
+  .echoes-card.bearish .echoes-status { color: var(--down); }
+  
+  .echoes-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+  .echoes-stat {
+    display: flex;
+    flex-direction: column;
+  }
+  .echoes-stat .val {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .echoes-stat .val.text-up { color: var(--up); }
+  .echoes-stat .val.text-down { color: var(--down); }
+  
+  .echoes-sparkline-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+  }
+  #echoes-sparkline {
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  body.dark-theme #echoes-sparkline {
+    background: rgba(0, 0, 0, 0.25);
+  }
+  .sparkline-label {
+    font-size: 9px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.2;
+  }
 
-  .footer { display: flex; justify-content: space-between; font-size: 11px;
-    color: var(--muted); margin-top: 10px; padding: 0 4px; }
-  .err { background: rgba(216,90,48,.15); border: 1px solid var(--down);
-    color: var(--down); padding: 10px 14px; border-radius: 8px; font-size: 13px;
-    margin-bottom: 14px; display: none; }
+  /* Stats Overlay */
+  .stats-card .overlay-card-body {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .overlay-stat {
+    display: flex;
+    flex-direction: column;
+  }
+  .overlay-stat .k {
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .overlay-stat .v {
+    font-size: 13px;
+    font-weight: 600;
+  }
 
-  /* Tab Navigation styling */
-  .tab-container { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-  .tab-btn { background: transparent; border: none; color: var(--muted); padding: 8px 16px; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 6px; transition: all 0.3s ease; }
-  .tab-btn:hover { color: var(--text); background: rgba(255, 255, 255, 0.05); }
-  .tab-btn.active { color: #fff; background: var(--blue); }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-
-  /* EMA/Kronos Scalper specific styling */
-  .scalper-badges-panel { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-  .scalper-badge { padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--muted); background: var(--surface); border: 1px solid var(--border); transition: all 0.3s ease; opacity: 0.5; }
-  .scalper-badge.active { opacity: 1; }
+  /* Scalper Overlay state badges */
+  .state-badges-card .overlay-card-body {
+    padding-top: 4px;
+  }
+  .scalper-badges-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .scalper-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
+    opacity: 0.5;
+  }
+  .scalper-badge.active {
+    opacity: 1;
+  }
   #badge-awaiting.active { color: #fff; background: #475569; border-color: #475569; }
   #badge-long-trig.active { color: #fff; background: #eab308; border-color: #eab308; }
   #badge-short-trig.active { color: #fff; background: #f97316; border-color: #f97316; }
   #badge-pos-long.active { color: #fff; background: #10b981; border-color: #10b981; }
   #badge-pos-short.active { color: #fff; background: #ef4444; border-color: #ef4444; }
 
-  .scalper-info-bar { background: var(--surface); border: 1px solid var(--border); padding: 12px 16px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; color: var(--text); }
-  .scalper-chart-card { background: #ffffff; border: 1px solid #e0e3eb; border-radius: 12px; padding: 14px; margin-top: 14px; }
-  .scalper-chart-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; color: #333333; }
-  .scalper-chart-head .t { font-size: 13px; font-weight: 600; }
-  .scalper-legend { display: flex; gap: 14px; font-size: 11px; color: #666666; }
-  .scalper-swatch { display: inline-block; width: 12px; height: 3px; vertical-align: 3px; margin-right: 4px; border-radius: 2px; }
-  #tv-chart-container { position: relative; width: 100%; height: 400px; border-radius: 8px; overflow: hidden; }
-  #tv-chart { width: 100%; height: 100%; }
-
-  /* Trade Logs Table styling */
-  .scalper-logs-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-top: 16px;
+  .scalper-trade-info-card {
+    border-left: 4px solid var(--blue);
   }
-  .scalper-logs-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-  }
-  .scalper-logs-head .t {
-    font-size: 14px;
-    font-weight: 600;
-  }
-  .scalper-table-wrapper {
-    overflow-x: auto;
-  }
-  .scalper-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    text-align: left;
-  }
-  .scalper-table th, .scalper-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border);
-  }
-  .scalper-table th {
-    color: var(--muted);
-    font-weight: 500;
+  #scalper-info-text {
     font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    line-height: 1.3;
   }
-  .scalper-table tr:last-child td {
-    border-bottom: none;
+
+  /* Indicator Toggles Inline Row */
+  .indicator-toggles.inline-row {
+    display: flex;
+    gap: 8px;
+    font-size: 11px;
+    align-items: center;
   }
-  .scalper-table td {
-    font-variant-numeric: tabular-nums;
-  }
-  .scalper-table .tr-long {
-    color: var(--up);
-    font-weight: 600;
-  }
-  .scalper-table .tr-short {
-    color: var(--down);
-    font-weight: 600;
-  }
-  .scalper-table .badge-result {
-    display: inline-block;
+  .indicator-toggles.inline-row label {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.03);
     padding: 2px 6px;
     border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .scalper-table .badge-profit {
-    background: rgba(29, 158, 117, 0.15);
-    color: var(--up);
-  }
-  .scalper-table .badge-loss {
-    background: rgba(216, 90, 48, 0.15);
-    color: var(--down);
-  }
-
-  /* Mobile responsiveness */
-  @media (max-width: 768px) {
-    body {
-      padding: 10px;
-    }
-    .topbar {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 12px;
-    }
-    .title {
-      font-size: 20px;
-      text-align: center;
-    }
-    .controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    .controls select:last-child {
-      grid-column: span 2;
-    }
-    .live {
-      justify-content: center;
-      margin-top: 4px;
-    }
-    .signal {
-      flex-direction: column;
-      gap: 14px;
-      padding: 14px;
-    }
-    .sig-dir {
-      font-size: 28px;
-    }
-    .right {
-      text-align: left;
-    }
-    .stats {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
-    .scalper-badges-panel {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      justify-content: center;
-      padding-bottom: 6px;
-    }
-    .scalper-badge {
-      padding: 6px 10px;
-      font-size: 11px;
-    }
-    .scalper-table th, .scalper-table td {
-      padding: 8px 6px;
-      font-size: 12px;
-    }
-    #tv-chart-container {
-      height: 480px;
-    }
-    #chart {
-      height: 450px;
-    }
-  }
-
-  /* --- Candl Integration Styles --- */
-  .dashboard-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 14px;
-    margin-bottom: 14px;
-  }
-  @media (max-width: 768px) {
-    .dashboard-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .drawing-toolbar {
-    position: absolute;
-    left: 12px;
-    top: 55px;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    background: rgba(22, 27, 34, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 5px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  }
-  .drawing-toolbar.light {
-    background: rgba(255, 255, 255, 0.85);
-    border-color: #e0e3eb;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-  .drawing-toolbar button {
-    width: 30px;
-    height: 30px;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     transition: all 0.2s;
-  }
-  .drawing-toolbar.light button {
-    color: #333333;
-  }
-  .drawing-toolbar button:hover {
-    background: rgba(255, 255, 255, 0.15);
-  }
-  .drawing-toolbar.light button:hover {
-    background: rgba(0, 0, 0, 0.08);
-  }
-  .drawing-toolbar button.active {
-    background: var(--blue);
-    color: #fff;
-  }
-  .drawing-toolbar.light button.active {
-    background: #2962FF;
-    color: #fff;
-  }
-  .drawing-toolbar button .icon {
-    font-size: 14px;
-  }
-
-  .indicator-toggles {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 6px;
-    margin-bottom: 6px;
-    font-size: 11px;
-    color: var(--muted);
-  }
-  .indicator-toggles.light {
-    color: #666666;
-  }
-  .indicator-toggles label {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
     user-select: none;
-    transition: color 0.2s;
   }
-  .indicator-toggles label:hover {
-    color: var(--text);
+  body.dark-theme .indicator-toggles.inline-row label {
+    background: rgba(255, 255, 255, 0.03);
   }
-  .indicator-toggles.light label:hover {
-    color: #111;
+  .indicator-toggles.inline-row label:hover {
+    background: rgba(0, 0, 0, 0.06);
   }
-  .indicator-toggles input[type="checkbox"] {
+  body.dark-theme .indicator-toggles.inline-row label:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .indicator-toggles.inline-row input[type="checkbox"] {
     accent-color: var(--blue);
     cursor: pointer;
   }
-  .indicator-toggles.light input[type="checkbox"] {
-    accent-color: #2962FF;
-  }
 
-  .echoes-card {
-    border-radius: 14px; padding: 18px 22px;
-    border: 1px solid var(--border); background: var(--surface);
-    display: flex; flex-direction: column; justify-content: space-between; gap: 8px;
-    transition: all .4s ease;
-  }
-  .echoes-card.bullish { background: rgba(29,158,117,.10); border-color: var(--up); }
-  .echoes-card.bearish { background: rgba(216,90,48,.10); border-color: var(--down); }
-  .echoes-card.neutral { background: rgba(139,148,158,.08); border-color: var(--flat); }
-  
-  .echoes-status { font-size: 26px; font-weight: 700; color: var(--text); }
-  .echoes-card.bullish .echoes-status { color: var(--up); }
-  .echoes-card.bearish .echoes-status { color: var(--down); }
-  
-  .echoes-stats-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 4px; }
-  .echoes-stat { display: flex; gap: 4px; }
-  .echoes-stat .val { font-weight: 600; color: var(--text); }
-  .echoes-stat .val.text-up { color: var(--up); }
-  .echoes-stat .val.text-down { color: var(--down); }
-  
-  .echoes-sparkline-container { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; }
-  #echoes-sparkline { background: rgba(0,0,0,0.25); border-radius: 4px; border: 1px solid var(--border); }
-  .sparkline-label { font-size: 10px; color: var(--muted); text-align: right; line-height: 1.3; }
-
-  .alerts-card {
+  /* Below-Chart Tables styling */
+  .alerts-card, .scalper-logs-card {
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
   }
-  .alerts-head {
+  .alerts-head, .scalper-logs-head {
+    height: 36px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-    gap: 12px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
   }
-  .alerts-head .t {
-    font-size: 14px;
+  .alerts-head .t, .scalper-logs-head .t {
+    font-size: 12px;
     font-weight: 600;
   }
-  .audio-settings {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--text);
+  .alerts-table-wrapper, .scalper-table-wrapper {
+    flex: 1;
+    overflow-y: auto;
   }
-  .audio-settings select {
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 6px;
-    background: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    cursor: pointer;
-  }
-  .alerts-table-wrapper {
-    overflow-x: auto;
-  }
-  .alerts-table {
+  .alerts-table, .scalper-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 12px;
     text-align: left;
   }
-  .alerts-table th, .alerts-table td {
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
-  }
-  .alerts-table th {
+  .alerts-table th, .scalper-table th {
     color: var(--muted);
-    font-weight: 500;
-    font-size: 11px;
+    font-weight: 600;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 5;
   }
-  .alerts-table tr:last-child td {
+  .alerts-table td, .scalper-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .alerts-table tr:nth-child(even), .scalper-table tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.015);
+  }
+  body.dark-theme .alerts-table tr:nth-child(even),
+  body.dark-theme .scalper-table tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.015);
+  }
+  .alerts-table tr:hover, .scalper-table tr:hover {
+    background: rgba(41, 98, 255, 0.04) !important;
+  }
+  .alerts-table tr:last-child td, .scalper-table tr:last-child td {
     border-bottom: none;
   }
-  .alerts-table td {
-    font-variant-numeric: tabular-nums;
+
+  /* Table styling components */
+  .tr-long {
+    color: var(--up) !important;
+    font-weight: 700;
   }
+  .tr-short {
+    color: var(--down) !important;
+    font-weight: 700;
+  }
+  .badge-result {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge-profit {
+    background: rgba(38, 166, 154, 0.12);
+    color: var(--up) !important;
+  }
+  .badge-loss {
+    background: rgba(239, 83, 80, 0.12);
+    color: var(--down) !important;
+  }
+  
   .alert-badge {
     display: inline-block;
     padding: 2px 6px;
     border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
   }
   .alert-badge.active {
-    background: rgba(55, 138, 221, 0.15);
-    color: var(--blue);
+    background: rgba(41, 98, 255, 0.12);
+    color: var(--blue) !important;
   }
   .alert-badge.triggered {
-    background: rgba(139, 148, 158, 0.15);
-    color: var(--flat);
+    background: rgba(112, 117, 122, 0.12);
+    color: var(--muted) !important;
   }
   .delete-alert-btn {
     background: transparent;
     border: none;
     color: var(--down);
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
     transition: transform 0.2s;
   }
   .delete-alert-btn:hover {
     transform: scale(1.2);
   }
-  .alert-toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--blue);
-    color: #fff;
-    padding: 12px 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
-    z-index: 9999;
-    font-size: 13px;
-    font-weight: 600;
-    transform: translateY(100px);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    cursor: pointer;
+
+  /* Slide-Down Indicators Panel */
+  .indicators-dropdown-panel {
+    position: absolute;
+    top: 52px;
+    right: 16px;
+    width: 320px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    padding: 16px;
+    display: none;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .alert-toast.show {
-    transform: translateY(0);
-    opacity: 1;
+  .indicators-dropdown-panel.active {
+    display: block;
+  }
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
-  /* Modal styling */
+  /* Modals Overlay */
   .modal-overlay {
     position: fixed;
     top: 0;
@@ -517,7 +799,7 @@
     border-radius: 12px;
     width: 90%;
     max-width: 450px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     transform: translateY(20px);
     transition: transform 0.3s ease;
     display: flex;
@@ -556,8 +838,6 @@
     padding: 18px;
     overflow-y: auto;
   }
-  
-  /* Indicators Modal styling */
   .indicator-search-box {
     margin-bottom: 14px;
   }
@@ -590,10 +870,10 @@
     user-select: none;
   }
   .indicator-item:hover {
-    background: rgba(255, 255, 255, 0.04);
-  }
-  body.light-theme .indicator-item:hover {
     background: rgba(0, 0, 0, 0.03);
+  }
+  body.dark-theme .indicator-item:hover {
+    background: rgba(255, 255, 255, 0.04);
   }
   .indicator-item-left {
     display: flex;
@@ -605,15 +885,15 @@
     font-size: 10px;
     padding: 2px 6px;
     border-radius: 4px;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.04);
     color: var(--muted);
     border: 1px solid var(--border);
   }
-  body.light-theme .indicator-badge {
-    background: rgba(0, 0, 0, 0.04);
+  body.dark-theme .indicator-badge {
+    background: rgba(255, 255, 255, 0.06);
   }
   
-  /* Settings Switch toggle styling */
+  /* Settings section */
   .settings-section {
     margin-bottom: 20px;
   }
@@ -668,12 +948,12 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.05);
     transition: .3s;
     border: 1px solid var(--border);
   }
-  body.light-theme .slider {
-    background-color: rgba(0, 0, 0, 0.05);
+  body.dark-theme .slider {
+    background-color: rgba(255, 255, 255, 0.1);
   }
   .slider:before {
     position: absolute;
@@ -700,7 +980,6 @@
     border-radius: 50%;
   }
   
-  /* Alerts Modal tabs & controls */
   .alert-type-tabs {
     display: flex;
     border-radius: 6px;
@@ -769,185 +1048,352 @@
     background: #1b4cd6;
   }
   .btn-secondary {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.04);
     color: var(--text);
     border: 1px solid var(--border);
   }
-  body.light-theme .btn-secondary {
-    background: rgba(0, 0, 0, 0.04);
+  body.dark-theme .btn-secondary {
+    background: rgba(255, 255, 255, 0.06);
   }
   .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-  body.light-theme .btn-secondary:hover {
     background: rgba(0, 0, 0, 0.08);
+  }
+  body.dark-theme .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
   }
   .btn-full {
     width: 100%;
     margin-top: 10px;
   }
-  
-  /* Topbar styling */
-  .candl-topbar {
+
+  .footer {
+    height: 22px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
+    font-size: 10px;
+    color: var(--muted);
+    padding: 0 16px;
+    border-top: 1px solid var(--border);
     background: var(--surface);
+    flex-shrink: 0;
+  }
+  .err {
+    background: rgba(239, 83, 80, 0.15);
+    border: 1px solid var(--down);
+    color: var(--down);
+    padding: 10px 14px;
+    font-size: 13px;
+    z-index: 10;
+    flex-shrink: 0;
+    display: none;
+  }
+
+  #countdown-overlay-live, #countdown-overlay-scalper {
+    position: absolute;
+    right: 16px;
+    top: 8px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.9);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 12px;
-    margin-bottom: 16px;
-    gap: 8px;
-    font-size: 13px;
-    flex-wrap: wrap;
+    color: var(--text);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    pointer-events: none;
+    box-shadow: var(--shadow);
+    display: none;
   }
-  .candl-topbar .divider {
-    width: 1px;
-    height: 20px;
-    background: var(--border);
+  body.dark-theme #countdown-overlay-live,
+  body.dark-theme #countdown-overlay-scalper {
+    background: rgba(19, 26, 46, 0.9);
   }
-  .logo-section {
+
+  /* View Mode Height Calculations */
+  body.view-fullscreen .tab-content {
+    display: none;
+    height: calc(100vh - 92px);
+    overflow: hidden;
+  }
+  body.view-fullscreen .tab-content.active {
     display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 700;
-    font-size: 15px;
-    color: var(--text);
+    flex-direction: column;
   }
-  .search-select {
-    background: transparent;
+  body.view-fullscreen .chart-card,
+  body.view-fullscreen .scalper-chart-card {
+    flex: 1;
+    height: 100%;
+    border-radius: 0;
     border: none;
-    color: var(--text);
-    font-weight: 600;
-    font-size: 13px;
-    cursor: pointer;
-    outline: none;
-    padding: 4px 8px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
   }
-  .search-select option {
-    background: var(--surface);
-    color: var(--text);
+  body.view-fullscreen .chart-viewport-wrapper {
+    flex: 1;
+    height: 100% !important;
   }
-  .timeframe-buttons {
+  body.view-fullscreen .alerts-card,
+  body.view-fullscreen .scalper-logs-card {
+    display: none !important;
+  }
+
+  body.view-split .tab-content {
+    display: none;
+    height: calc(100vh - 92px);
+    overflow: hidden;
+  }
+  body.view-split .tab-content.active {
+    display: flex;
+    flex-direction: column;
+  }
+  body.view-split .chart-card,
+  body.view-split .scalper-chart-card {
+    height: 60vh;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  body.view-split .chart-viewport-wrapper {
+    flex: 1;
+  }
+  body.view-split .alerts-card,
+  body.view-split .scalper-logs-card {
+    height: calc(40vh - 92px);
+    margin-top: 0;
+    border-radius: 0;
+    border: none;
+    overflow-y: auto;
+    background: var(--bg);
+  }
+
+  body.view-compact .tab-content {
+    display: none;
+    height: calc(100vh - 92px);
+    overflow: hidden;
+  }
+  body.view-compact .tab-content.active {
+    display: flex;
+    flex-direction: column;
+  }
+  body.view-compact .chart-card,
+  body.view-compact .scalper-chart-card {
+    height: 45vh;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  body.view-compact .chart-viewport-wrapper {
+    flex: 1;
+  }
+  body.view-compact .alerts-card,
+  body.view-compact .scalper-logs-card {
+    height: calc(55vh - 92px);
+    margin-top: 0;
+    border-radius: 0;
+    border: none;
+    overflow-y: auto;
+    background: var(--bg);
+  }
+
+  .view-mode-buttons {
     display: flex;
     gap: 4px;
+    background: rgba(0, 0, 0, 0.03);
+    padding: 2px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
   }
-  .tf-btn {
+  body.dark-theme .view-mode-buttons {
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .view-mode-btn {
     background: transparent;
     border: none;
     color: var(--muted);
     padding: 4px 8px;
     border-radius: 4px;
     cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-  .tf-btn:hover {
-    color: var(--text);
-    background: rgba(255, 255, 255, 0.05);
-  }
-  body.light-theme .tf-btn:hover {
-    background: rgba(0, 0, 0, 0.05);
-  }
-  .tf-btn.active {
-    background: var(--blue);
-    color: #ffffff !important;
-  }
-  .top-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    padding: 6px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-  .top-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-  body.light-theme .top-btn:hover {
-    background: rgba(0, 0, 0, 0.05);
-  }
-  .top-btn-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    padding: 6px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s;
-  }
-  .top-btn-icon:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-  body.light-theme .top-btn-icon:hover {
-    background: rgba(0, 0, 0, 0.05);
-  }
-  .right-section {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .live-status-indicator {
-    display: flex;
-    align-items: center;
-    gap: 6px;
     font-size: 11px;
-    color: var(--muted);
-    margin-left: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.15s;
   }
-  .live-status-indicator .dot {
-    width: 6px;
-    height: 6px;
-    background: #555;
-    border-radius: 50%;
+  .view-mode-btn:hover {
+    color: var(--text);
   }
-  .live-status-indicator .dot.active {
-    background: var(--up);
-    box-shadow: 0 0 8px var(--up);
-    animation: pulse 2s infinite;
+  .view-mode-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
-  
-  .mt-12 { margin-top: 12px; }
-  .mt-16 { margin-top: 16px; }
+  body.dark-theme .view-mode-btn.active {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
 
+  /* Mobile HUD strip & bottom sheet drawer */
+  .mobile-hud-strip {
+    display: none;
+  }
+  .mobile-bottom-sheet {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    body {
+      overflow: auto;
+      height: auto;
+    }
+    .candl-topbar {
+      flex-direction: column;
+      height: auto;
+      padding: 8px 12px;
+      gap: 8px;
+      align-items: stretch;
+    }
+    .right-section {
+      margin-left: 0;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .timeframe-buttons {
+      width: 100%;
+      justify-content: flex-start;
+      padding-bottom: 4px;
+    }
+    .tab-content {
+      height: auto !important;
+      overflow: visible !important;
+    }
+    body.view-fullscreen .tab-content,
+    body.view-split .tab-content,
+    body.view-compact .tab-content {
+      height: auto !important;
+    }
+    .chart-card, .scalper-chart-card {
+      height: 400px !important;
+      border-bottom: 1px solid var(--border);
+    }
+    .alerts-card, .scalper-logs-card {
+      height: auto !important;
+      display: block !important;
+      margin-top: 12px;
+    }
+    .mobile-hud-strip {
+      display: flex;
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      right: 8px;
+      height: 44px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      z-index: 100;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      cursor: pointer;
+    }
+    body.dark-theme .mobile-hud-strip {
+      background: rgba(19, 26, 46, 0.95);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .hud-item {
+      display: flex;
+      flex-direction: column;
+      font-size: 10px;
+    }
+    .hud-item .lbl {
+      color: var(--muted);
+      font-size: 8px;
+      text-transform: uppercase;
+    }
+    .hud-item .val {
+      font-weight: 700;
+      color: var(--text);
+    }
+    .mobile-bottom-sheet {
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
+      z-index: 2000;
+      max-height: 80vh;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mobile-bottom-sheet.active {
+      transform: translateY(0);
+    }
+    .sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .drag-handle {
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+    }
+    .sheet-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .sheet-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .sheet-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .mobile-sheet-content-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .mobile-sheet-content-wrapper .overlay-card {
+      width: 100% !important;
+      position: static !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+      border: 1px solid var(--border) !important;
+      background: var(--surface) !important;
+    }
+  }
 </style>
 </head>
 <body>
 
   <!-- Modals Overlay Library -->
-  <!-- Indicators Modal -->
-  <div id="indicators-modal" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Indicators</h3>
-        <button class="close-btn" onclick="toggleModal('indicators-modal', false)">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="indicator-search-box">
-          <input type="text" id="indicator-search" class="form-input" placeholder="Search indicators..." oninput="filterIndicators()">
-        </div>
-        <div class="indicator-list" id="indicator-list-container">
-          <!-- Dynamically populated indicator list -->
-        </div>
-        <div class="active-indicators-section" style="margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px;">
-          <h4 style="font-size: 11px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;">On Chart</h4>
-          <div id="active-indicators-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text);">
-            <!-- Active indicator pills -->
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Settings Modal -->
   <div id="settings-modal" class="modal-overlay">
     <div class="modal-content">
@@ -1063,10 +1509,9 @@
     </div>
   </div>
 
-
   <div class="candl-topbar">
     <div class="logo-section">
-      <span class="logo-icon">🧪</span>
+      <span class="logo-icon" style="color: #2962FF; font-weight: 800; font-size: 18px; margin-right: 4px;">Δ</span>
       <span class="logo-text">GreeksLab</span>
     </div>
     <div class="divider"></div>
@@ -1101,17 +1546,43 @@
       <option value="area">Area</option>
     </select>
     <div class="divider"></div>
-    <button class="top-btn" onclick="toggleModal('indicators-modal', true)"><span class="icon">📊</span> Indicators</button>
+    <button class="top-btn" id="indicators-toggle-btn" onclick="toggleIndicatorsDropdown(event)"><span class="icon">📊</span> Indicators</button>
     <button class="top-btn" onclick="openSettingsModal()"><span class="icon">⚙️</span> Settings</button>
     <button class="top-btn" onclick="openAlertsModal()"><span class="icon">🔔</span> Alerts</button>
     
     <div class="right-section">
-      <button class="top-btn-icon" onclick="resetActiveChartView()" title="Reset View">↩️</button>
-      <button class="top-btn-icon" onclick="toggleFullscreen()" title="Toggle Fullscreen">🎦</button>
+      <div class="view-mode-buttons">
+        <button class="view-mode-btn active" data-mode="split" onclick="setViewMode('split')">Split</button>
+        <button class="view-mode-btn" data-mode="fullscreen" onclick="setViewMode('fullscreen')">Full</button>
+        <button class="view-mode-btn" data-mode="compact" onclick="setViewMode('compact')">Compact</button>
+      </div>
+      <div class="divider"></div>
+      <button class="top-btn-icon" onclick="resetActiveChartView()" title="Reset View">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M16 3h5v5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 21H3v-5"></path></svg>
+      </button>
+      <button class="top-btn-icon" onclick="toggleFullscreen()" title="Toggle Fullscreen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M8 3H5a2 2 0 0 0-2 2v3m18-5h-3a2 2 0 0 0-2 2v3m-8 13H5a2 2 0 0 1-2-2v-3m18 5h-3a2 2 0 0 1-2-2v-3"></path></svg>
+      </button>
       <button class="top-btn-icon" id="global-theme-toggle" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
       <div class="live-status-indicator">
         <span class="dot active" id="dot"></span>
         <span id="status">Loading…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide-Down Indicators Panel -->
+  <div class="indicators-dropdown-panel" id="indicators-dropdown">
+    <div class="indicator-search-box">
+      <input type="text" id="indicator-search" class="form-input" placeholder="Search indicators..." oninput="filterIndicators()">
+    </div>
+    <div class="indicator-list" id="indicator-list-container">
+      <!-- Dynamically populated indicator list -->
+    </div>
+    <div class="active-indicators-section" style="margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px;">
+      <h4 style="font-size: 11px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;">On Chart</h4>
+      <div id="active-indicators-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text);">
+        <!-- Active indicator pills -->
       </div>
     </div>
   </div>
@@ -1126,78 +1597,127 @@
 
   <!-- Tab 1: Live Forecast (Existing Content) -->
   <div id="tab-live-signal" class="tab-content active">
-    <div class="dashboard-grid">
-      <div class="signal flat" id="sig">
-        <div>
-          <div class="sig-label">Kronos prediction</div>
-          <div class="sig-dir" id="dir">—</div>
-          <div class="sig-sub">Confidence <span id="conf" style="font-weight:600;color:var(--text)">—</span></div>
-        </div>
-        <div class="right">
-          <div class="sig-label">Action</div>
-          <div class="sig-action" id="act">—</div>
-          <div class="sig-sub" id="bias">—</div>
-        </div>
-      </div>
-      
-      <div class="echoes-card flat" id="echoes-card">
-        <div>
-          <div class="sig-label">Echoes confirmation</div>
-          <div class="echoes-status" id="echoes-status">Scanning…</div>
-        </div>
-        <div class="echoes-stats-row">
-          <div class="echoes-stat"><span class="lbl">Median aftermath:</span> <span id="echoes-median" class="val">—</span></div>
-          <div class="echoes-stat"><span class="lbl">Best:</span> <span id="echoes-best" class="val text-up">—</span></div>
-          <div class="echoes-stat"><span class="lbl">Worst:</span> <span id="echoes-worst" class="val text-down">—</span></div>
-        </div>
-        <div class="echoes-sparkline-container">
-          <canvas id="echoes-sparkline" width="160" height="35"></canvas>
-          <div class="sparkline-label">Query & matches</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="stats">
-      <div class="stat"><div class="k">Current</div><div class="v" id="s-cur">—</div></div>
-      <div class="stat"><div class="k">Predicted (5 bars)</div><div class="v" id="s-p5">—</div></div>
-      <div class="stat"><div class="k">Predicted (end)</div><div class="v" id="s-pn">—</div></div>
-      <div class="stat"><div class="k">Expected move</div><div class="v" id="s-mv">—</div></div>
-    </div>
-
     <div class="chart-card">
       <div class="chart-head">
-        <div class="t">Price + Kronos forecast + Oracle probability cone</div>
+        <div class="t">Oracle Probability Cone + AI Forecasts</div>
         <div class="legend">
           <span><span class="swatch" style="background:var(--up)"></span>Actual candles</span>
           <span><span class="swatch" style="background:var(--pred)"></span>AI prediction</span>
-          <span><span class="swatch" style="background:#378add"></span>Oracle median</span>
+          <span><span class="swatch" style="background:#2962FF"></span>Oracle median</span>
         </div>
       </div>
       
-
-
-      <div style="position: relative; width: 100%; height: 360px;">
+      <div class="chart-viewport-wrapper">
+        <!-- Side Drawing Toolbar with SVGs -->
         <div class="drawing-toolbar" id="live-drawing-toolbar">
-          <button class="tool-btn active" data-tool="select" title="Cursor (Select)"><span class="icon">🖱️</span></button>
-          <button class="tool-btn" data-tool="trendline" title="Trend Line"><span class="icon">📈</span></button>
-          <button class="tool-btn" data-tool="fib" title="Fibonacci Levels"><span class="icon">🧬</span></button>
-          <button class="tool-btn" data-tool="elliottimpulse" title="Elliott Impulse Wave"><span class="icon">🌊</span></button>
-          <button class="tool-btn" data-tool="elliottcorrection" title="Elliott Correction Wave"><span class="icon">📉</span></button>
-          <button class="tool-btn" data-tool="brush" title="Freehand Brush"><span class="icon">🖌️</span></button>
-          <button class="tool-btn" data-tool="rect" title="Rectangle"><span class="icon">⬛</span></button>
-          <button class="tool-btn" data-tool="longpos" title="Long Position"><span class="icon">🟢</span></button>
-          <button class="tool-btn" data-tool="shortpos" title="Short Position"><span class="icon">🔴</span></button>
-          <button class="tool-btn tool-btn-magnet" id="live-magnet-btn" onclick="toggleMagnetSnap()" title="Magnet Snap (Snap to OHLC)"><span class="icon">🧲</span></button>
-          <button class="tool-btn" id="live-undo-btn" onclick="undoDrawings('live')" title="Undo (Ctrl+Z)"><span class="icon">↩️</span></button>
-          <button class="tool-btn" id="live-redo-btn" onclick="redoDrawings('live')" title="Redo (Ctrl+Y)"><span class="icon">↪️</span></button>
-          <button class="tool-btn" id="live-clear-drawings" title="Clear Drawings"><span class="icon">🗑️</span></button>
+          <button class="tool-btn active" data-tool="select" title="Cursor (Select)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="trendline" title="Trend Line">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><circle cx="18" cy="6" r="2" fill="currentColor"/><circle cx="6" cy="18" r="2" fill="currentColor"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="fib" title="Fibonacci Levels">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="4" y1="14" x2="20" y2="14"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="elliottimpulse" title="Elliott Impulse Wave">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l3-14 4 10 5-12 4 10 2-3"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="elliottcorrection" title="Elliott Correction Wave">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6 12 6-8 6 8"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="brush" title="Freehand Brush">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4Z"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="rect" title="Rectangle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="longpos" title="Long Position">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#26a69a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="#26a69a"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="shortpos" title="Short Position">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ef5350" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="#ef5350"/></svg>
+          </button>
+          <button class="tool-btn tool-btn-magnet" id="live-magnet-btn" onclick="toggleMagnetSnap()" title="Magnet Snap (Snap to OHLC)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 11V6a5 5 0 00-10 0v5"/><path d="M7 11H5v3a4 4 0 008 0v-3h-2"/><path d="M15 11h-2v3a4 4 0 008 0v-3h-2"/></svg>
+          </button>
+          <button class="tool-btn" id="live-undo-btn" onclick="undoDrawings('live')" title="Undo (Ctrl+Z)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg>
+          </button>
+          <button class="tool-btn" id="live-redo-btn" onclick="redoDrawings('live')" title="Redo (Ctrl+Y)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"/></svg>
+          </button>
+          <button class="tool-btn" id="live-clear-drawings" title="Clear Drawings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          </button>
         </div>
-        <div id="chart" style="width: 100%; height: 100%;"></div>
+        
+        <!-- Floating Overlays Container -->
+        <div class="chart-overlays-container" id="live-overlays">
+          <button class="overlays-collapse-btn" onclick="toggleOverlaysCollapse()" title="Collapse Overlays">
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          
+          <!-- Kronos Signal Card -->
+          <div class="overlay-card signal flat" id="sig">
+            <div class="overlay-card-header">
+              <span class="card-title">KRONOS FORECAST</span>
+            </div>
+            <div class="sig-flex-row">
+              <div>
+                <div class="sig-label">Direction</div>
+                <div class="sig-dir" id="dir">—</div>
+                <div class="sig-sub">Conf: <span id="conf">—</span></div>
+              </div>
+              <div class="right">
+                <div class="sig-label">Action</div>
+                <div class="sig-action" id="act">—</div>
+                <div class="sig-sub" id="bias">—</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Echoes Confirmation Card -->
+          <div class="overlay-card echoes-card flat" id="echoes-card">
+            <div class="overlay-card-header">
+              <span class="card-title">ECHOES CONFIRMATION</span>
+            </div>
+            <div>
+              <div class="sig-label">Echoes Status</div>
+              <div class="echoes-status" id="echoes-status">Scanning…</div>
+            </div>
+            <div class="echoes-stats-row">
+              <div class="echoes-stat"><span class="lbl">Median</span> <span id="echoes-median" class="val">—</span></div>
+              <div class="echoes-stat"><span class="lbl">Best</span> <span id="echoes-best" class="val text-up">—</span></div>
+              <div class="echoes-stat"><span class="lbl">Worst</span> <span id="echoes-worst" class="val text-down">—</span></div>
+            </div>
+            <div class="echoes-sparkline-container">
+              <canvas id="echoes-sparkline" width="160" height="35"></canvas>
+              <div class="sparkline-label">Query &<br>matches</div>
+            </div>
+          </div>
+          
+          <!-- Forecast Metrics Card -->
+          <div class="overlay-card stats-card" id="stats-card">
+            <div class="overlay-card-header">
+              <span class="card-title">FORECAST METRICS</span>
+            </div>
+            <div class="overlay-card-body">
+              <div class="overlay-stat"><span class="k">Current</span><span class="v" id="s-cur">—</span></div>
+              <div class="overlay-stat"><span class="k">Predicted (5b)</span><span class="v" id="s-p5">—</span></div>
+              <div class="overlay-stat"><span class="k">Predicted (end)</span><span class="v" id="s-pn">—</span></div>
+              <div class="overlay-stat"><span class="k">Expected move</span><span class="v" id="s-mv">—</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Chart Canvas -->
+        <div id="chart"></div>
+        
+        <div id="countdown-overlay-live">00:00</div>
       </div>
-      <div id="countdown-overlay-live" style="position: absolute; right: 70px; top: 90px; z-index: 10; background: rgba(55, 138, 221, 0.95); color: #ffffff; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-variant-numeric: tabular-nums; font-weight: bold; font-family: monospace; pointer-events: none; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: none;">00:00</div>
     </div>
 
-    <!-- Alerts Manager Card -->
+    <!-- Price Alerts Manager Card -->
     <div class="alerts-card" id="alerts-card">
       <div class="alerts-head">
         <div class="t">Active Price Alerts</div>
@@ -1224,24 +1744,23 @@
       </div>
     </div>
   </div>
-
   <!-- Tab 2: EMA/Kronos Scalper -->
   <div id="tab-scalper" class="tab-content">
-    <div class="scalper-badges-panel">
-      <span id="badge-awaiting" class="scalper-badge active">Awaiting Setup</span>
-      <span id="badge-long-trig" class="scalper-badge">Long Trigger Formed</span>
-      <span id="badge-short-trig" class="scalper-badge">Short Trigger Formed</span>
-      <span id="badge-pos-long" class="scalper-badge">In Position: Long</span>
-      <span id="badge-pos-short" class="scalper-badge">In Position: Short</span>
-    </div>
-    
-    <div id="scalper-info-bar" class="scalper-info-bar" style="display: none;">
-      <span id="scalper-info-text"></span>
-    </div>
-
     <div class="scalper-chart-card">
       <div class="scalper-chart-head">
-        <div class="t">9/15 EMA + Kronos Scalping Strategy</div>
+        <div class="t">9/15 EMA Scalper</div>
+        <div class="indicator-toggles inline-row" id="scalper-indicator-toggles">
+          <label><input type="checkbox" data-indicator="volume"> Volume</label>
+          <label><input type="checkbox" data-indicator="ema9" checked> EMA 9</label>
+          <label><input type="checkbox" data-indicator="ema15" checked> EMA 15</label>
+          <label><input type="checkbox" data-indicator="vwap"> VWAP</label>
+          <label><input type="checkbox" data-indicator="stochastic"> Stoch</label>
+          <label><input type="checkbox" data-indicator="obv"> OBV</label>
+          <label><input type="checkbox" data-indicator="cvd"> CVD</label>
+          <label><input type="checkbox" data-indicator="bollinger"> BBands</label>
+          <label><input type="checkbox" data-indicator="rsi"> RSI</label>
+          <label><input type="checkbox" data-indicator="macd"> MACD</label>
+        </div>
         <div class="scalper-legend">
           <span><span class="scalper-swatch" style="background:#26a69a"></span>Candles</span>
           <span><span class="scalper-swatch" style="background:#2962FF"></span>9 EMA</span>
@@ -1249,39 +1768,85 @@
         </div>
       </div>
       
-      <div class="indicator-toggles light" id="scalper-indicator-toggles">
-        <label><input type="checkbox" data-indicator="volume"> Volume</label>
-        <label><input type="checkbox" data-indicator="ema9" checked> EMA 9</label>
-        <label><input type="checkbox" data-indicator="ema15" checked> EMA 15</label>
-        <label><input type="checkbox" data-indicator="vwap"> VWAP</label>
-        <label><input type="checkbox" data-indicator="stochastic"> Stochastic</label>
-        <label><input type="checkbox" data-indicator="obv"> OBV</label>
-        <label><input type="checkbox" data-indicator="cvd"> CVD</label>
-        <label><input type="checkbox" data-indicator="bollinger"> Bollinger Bands</label>
-        <label><input type="checkbox" data-indicator="rsi"> RSI</label>
-        <label><input type="checkbox" data-indicator="macd"> MACD</label>
-      </div>
-
-      <div id="tv-chart-container" style="position: relative; width: 100%; height: 400px;">
+      <div class="chart-viewport-wrapper">
+        <!-- Side Drawing Toolbar with SVGs -->
         <div class="drawing-toolbar" id="scalper-drawing-toolbar">
-          <button class="tool-btn active" data-tool="select" title="Cursor (Select)"><span class="icon">🖱️</span></button>
-          <button class="tool-btn" data-tool="trendline" title="Trend Line"><span class="icon">📈</span></button>
-          <button class="tool-btn" data-tool="fib" title="Fibonacci Levels"><span class="icon">🧬</span></button>
-          <button class="tool-btn" data-tool="elliottimpulse" title="Elliott Impulse Wave"><span class="icon">🌊</span></button>
-          <button class="tool-btn" data-tool="elliottcorrection" title="Elliott Correction Wave"><span class="icon">📉</span></button>
-          <button class="tool-btn" data-tool="brush" title="Freehand Brush"><span class="icon">🖌️</span></button>
-          <button class="tool-btn" data-tool="rect" title="Rectangle"><span class="icon">⬛</span></button>
-          <button class="tool-btn" data-tool="longpos" title="Long Position"><span class="icon">🟢</span></button>
-          <button class="tool-btn" data-tool="shortpos" title="Short Position"><span class="icon">🔴</span></button>
-          <button class="tool-btn tool-btn-magnet" id="scalper-magnet-btn" onclick="toggleMagnetSnap()" title="Magnet Snap (Snap to OHLC)"><span class="icon">🧲</span></button>
-          <button class="tool-btn" id="scalper-undo-btn" onclick="undoDrawings('scalper')" title="Undo (Ctrl+Z)"><span class="icon">↩️</span></button>
-          <button class="tool-btn" id="scalper-redo-btn" onclick="redoDrawings('scalper')" title="Redo (Ctrl+Y)"><span class="icon">↪️</span></button>
-          <button class="tool-btn" id="scalper-clear-drawings" title="Clear Drawings"><span class="icon">🗑️</span></button>
+          <button class="tool-btn active" data-tool="select" title="Cursor (Select)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="trendline" title="Trend Line">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><circle cx="18" cy="6" r="2" fill="currentColor"/><circle cx="6" cy="18" r="2" fill="currentColor"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="fib" title="Fibonacci Levels">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="4" y1="14" x2="20" y2="14"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="elliottimpulse" title="Elliott Impulse Wave">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l3-14 4 10 5-12 4 10 2-3"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="elliottcorrection" title="Elliott Correction Wave">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6 12 6-8 6 8"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="brush" title="Freehand Brush">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4Z"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="rect" title="Rectangle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="longpos" title="Long Position">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#26a69a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="#26a69a"/></svg>
+          </button>
+          <button class="tool-btn" data-tool="shortpos" title="Short Position">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ef5350" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="#ef5350"/></svg>
+          </button>
+          <button class="tool-btn tool-btn-magnet" id="scalper-magnet-btn" onclick="toggleMagnetSnap()" title="Magnet Snap (Snap to OHLC)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 11V6a5 5 0 00-10 0v5"/><path d="M7 11H5v3a4 4 0 008 0v-3h-2"/><path d="M15 11h-2v3a4 4 0 008 0v-3h-2"/></svg>
+          </button>
+          <button class="tool-btn" id="scalper-undo-btn" onclick="undoDrawings('scalper')" title="Undo (Ctrl+Z)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg>
+          </button>
+          <button class="tool-btn" id="scalper-redo-btn" onclick="redoDrawings('scalper')" title="Redo (Ctrl+Y)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3l3 2.7"/></svg>
+          </button>
+          <button class="tool-btn" id="scalper-clear-drawings" title="Clear Drawings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          </button>
         </div>
+        
+        <!-- Floating Overlays Container for Scalper -->
+        <div class="chart-overlays-container" id="scalper-overlays">
+          <button class="overlays-collapse-btn" onclick="toggleOverlaysCollapse()" title="Collapse Overlays">
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          
+          <!-- State Badges Overlay Card -->
+          <div class="overlay-card state-badges-card">
+            <div class="overlay-card-header">
+              <span class="card-title">EMA SCALPER STATE</span>
+            </div>
+            <div class="scalper-badges-panel">
+              <span id="badge-awaiting" class="scalper-badge active">Awaiting Setup</span>
+              <span id="badge-long-trig" class="scalper-badge">Long Trigger Formed</span>
+              <span id="badge-short-trig" class="scalper-badge">Short Trigger Formed</span>
+              <span id="badge-pos-long" class="scalper-badge">In Position: Long</span>
+              <span id="badge-pos-short" class="scalper-badge">In Position: Short</span>
+            </div>
+          </div>
+          
+          <!-- Active Trade Info Overlay Card -->
+          <div class="overlay-card scalper-trade-info-card" id="scalper-info-bar" style="display: none;">
+            <div class="overlay-card-header">
+              <span class="card-title">ACTIVE POSITION</span>
+            </div>
+            <div id="scalper-info-text"></div>
+          </div>
+        </div>
+
+        <!-- Scalper Chart Canvas -->
         <div id="tv-chart" style="width: 100%; height: 100%;"></div>
+        
         <div id="scalper-target-box" style="position: absolute; display: none; background: rgba(38, 166, 154, 0.08); pointer-events: none; border-top: 1px solid rgba(38, 166, 154, 0.4); border-bottom: 1px solid rgba(38, 166, 154, 0.4); z-index: 5;"></div>
         <div id="scalper-stop-box" style="position: absolute; display: none; background: rgba(239, 83, 80, 0.08); pointer-events: none; border-top: 1px solid rgba(239, 83, 80, 0.4); border-bottom: 1px solid rgba(239, 83, 80, 0.4); z-index: 5;"></div>
-        <div id="countdown-overlay-scalper" style="position: absolute; right: 70px; top: 15px; z-index: 10; background: rgba(239, 83, 80, 0.95); color: #ffffff; padding: 3px 6px; border-radius: 4px; font-size: 11px; font-variant-numeric: tabular-nums; font-weight: bold; font-family: monospace; pointer-events: none; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: none;">00:00</div>
+        <div id="countdown-overlay-scalper">00:00</div>
       </div>
     </div>
 
@@ -1312,8 +1877,7 @@
       </div>
     </div>
   </div>
-
-  <div class="footer">
+    <div class="footer">
     <span id="updated">Last update: —</span>
     <span id="meta">Kronos-small · context 400</span>
   </div>
@@ -1326,6 +1890,8 @@ const $ = id => document.getElementById(id);
 function fmt(n) { return Number(n).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}); }
 
 let activeTab = 'live-signal';
+window.lastEchoScan = null;
+
 let liveChartEngine = null;
 let scalperChartEngine = null;
 
@@ -1691,8 +2257,15 @@ function checkAlerts(candle) {
 // Echoes Similarity Search Visualizer (Sparkline)
 // -------------------------------------------------------------
 function drawEchoesSparkline(echoScan) {
+  window.lastEchoScan = echoScan;
   const canvas = $('echoes-sparkline');
-  if (!canvas) return;
+  if (canvas) drawEchoesSparklineOnCanvas(canvas, echoScan);
+  
+  const mobileCanvas = document.querySelector('#mobile-sheet-content #echoes-sparkline');
+  if (mobileCanvas) drawEchoesSparklineOnCanvas(mobileCanvas, echoScan);
+}
+
+function drawEchoesSparklineOnCanvas(canvas, echoScan) {
   const ctx = canvas.getContext('2d');
   const w = canvas.width;
   const h = canvas.height;
@@ -1725,12 +2298,11 @@ function drawEchoesSparkline(echoScan) {
   const getX = (idx) => idx * scaleX;
   const getY = (val) => h - (val - minVal) * scaleY;
   
-  // Matched historical paths
   echoScan.results.forEach(res => {
     if (!res.aftermathPct) return;
     ctx.beginPath();
     const endingPct = res.aftermathPct[res.aftermathPct.length - 1];
-    ctx.strokeStyle = endingPct > 0 ? 'rgba(29, 158, 117, 0.25)' : 'rgba(216, 90, 48, 0.25)';
+    ctx.strokeStyle = endingPct > 0 ? 'rgba(38, 166, 154, 0.25)' : 'rgba(239, 83, 80, 0.25)';
     ctx.lineWidth = 1;
     
     const startX = getX(query.length - 1);
@@ -1745,7 +2317,6 @@ function drawEchoesSparkline(echoScan) {
     ctx.stroke();
   });
   
-  // Real Query path (thick orange)
   ctx.beginPath();
   ctx.strokeStyle = '#ef9f27';
   ctx.lineWidth = 2;
@@ -1755,16 +2326,12 @@ function drawEchoesSparkline(echoScan) {
   });
   ctx.stroke();
 }
-
-// -------------------------------------------------------------
-// Chart Initializations
-// -------------------------------------------------------------
 function initLiveChart() {
   if (liveChartEngine) return;
   const container = document.getElementById('chart');
   
   liveChartEngine = createChartEngine(container, {
-    theme: document.body.classList.contains('light-theme') ? 'light' : 'dark',
+    theme: document.body.classList.contains('dark-theme') ? 'dark' : 'light',
     pricePrecision: 2,
     chartType: 'candles',
     onActiveToolChange: (tool) => {
@@ -1815,7 +2382,7 @@ function initScalperChart() {
   const container = document.getElementById('tv-chart');
   
   scalperChartEngine = createChartEngine(container, {
-    theme: document.body.classList.contains('light-theme') ? 'light' : 'dark',
+    theme: document.body.classList.contains('dark-theme') ? 'dark' : 'light',
     pricePrecision: 2,
     chartType: 'candles',
     onActiveToolChange: (tool) => {
@@ -1987,6 +2554,7 @@ async function load(isFirstLoad = false) {
       
       echoesCard.className = `echoes-card ${statusKlass}`;
       $('echoes-status').textContent = statusText;
+      if ($('mobile-hud-echoes')) $('mobile-hud-echoes').textContent = statusText;
       $('echoes-median').textContent = `${echoScan.stats.medianEndPct >= 0 ? '+' : ''}${echoScan.stats.medianEndPct.toFixed(2)}%`;
       $('echoes-best').textContent = `+${echoScan.stats.bestEndPct.toFixed(2)}%`;
       $('echoes-worst').textContent = `${echoScan.stats.worstEndPct.toFixed(2)}%`;
@@ -2024,6 +2592,11 @@ async function load(isFirstLoad = false) {
       liveChartEngine.resetView();
     }
 
+    // Sync mobile HUD strip
+    if ($('mobile-hud-signal')) $('mobile-hud-signal').textContent = d.direction;
+    if ($('mobile-hud-conf')) $('mobile-hud-conf').textContent = d.confidence + '%';
+    if ($('mobile-hud-price')) $('mobile-hud-price').textContent = fmt(d.current);
+    
     const klass = d.direction === 'Long' ? 'up' : d.direction === 'Short' ? 'down' : 'flat';
     $('sig').className = 'signal ' + klass;
     $('dir').textContent = d.direction;
@@ -2498,10 +3071,10 @@ window.addEventListener('click', (e) => {
 
 // Theme Handling
 function toggleTheme() {
-  const isLight = document.body.classList.toggle('light-theme');
-  const theme = isLight ? 'light' : 'dark';
+  const isDark = document.body.classList.toggle('dark-theme');
+  const theme = isDark ? 'dark' : 'light';
   localStorage.setItem('greeks_theme', theme);
-  $('global-theme-toggle').textContent = isLight ? '☀️' : '🌙';
+  $('global-theme-toggle').textContent = isDark ? '🌙' : '☀️';
   
   if (liveChartEngine) liveChartEngine.setTheme(theme);
   if (scalperChartEngine) scalperChartEngine.setTheme(theme);
@@ -2509,18 +3082,16 @@ function toggleTheme() {
 window.toggleTheme = toggleTheme;
 
 function applySavedTheme() {
-  const savedTheme = localStorage.getItem('greeks_theme') || 'dark';
-  const isLight = savedTheme === 'light';
-  if (isLight) {
-    document.body.classList.add('light-theme');
-    $('global-theme-toggle').textContent = '☀️';
-  } else {
-    document.body.classList.remove('light-theme');
+  const savedTheme = localStorage.getItem('greeks_theme') || 'light';
+  const isDark = savedTheme === 'dark';
+  if (isDark) {
+    document.body.classList.add('dark-theme');
     $('global-theme-toggle').textContent = '🌙';
+  } else {
+    document.body.classList.remove('dark-theme');
+    $('global-theme-toggle').textContent = '☀️';
   }
 }
-
-// Chart Settings Handling
 function loadChartSettings(engine) {
   if (!engine) return;
   const upColor = localStorage.getItem('greeks_up_color') || '#26a69a';
@@ -2861,7 +3432,116 @@ function startShadedBoxesLoop() {
 
 
 
-  applySavedTheme();
+  
+// View Mode Toggling
+function setViewMode(mode) {
+  document.body.classList.remove('view-fullscreen', 'view-split', 'view-compact');
+  document.body.classList.add('view-' + mode);
+  localStorage.setItem('greeks_view_mode', mode);
+  
+  document.querySelectorAll('.view-mode-btn').forEach(btn => {
+    if (btn.getAttribute('data-mode') === mode) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+  
+  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'));
+    updateShadedBoxes();
+  }, 100);
+}
+window.setViewMode = setViewMode;
+
+function applySavedViewMode() {
+  const mode = localStorage.getItem('greeks_view_mode') || 'split';
+  setViewMode(mode);
+}
+
+// Overlays Collapse Toggling
+function toggleOverlaysCollapse() {
+  const cLive = $('live-overlays');
+  const cScalper = $('scalper-overlays');
+  let isCollapsed = false;
+  if (cLive) isCollapsed = cLive.classList.toggle('collapsed');
+  if (cScalper) cScalper.classList.toggle('collapsed', isCollapsed);
+  localStorage.setItem('greeks_overlays_collapsed', isCollapsed ? 'true' : 'false');
+}
+window.toggleOverlaysCollapse = toggleOverlaysCollapse;
+
+function applyOverlaysCollapse() {
+  const collapsed = localStorage.getItem('greeks_overlays_collapsed') === 'true';
+  const cLive = $('live-overlays');
+  const cScalper = $('scalper-overlays');
+  if (cLive && collapsed) cLive.classList.add('collapsed');
+  if (cScalper && collapsed) cScalper.classList.add('collapsed');
+}
+
+// Indicators dropdown toggle
+function toggleIndicatorsDropdown(event) {
+  if (event) event.stopPropagation();
+  const dropdown = $('indicators-dropdown');
+  if (dropdown) {
+    const active = dropdown.classList.toggle('active');
+    if (active) {
+      renderIndicatorsModalList();
+    }
+  }
+}
+window.toggleIndicatorsDropdown = toggleIndicatorsDropdown;
+
+// Close indicators dropdown when clicking outside
+window.addEventListener('click', (e) => {
+  const dropdown = $('indicators-dropdown');
+  const btn = $('indicators-toggle-btn');
+  if (dropdown && dropdown.classList.contains('active') && !dropdown.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+    dropdown.classList.remove('active');
+  }
+});
+
+// Mobile Bottom Sheet
+function openMobileSheet() {
+  const sheet = $('mobile-bottom-sheet');
+  const content = $('mobile-sheet-content');
+  if (sheet && content) {
+    if (activeTab === 'live-signal') {
+      const sigHtml = $('sig') ? $('sig').outerHTML : '';
+      const echoesHtml = $('echoes-card') ? $('echoes-card').outerHTML : '';
+      const statsHtml = $('stats-card') ? $('stats-card').outerHTML : '';
+      content.innerHTML = `
+        <div class="mobile-sheet-content-wrapper">
+          ${sigHtml}
+          ${echoesHtml}
+          ${statsHtml}
+        </div>
+      `;
+      const mobileCanvas = content.querySelector('#echoes-sparkline');
+      if (mobileCanvas && window.lastEchoScan) {
+        drawEchoesSparklineOnCanvas(mobileCanvas, window.lastEchoScan);
+      }
+    } else {
+      const stateHtml = document.querySelector('#tab-scalper .state-badges-card') ? document.querySelector('#tab-scalper .state-badges-card').outerHTML : '';
+      const tradeHtml = document.querySelector('#tab-scalper .scalper-trade-info-card') ? document.querySelector('#tab-scalper .scalper-trade-info-card').outerHTML : '';
+      content.innerHTML = `
+        <div class="mobile-sheet-content-wrapper">
+          ${stateHtml}
+          ${tradeHtml}
+        </div>
+      `;
+    }
+    sheet.classList.add('active');
+  }
+}
+window.openMobileSheet = openMobileSheet;
+
+function closeMobileSheet() {
+  const sheet = $('mobile-bottom-sheet');
+  if (sheet) sheet.classList.remove('active');
+}
+window.closeMobileSheet = closeMobileSheet;
+
+applySavedTheme();
+  applySavedViewMode();
+  applyOverlaysCollapse();
+
   
   // Load active indicators from localStorage
   const savedLiveInds = localStorage.getItem('greeks_active_indicators_live-signal');
@@ -2889,5 +3569,40 @@ load(true);
 schedule();
 startCountdownTimer();
 </script>
+
+  <!-- Mobile HUD Strip -->
+  <div class="mobile-hud-strip" onclick="openMobileSheet()">
+    <div class="hud-item">
+      <span class="lbl">SIGNAL</span>
+      <span class="val" id="mobile-hud-signal">—</span>
+    </div>
+    <div class="hud-item">
+      <span class="lbl">CONFIDENCE</span>
+      <span class="val" id="mobile-hud-conf">—</span>
+    </div>
+    <div class="hud-item">
+      <span class="lbl">ECHOES</span>
+      <span class="val" id="mobile-hud-echoes">—</span>
+    </div>
+    <div class="hud-item">
+      <span class="lbl">PRICE</span>
+      <span class="val" id="mobile-hud-price">—</span>
+    </div>
+    <div class="hud-chevron">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="18 15 12 9 6 15"></polyline></svg>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Sheet Drawer -->
+  <div id="mobile-bottom-sheet" class="mobile-bottom-sheet">
+    <div class="sheet-header">
+      <div class="drag-handle"></div>
+      <span class="sheet-title">Forecast Details</span>
+      <button class="sheet-close-btn" onclick="closeMobileSheet()">✕</button>
+    </div>
+    <div class="sheet-body" id="mobile-sheet-content">
+      <!-- Cloned content is placed here dynamically -->
+    </div>
+  </div>
 </body>
 </html>
