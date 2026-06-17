@@ -6,7 +6,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Greeks</title>
+<title>The Greeks Lab</title>
 <script type="importmap">
   {
     "imports": {
@@ -1789,6 +1789,59 @@
     font-size: 15px;
     font-weight: 800;
   }
+
+  .mobile-forecast-btn {
+    display: none;
+  }
+  
+  @media (max-width: 768px) {
+    .chart-head-metrics {
+      display: none !important;
+    }
+    .mobile-forecast-btn {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: calc(100% - 24px);
+      margin: 8px auto;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease;
+    }
+    .mobile-forecast-btn.glowing-green {
+      background: #10b981 !important;
+      color: #fff !important;
+      border-color: #10b981 !important;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.7) !important;
+      animation: mobile-pulse-green 1.5s infinite alternate;
+    }
+    .mobile-forecast-btn.glowing-red {
+      background: #ef4444 !important;
+      color: #fff !important;
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.7) !important;
+      animation: mobile-pulse-red 1.5s infinite alternate;
+    }
+  }
+
+  @keyframes mobile-pulse-green {
+    0% { box-shadow: 0 0 4px rgba(16, 185, 129, 0.4); }
+    100% { box-shadow: 0 0 16px rgba(16, 185, 129, 0.8); }
+  }
+  @keyframes mobile-pulse-red {
+    0% { box-shadow: 0 0 4px rgba(239, 68, 68, 0.4); }
+    100% { box-shadow: 0 0 16px rgba(239, 68, 68, 0.8); }
+  }
 </style>
 </head>
 <body>
@@ -1797,7 +1850,7 @@
     <div class="sidebar-header">
       <div class="logo-section">
         <span class="logo-icon" style="color: #2962FF; font-weight: 800; font-size: 18px; margin-right: 4px;">Δ</span>
-        <span class="logo-text">GreeksLab</span>
+        <span class="logo-text">The Greeks Lab</span>
       </div>
       <button class="sidebar-close-btn" onclick="toggleSidebarDrawer(event)">✕</button>
     </div>
@@ -2004,7 +2057,7 @@
     </button>
     <div class="logo-section">
       <span class="logo-icon" style="color: #2962FF; font-weight: 800; font-size: 18px; margin-right: 4px;">Δ</span>
-      <span class="logo-text">GreeksLab</span>
+      <span class="logo-text">The Greeks Lab</span>
     </div>
     <div class="divider"></div>
     <div class="symbol-search-container">
@@ -2102,6 +2155,9 @@
             <span class="m-val bold" id="act">—</span>
           </div>
         </div>
+        <button class="mobile-forecast-btn" id="mobile-forecast-trigger" onclick="openMobileSheet()">
+          📊 FORECAST: <span id="m-dir">—</span> — <span id="m-act">—</span>
+        </button>
       </div>
       
       <div class="chart-viewport-wrapper">
@@ -3132,6 +3188,18 @@ async function load(isFirstLoad = false) {
     updateIdText('s-p5', fmt(d.pred_5));
     updateIdText('s-pn', fmt(d.pred_n));
     updateIdText('s-mv', (d.move >= 0 ? '+' : '') + fmt(d.move) + '  (' + d.move_pct + '%)');
+    
+    // Update mobile forecast trigger button text & glow
+    const mTrigger = $('mobile-forecast-trigger');
+    if (mTrigger) {
+      mTrigger.innerHTML = `📊 Forecast: <span>${d.direction}</span> — <span>${d.action}</span> (${d.confidence}%)`;
+      mTrigger.className = 'mobile-forecast-btn';
+      if (d.direction === 'Long') {
+        mTrigger.classList.add('glowing-green');
+      } else if (d.direction === 'Short') {
+        mTrigger.classList.add('glowing-red');
+      }
+    }
     
     // Update direction flashing classes on all #dir elements
     document.querySelectorAll('#dir').forEach(el => {
