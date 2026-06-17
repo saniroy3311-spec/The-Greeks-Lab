@@ -55,6 +55,9 @@ TF_MAP = {
 }
 TF_MINUTES = {"1m":1,"3m":3,"5m":5,"15m":15,"30m":30,"1h":60,"1d":1440}
 
+import mimetypes
+mimetypes.add_type('application/javascript', '.js')
+
 app = Flask(__name__)
 CORS(app)
 
