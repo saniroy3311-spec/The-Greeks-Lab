@@ -274,9 +274,9 @@ def background_cache_worker():
                 with _cache_lock:
                     cached = _cache.get(key)
                 
-                # Active combinations updated if older than 10 seconds.
+                # Active combinations updated if older than 30 seconds.
                 # Passive (default) combinations updated if older than 90 seconds.
-                max_age = 2 if is_active else 90
+                max_age = 30 if is_active else 90
                 
                 if not cached or (time.time() - cached[0]) >= max_age:
                     try:

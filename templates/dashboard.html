@@ -865,6 +865,13 @@ function updateChartIndicators(engine, candles, togglesContainerId) {
     if (def) {
       try {
         const outputs = def.compute(candles, params);
+        if (outputs && outputs.length > 0) {
+          if (id === 'ema9') {
+            outputs[0].color = '#2962FF'; // Blue
+          } else if (id === 'ema15') {
+            outputs[0].color = '#FF6D00'; // Orange
+          }
+        }
         renderDataList.push({
           instanceId: id,
           label: label,
@@ -1226,6 +1233,31 @@ function initScalperChart() {
     }
   });
   
+  // Keep shaded boxes in sync during user scroll/zoom/pan
+  container.addEventListener('mousedown', () => {
+    const onMouseMove = () => updateShadedBoxes();
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  });
+  
+  container.addEventListener('wheel', () => {
+    requestAnimationFrame(updateShadedBoxes);
+  }, { passive: true });
+
+  container.addEventListener('touchstart', () => {
+    const onTouchMove = () => updateShadedBoxes();
+    const onTouchEnd = () => {
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+    };
+    window.addEventListener('touchmove', onTouchMove);
+    window.addEventListener('touchend', onTouchEnd);
+  }, { passive: true });
+
   setupIndicatorToggles(scalperChartEngine, () => scalperCandles, 'scalper-indicator-toggles');
   setupDrawingToolbars(scalperChartEngine, 'scalper-drawing-toolbar', 'scalper-clear-drawings', 'scalper');
   setupDrawingsStorage(scalperChartEngine, 'scalper');
@@ -1781,8 +1813,7 @@ function startCountdownTimer() {
     const duration = TF_DURATIONS[tf] || 300;
     
     const now = Math.floor(Date.now() / 1000);
-    const closeTime = activeCandleOpenTime + duration;
-    const remaining = closeTime - now;
+    const remaining = duration - (now % duration);
     
     const overlayId = activeTab === 'live-signal' ? 'countdown-overlay-live' : 'countdown-overlay-scalper';
     const otherOverlayId = activeTab === 'live-signal' ? 'countdown-overlay-scalper' : 'countdown-overlay-live';
