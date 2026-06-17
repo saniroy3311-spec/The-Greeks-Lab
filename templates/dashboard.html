@@ -298,7 +298,7 @@
   .drawing-toolbar {
     position: absolute;
     left: 0;
-    top: 0;
+    top: 40px;
     bottom: 0;
     width: 36px;
     z-index: 20;
@@ -350,26 +350,34 @@
   .chart-overlays-container {
     position: absolute;
     top: 12px;
+    bottom: 12px;
     left: 48px;
     z-index: 15;
     display: flex;
     flex-direction: column;
-    gap: 8px;
     width: 320px;
-    max-height: calc(100% - 24px);
-    overflow-y: auto;
     pointer-events: none;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    scrollbar-width: none;
-  }
-  .chart-overlays-container::-webkit-scrollbar {
-    display: none;
   }
   .chart-overlays-container.collapsed {
     transform: translateX(-332px);
   }
-  .chart-overlays-container * {
+  .chart-overlays-container .overlay-card,
+  .chart-overlays-container .overlays-collapse-btn {
     pointer-events: auto;
+  }
+  .chart-overlays-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+    scrollbar-width: none;
+    pointer-events: none;
+  }
+  .chart-overlays-inner::-webkit-scrollbar {
+    display: none;
   }
   
   /* Collapse Toggle Tab on overlays */
@@ -1768,55 +1776,57 @@
             <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
           </button>
           
-          <!-- Kronos Signal Card -->
-          <div class="overlay-card signal flat" id="sig">
-            <div class="overlay-card-header">
-              <span class="card-title">KRONOS FORECAST</span>
+          <div class="chart-overlays-inner">
+            <!-- Kronos Signal Card -->
+            <div class="overlay-card signal flat" id="sig">
+              <div class="overlay-card-header">
+                <span class="card-title">KRONOS FORECAST</span>
+              </div>
+              <div class="sig-flex-row">
+                <div>
+                  <div class="sig-label">Direction</div>
+                  <div class="sig-dir" id="dir">—</div>
+                  <div class="sig-sub">Conf: <span id="conf">—</span></div>
+                </div>
+                <div class="right">
+                  <div class="sig-label">Action</div>
+                  <div class="sig-action" id="act">—</div>
+                  <div class="sig-sub" id="bias">—</div>
+                </div>
+              </div>
             </div>
-            <div class="sig-flex-row">
+            
+            <!-- Echoes Confirmation Card -->
+            <div class="overlay-card echoes-card flat" id="echoes-card">
+              <div class="overlay-card-header">
+                <span class="card-title">ECHOES CONFIRMATION</span>
+              </div>
               <div>
-                <div class="sig-label">Direction</div>
-                <div class="sig-dir" id="dir">—</div>
-                <div class="sig-sub">Conf: <span id="conf">—</span></div>
+                <div class="sig-label">Echoes Status</div>
+                <div class="echoes-status" id="echoes-status">Scanning…</div>
               </div>
-              <div class="right">
-                <div class="sig-label">Action</div>
-                <div class="sig-action" id="act">—</div>
-                <div class="sig-sub" id="bias">—</div>
+              <div class="echoes-stats-row">
+                <div class="echoes-stat"><span class="lbl">Median</span> <span id="echoes-median" class="val">—</span></div>
+                <div class="echoes-stat"><span class="lbl">Best</span> <span id="echoes-best" class="val text-up">—</span></div>
+                <div class="echoes-stat"><span class="lbl">Worst</span> <span id="echoes-worst" class="val text-down">—</span></div>
+              </div>
+              <div class="echoes-sparkline-container">
+                <canvas id="echoes-sparkline" width="160" height="35"></canvas>
+                <div class="sparkline-label">Query &<br>matches</div>
               </div>
             </div>
-          </div>
-          
-          <!-- Echoes Confirmation Card -->
-          <div class="overlay-card echoes-card flat" id="echoes-card">
-            <div class="overlay-card-header">
-              <span class="card-title">ECHOES CONFIRMATION</span>
-            </div>
-            <div>
-              <div class="sig-label">Echoes Status</div>
-              <div class="echoes-status" id="echoes-status">Scanning…</div>
-            </div>
-            <div class="echoes-stats-row">
-              <div class="echoes-stat"><span class="lbl">Median</span> <span id="echoes-median" class="val">—</span></div>
-              <div class="echoes-stat"><span class="lbl">Best</span> <span id="echoes-best" class="val text-up">—</span></div>
-              <div class="echoes-stat"><span class="lbl">Worst</span> <span id="echoes-worst" class="val text-down">—</span></div>
-            </div>
-            <div class="echoes-sparkline-container">
-              <canvas id="echoes-sparkline" width="160" height="35"></canvas>
-              <div class="sparkline-label">Query &<br>matches</div>
-            </div>
-          </div>
-          
-          <!-- Forecast Metrics Card -->
-          <div class="overlay-card stats-card" id="stats-card">
-            <div class="overlay-card-header">
-              <span class="card-title">FORECAST METRICS</span>
-            </div>
-            <div class="overlay-card-body">
-              <div class="overlay-stat"><span class="k">Current</span><span class="v" id="s-cur">—</span></div>
-              <div class="overlay-stat"><span class="k">Predicted (5b)</span><span class="v" id="s-p5">—</span></div>
-              <div class="overlay-stat"><span class="k">Predicted (end)</span><span class="v" id="s-pn">—</span></div>
-              <div class="overlay-stat"><span class="k">Expected move</span><span class="v" id="s-mv">—</span></div>
+            
+            <!-- Forecast Metrics Card -->
+            <div class="overlay-card stats-card" id="stats-card">
+              <div class="overlay-card-header">
+                <span class="card-title">FORECAST METRICS</span>
+              </div>
+              <div class="overlay-card-body">
+                <div class="overlay-stat"><span class="k">Current</span><span class="v" id="s-cur">—</span></div>
+                <div class="overlay-stat"><span class="k">Predicted (5b)</span><span class="v" id="s-p5">—</span></div>
+                <div class="overlay-stat"><span class="k">Predicted (end)</span><span class="v" id="s-pn">—</span></div>
+                <div class="overlay-stat"><span class="k">Expected move</span><span class="v" id="s-mv">—</span></div>
+              </div>
             </div>
           </div>
         </div>
@@ -1917,26 +1927,28 @@
             <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
           </button>
           
-          <!-- State Badges Overlay Card -->
-          <div class="overlay-card state-badges-card">
-            <div class="overlay-card-header">
-              <span class="card-title">EMA SCALPER STATE</span>
+          <div class="chart-overlays-inner">
+            <!-- State Badges Overlay Card -->
+            <div class="overlay-card state-badges-card">
+              <div class="overlay-card-header">
+                <span class="card-title">EMA SCALPER STATE</span>
+              </div>
+              <div class="scalper-badges-panel">
+                <span id="badge-awaiting" class="scalper-badge active">Awaiting Setup</span>
+                <span id="badge-long-trig" class="scalper-badge">Long Trigger Formed</span>
+                <span id="badge-short-trig" class="scalper-badge">Short Trigger Formed</span>
+                <span id="badge-pos-long" class="scalper-badge">In Position: Long</span>
+                <span id="badge-pos-short" class="scalper-badge">In Position: Short</span>
+              </div>
             </div>
-            <div class="scalper-badges-panel">
-              <span id="badge-awaiting" class="scalper-badge active">Awaiting Setup</span>
-              <span id="badge-long-trig" class="scalper-badge">Long Trigger Formed</span>
-              <span id="badge-short-trig" class="scalper-badge">Short Trigger Formed</span>
-              <span id="badge-pos-long" class="scalper-badge">In Position: Long</span>
-              <span id="badge-pos-short" class="scalper-badge">In Position: Short</span>
+            
+            <!-- Active Trade Info Overlay Card -->
+            <div class="overlay-card scalper-trade-info-card" id="scalper-info-bar" style="display: none;">
+              <div class="overlay-card-header">
+                <span class="card-title">ACTIVE POSITION</span>
+              </div>
+              <div id="scalper-info-text"></div>
             </div>
-          </div>
-          
-          <!-- Active Trade Info Overlay Card -->
-          <div class="overlay-card scalper-trade-info-card" id="scalper-info-bar" style="display: none;">
-            <div class="overlay-card-header">
-              <span class="card-title">ACTIVE POSITION</span>
-            </div>
-            <div id="scalper-info-text"></div>
           </div>
         </div>
 
