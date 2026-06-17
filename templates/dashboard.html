@@ -727,6 +727,8 @@
 
   /* Desktop hide rule for overlay cards relocated to headers */
   #stats-card,
+  #sig,
+  #echoes-card,
   #tab-scalper .state-badges-card {
     display: none;
   }
@@ -1817,9 +1819,9 @@
       <div class="sidebar-section-title" style="margin-top: 16px;">Chart View Mode</div>
       <div class="sidebar-menu-list" style="padding: 4px 12px;">
         <div class="view-mode-buttons" style="display: flex; gap: 4px; width: 100%;">
-          <button class="view-mode-btn active" id="sidebar-view-split" onclick="setViewMode('split')" style="flex: 1; text-align: center;">Split</button>
-          <button class="view-mode-btn" id="sidebar-view-fullscreen" onclick="setViewMode('fullscreen')" style="flex: 1; text-align: center;">Full</button>
-          <button class="view-mode-btn" id="sidebar-view-compact" onclick="setViewMode('compact')" style="flex: 1; text-align: center;">Compact</button>
+          <button class="view-mode-btn active" id="sidebar-view-split" data-mode="split" onclick="setViewMode('split')" style="flex: 1; text-align: center;">Split</button>
+          <button class="view-mode-btn" id="sidebar-view-fullscreen" data-mode="fullscreen" onclick="setViewMode('fullscreen')" style="flex: 1; text-align: center;">Full</button>
+          <button class="view-mode-btn" id="sidebar-view-compact" data-mode="compact" onclick="setViewMode('compact')" style="flex: 1; text-align: center;">Compact</button>
         </div>
       </div>
 
@@ -2052,12 +2054,6 @@
     </button>
     
     <div class="right-section">
-      <div class="view-mode-buttons">
-        <button class="view-mode-btn active" data-mode="split" onclick="setViewMode('split')">Split</button>
-        <button class="view-mode-btn" data-mode="fullscreen" onclick="setViewMode('fullscreen')">Full</button>
-        <button class="view-mode-btn" data-mode="compact" onclick="setViewMode('compact')">Compact</button>
-      </div>
-      <div class="divider"></div>
       <button class="top-btn-icon" onclick="toggleDrawingToolbar()" title="Toggle Drawing Toolbar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4Z"/></svg>
       </button>
