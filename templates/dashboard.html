@@ -254,7 +254,7 @@
     display: flex;
     flex-direction: column;
   }
-  .chart-head, .scalper-chart-head {
+  .chart-head {
     height: 36px;
     display: flex;
     justify-content: space-between;
@@ -265,9 +265,22 @@
     color: var(--text);
     flex-shrink: 0;
   }
+  .scalper-chart-head {
+    min-height: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 6px 16px;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    flex-shrink: 0;
+  }
   .chart-head .t, .scalper-chart-head .t {
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
   }
   .legend, .scalper-legend {
     display: flex;
@@ -564,34 +577,243 @@
     font-weight: 600;
   }
 
-  /* Scalper Overlay state badges */
-  .state-badges-card .overlay-card-body {
-    padding-top: 4px;
-  }
-  .scalper-badges-panel {
+  /* Scalper state badges (Horizontal row inside chart head) */
+  .scalper-badges-panel-top {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+    width: 100%;
+  }
+  .scalper-badges-panel-top::-webkit-scrollbar {
+    display: none;
   }
   .scalper-badge {
     padding: 4px 10px;
     border-radius: 6px;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 800;
     color: var(--muted);
     background: transparent;
-    border: 1px solid var(--border);
-    transition: all 0.2s ease;
-    opacity: 0.5;
+    border: 1.5px solid var(--border);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.35;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
   }
   .scalper-badge.active {
     opacity: 1;
+    transform: scale(1.06);
   }
-  #badge-awaiting.active { color: #fff; background: #475569; border-color: #475569; }
-  #badge-long-trig.active { color: #fff; background: #eab308; border-color: #eab308; }
-  #badge-short-trig.active { color: #fff; background: #f97316; border-color: #f97316; }
-  #badge-pos-long.active { color: #fff; background: #10b981; border-color: #10b981; }
-  #badge-pos-short.active { color: #fff; background: #ef4444; border-color: #ef4444; }
+  #badge-awaiting.active, .badge-awaiting.active { 
+    color: #fff; 
+    background: #475569; 
+    border-color: #475569; 
+    box-shadow: 0 0 8px rgba(71, 85, 105, 0.4);
+  }
+  #badge-long-trig.active, .badge-long-trig.active { 
+    color: #fff; 
+    background: #eab308; 
+    border-color: #eab308; 
+    box-shadow: 0 0 12px #eab308;
+    animation: flash-pulse-yellow 1.5s infinite alternate;
+  }
+  #badge-short-trig.active, .badge-short-trig.active { 
+    color: #fff; 
+    background: #f97316; 
+    border-color: #f97316; 
+    box-shadow: 0 0 12px #f97316;
+    animation: flash-pulse-orange 1.5s infinite alternate;
+  }
+  #badge-pos-long.active, .badge-pos-long.active { 
+    color: #fff; 
+    background: #10b981; 
+    border-color: #10b981; 
+    box-shadow: 0 0 12px #10b981;
+    animation: flash-pulse-green 1.5s infinite alternate;
+  }
+  #badge-pos-short.active, .badge-pos-short.active { 
+    color: #fff; 
+    background: #ef4444; 
+    border-color: #ef4444; 
+    box-shadow: 0 0 12px #ef4444;
+    animation: flash-pulse-red 1.5s infinite alternate;
+  }
+
+  @keyframes flash-pulse-yellow {
+    0% { box-shadow: 0 0 4px #eab308; }
+    100% { box-shadow: 0 0 16px #eab308; }
+  }
+  @keyframes flash-pulse-orange {
+    0% { box-shadow: 0 0 4px #f97316; }
+    100% { box-shadow: 0 0 16px #f97316; }
+  }
+  @keyframes flash-pulse-green {
+    0% { box-shadow: 0 0 4px #10b981; }
+    100% { box-shadow: 0 0 16px #10b981; }
+  }
+  @keyframes flash-pulse-red {
+    0% { box-shadow: 0 0 4px #ef4444; }
+    100% { box-shadow: 0 0 16px #ef4444; }
+  }
+
+  /* Live header metrics bar */
+  .chart-head-metrics {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .chart-head-metrics::-webkit-scrollbar {
+    display: none;
+  }
+  .metric-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .metric-item .m-lbl {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .metric-item .m-val {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .metric-item .m-val.mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .pulsing-green {
+    color: #fff !important;
+    background: #10b981;
+    padding: 2px 8px;
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    animation: flash-pulse-green 1.5s infinite alternate;
+  }
+  .pulsing-red {
+    color: #fff !important;
+    background: #ef4444;
+    padding: 2px 8px;
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+    animation: flash-pulse-red 1.5s infinite alternate;
+  }
+  .pulse-btn-green {
+    color: #fff !important;
+    background: #059669;
+    padding: 2px 8px;
+    border-radius: 4px;
+    box-shadow: 0 0 6px rgba(5, 150, 105, 0.4);
+  }
+  .pulse-btn-red {
+    color: #fff !important;
+    background: #dc2626;
+    padding: 2px 8px;
+    border-radius: 4px;
+    box-shadow: 0 0 6px rgba(220, 38, 38, 0.4);
+  }
+
+  /* Desktop hide rule for overlay cards relocated to headers */
+  #stats-card,
+  #tab-scalper .state-badges-card {
+    display: none;
+  }
+
+  /* Custom Flashy Alert Popups */
+  .setup-alert-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: setupAlertFadeIn 0.2s ease-out;
+  }
+  .setup-alert-content {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    transform: scale(0.9);
+    animation: setupAlertScaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  .setup-alert-content.long {
+    border-color: #10b981;
+    box-shadow: 0 0 24px rgba(16, 185, 129, 0.4);
+  }
+  .setup-alert-content.short {
+    border-color: #ef4444;
+    box-shadow: 0 0 24px rgba(239, 68, 68, 0.4);
+  }
+  .setup-alert-header {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .setup-alert-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+  .setup-alert-content.long .setup-alert-title {
+    color: #10b981;
+  }
+  .setup-alert-content.short .setup-alert-title {
+    color: #ef4444;
+  }
+  .setup-alert-msg {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.4;
+  }
+  .setup-alert-close-btn {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+    font-size: 13px;
+  }
+  .setup-alert-close-btn:hover {
+    background: #1b4cd6;
+  }
+  @keyframes setupAlertFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes setupAlertScaleIn {
+    to { transform: scale(1); }
+  }
 
   .scalper-trade-info-card {
     border-left: 4px solid var(--blue);
@@ -1254,20 +1476,56 @@
       height: auto;
     }
     .candl-topbar {
-      flex-direction: column;
-      height: auto;
-      padding: 8px 12px;
-      gap: 8px;
-      align-items: stretch;
+      display: grid !important;
+      grid-template-columns: auto auto 1fr auto;
+      grid-template-rows: auto auto;
+      height: auto !important;
+      padding: 8px 12px !important;
+      gap: 8px !important;
+      align-items: center !important;
+    }
+    #hamburger-menu-btn {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .logo-section {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .symbol-search-container {
+      grid-column: 3;
+      grid-row: 1;
+      justify-self: start;
     }
     .right-section {
-      margin-left: 0;
-      justify-content: space-between;
-      width: 100%;
+      grid-column: 4;
+      grid-row: 1;
+      justify-self: end;
+      display: flex !important;
+      gap: 8px !important;
+      align-items: center !important;
+      margin-left: 0 !important;
+      width: auto !important;
+    }
+    .view-mode-buttons {
+      display: none !important;
+    }
+    /* Hide dividers and desktop actions on mobile */
+    .candl-topbar .divider,
+    #chart-type,
+    #indicators-toggle-btn,
+    .candl-topbar button[onclick="openSettingsModal()"],
+    .candl-topbar button[onclick="openAlertsModal()"] {
+      display: none !important;
     }
     .timeframe-buttons {
-      width: 100%;
-      justify-content: flex-start;
+      grid-column: 1 / span 4;
+      grid-row: 2;
+      width: 100% !important;
+      display: flex !important;
+      justify-content: space-between !important;
+      border-top: 1px solid var(--border);
+      padding-top: 6px;
       padding-bottom: 4px;
     }
     .tab-content {
@@ -1389,6 +1647,10 @@
       opacity: 1 !important;
       border: 1px solid var(--border) !important;
       background: var(--surface) !important;
+      display: block !important;
+    }
+    .chart-overlays-container {
+      display: none !important;
     }
   }
 
@@ -1505,6 +1767,21 @@
           <span style="vertical-align: middle;">EMA/Kronos Scalper</span>
         </button>
       </div>
+      <div class="sidebar-section-title" style="margin-top: 16px;">Tools & Settings</div>
+      <div class="sidebar-menu-list">
+        <button class="sidebar-menu-item" onclick="toggleSidebarDrawer(event); openAlertsModal();">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="margin-right: 8px; vertical-align: middle;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span style="vertical-align: middle;">Create Alert</span>
+        </button>
+        <button class="sidebar-menu-item" onclick="toggleSidebarDrawer(event); openSettingsModal();">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="margin-right: 8px; vertical-align: middle;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span style="vertical-align: middle;">Settings</span>
+        </button>
+        <button class="sidebar-menu-item" onclick="toggleSidebarDrawer(event); toggleDrawingToolbar();">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="margin-right: 8px; vertical-align: middle;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4Z"/></svg>
+          <span id="mobile-toggle-drawing-text" style="vertical-align: middle;">Hide Drawing Toolbar</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1545,6 +1822,13 @@
             <label>Crosshair</label>
             <label class="switch">
               <input type="checkbox" id="settings-crosshair" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <label>Hide Drawing Toolbar</label>
+            <label class="switch">
+              <input type="checkbox" id="settings-hide-toolbar" onchange="toggleDrawingToolbar()">
               <span class="slider round"></span>
             </label>
           </div>
@@ -1685,6 +1969,9 @@
         <button class="view-mode-btn" data-mode="compact" onclick="setViewMode('compact')">Compact</button>
       </div>
       <div class="divider"></div>
+      <button class="top-btn-icon" onclick="toggleDrawingToolbar()" title="Toggle Drawing Toolbar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4Z"/></svg>
+      </button>
       <button class="top-btn-icon" onclick="resetActiveChartView()" title="Reset View">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M16 3h5v5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 21H3v-5"></path></svg>
       </button>
@@ -1718,11 +2005,31 @@
   <div id="tab-live-signal" class="tab-content active">
     <div class="chart-card">
       <div class="chart-head">
-        <div class="t">Oracle Probability Cone + AI Forecasts</div>
-        <div class="legend">
-          <span><span class="swatch" style="background:var(--up)"></span>Actual candles</span>
-          <span><span class="swatch" style="background:var(--pred)"></span>AI prediction</span>
-          <span><span class="swatch" style="background:#2962FF"></span>Oracle median</span>
+        <div class="chart-head-metrics">
+          <div class="metric-item">
+            <span class="m-lbl">Current</span>
+            <span class="m-val mono bold" id="s-cur">—</span>
+          </div>
+          <div class="metric-item">
+            <span class="m-lbl">Predicted (5b)</span>
+            <span class="m-val mono bold" id="s-p5">—</span>
+          </div>
+          <div class="metric-item">
+            <span class="m-lbl">Predicted (end)</span>
+            <span class="m-val mono bold" id="s-pn">—</span>
+          </div>
+          <div class="metric-item">
+            <span class="m-lbl">Expected Move</span>
+            <span class="m-val mono bold" id="s-mv">—</span>
+          </div>
+          <div class="metric-item direction-item">
+            <span class="m-lbl">Direction</span>
+            <span class="m-val bold" id="dir">—</span>
+          </div>
+          <div class="metric-item action-item">
+            <span class="m-lbl">Action</span>
+            <span class="m-val bold" id="act">—</span>
+          </div>
         </div>
       </div>
       
@@ -1833,8 +2140,6 @@
 
         <!-- Live Chart Canvas -->
         <div id="chart"></div>
-        
-        <div id="countdown-overlay-live">00:00</div>
       </div>
     </div>
 
@@ -1869,11 +2174,12 @@
   <div id="tab-scalper" class="tab-content">
     <div class="scalper-chart-card">
       <div class="scalper-chart-head">
-        <div class="t">9/15 EMA Scalper</div>
-        <div class="scalper-legend">
-          <span><span class="scalper-swatch" style="background:#26a69a"></span>Candles</span>
-          <span><span class="scalper-swatch" style="background:#2962FF"></span>9 EMA</span>
-          <span><span class="scalper-swatch" style="background:#FF6D00"></span>15 EMA</span>
+        <div class="scalper-badges-panel-top" id="scalper-badges-panel-top">
+          <span id="badge-awaiting" class="scalper-badge active">Awaiting Setup</span>
+          <span id="badge-long-trig" class="scalper-badge">Long Trigger Formed</span>
+          <span id="badge-short-trig" class="scalper-badge">Short Trigger Formed</span>
+          <span id="badge-pos-long" class="scalper-badge">In Position: Long</span>
+          <span id="badge-pos-short" class="scalper-badge">In Position: Short</span>
         </div>
       </div>
       
@@ -1934,11 +2240,11 @@
                 <span class="card-title">EMA SCALPER STATE</span>
               </div>
               <div class="scalper-badges-panel">
-                <span id="badge-awaiting" class="scalper-badge active">Awaiting Setup</span>
-                <span id="badge-long-trig" class="scalper-badge">Long Trigger Formed</span>
-                <span id="badge-short-trig" class="scalper-badge">Short Trigger Formed</span>
-                <span id="badge-pos-long" class="scalper-badge">In Position: Long</span>
-                <span id="badge-pos-short" class="scalper-badge">In Position: Short</span>
+                <span class="scalper-badge badge-awaiting active">Awaiting Setup</span>
+                <span class="scalper-badge badge-long-trig">Long Trigger Formed</span>
+                <span class="scalper-badge badge-short-trig">Short Trigger Formed</span>
+                <span class="scalper-badge badge-pos-long">In Position: Long</span>
+                <span class="scalper-badge badge-pos-short">In Position: Short</span>
               </div>
             </div>
             
@@ -1957,7 +2263,6 @@
         
         <div id="scalper-target-box" style="position: absolute; display: none; background: rgba(38, 166, 154, 0.08); pointer-events: none; border-top: 1px solid rgba(38, 166, 154, 0.4); border-bottom: 1px solid rgba(38, 166, 154, 0.4); z-index: 5;"></div>
         <div id="scalper-stop-box" style="position: absolute; display: none; background: rgba(239, 83, 80, 0.08); pointer-events: none; border-top: 1px solid rgba(239, 83, 80, 0.4); border-bottom: 1px solid rgba(239, 83, 80, 0.4); z-index: 5;"></div>
-        <div id="countdown-overlay-scalper">00:00</div>
       </div>
     </div>
 
@@ -2018,8 +2323,8 @@ let btcSocket = null;
 let wsLastClosedTime = null;
 let activeCandleOpenTime = null;
 
-let liveActiveIndicators = ['volume', 'ema9', 'ema15'];
-let scalperActiveIndicators = ['volume', 'ema9', 'ema15'];
+let liveActiveIndicators = ['ema9', 'ema15'];
+let scalperActiveIndicators = ['ema9', 'ema15'];
 
 const drawingsHistory = {
   live: { undoStack: [], redoStack: [], current: [] },
@@ -2726,14 +3031,36 @@ async function load(isFirstLoad = false) {
     
     const klass = d.direction === 'Long' ? 'up' : d.direction === 'Short' ? 'down' : 'flat';
     $('sig').className = 'signal ' + klass;
-    $('dir').textContent = d.direction;
-    $('conf').textContent = d.confidence + '%';
-    $('act').textContent = d.action;
-    $('bias').textContent = d.bias;
-    $('s-cur').textContent = fmt(d.current);
-    $('s-p5').textContent = fmt(d.pred_5);
-    $('s-pn').textContent = fmt(d.pred_n);
-    $('s-mv').textContent = (d.move >= 0 ? '+' : '') + fmt(d.move) + '  (' + d.move_pct + '%)';
+    updateIdText('dir', d.direction);
+    updateIdText('conf', d.confidence + '%');
+    updateIdText('act', d.action);
+    updateIdText('bias', d.bias);
+    updateIdText('s-cur', fmt(d.current));
+    updateIdText('s-p5', fmt(d.pred_5));
+    updateIdText('s-pn', fmt(d.pred_n));
+    updateIdText('s-mv', (d.move >= 0 ? '+' : '') + fmt(d.move) + '  (' + d.move_pct + '%)');
+    
+    // Update direction flashing classes on all #dir elements
+    document.querySelectorAll('#dir').forEach(el => {
+      el.classList.remove('pulsing-green', 'pulsing-red', 'text-up', 'text-down', 'text-flat');
+      if (d.direction === 'Long') {
+        el.classList.add('text-up', 'pulsing-green');
+      } else if (d.direction === 'Short') {
+        el.classList.add('text-down', 'pulsing-red');
+      } else {
+        el.classList.add('text-flat');
+      }
+    });
+
+    // Update action button classes on all #act elements
+    document.querySelectorAll('#act').forEach(el => {
+      el.classList.remove('pulse-btn-green', 'pulse-btn-red');
+      if (d.direction === 'Long') {
+        el.classList.add('pulse-btn-green');
+      } else if (d.direction === 'Short') {
+        el.classList.add('pulse-btn-red');
+      }
+    });
     
     // Sync alerts table and levels
     renderAlertsTable();
@@ -2862,12 +3189,23 @@ async function loadScalper(isFirstLoad = false) {
     };
     
     states.forEach(s => {
-      const el = $(idMap[s]);
-      if (el) {
+      const id = idMap[s];
+      const elements = document.querySelectorAll(`#${id}, .${id}`);
+      elements.forEach(el => {
         if (s === d.state) el.classList.add('active');
         else el.classList.remove('active');
-      }
+      });
     });
+    
+    // Check for state alert popups
+    if (d.state && d.state !== window.lastScalperState) {
+      if (window.lastScalperState !== undefined) {
+        if (d.state === "Long Trigger Formed" || d.state === "Short Trigger Formed") {
+          showSetupAlert(d.state);
+        }
+      }
+      window.lastScalperState = d.state;
+    }
     
     const infoBar = $('scalper-info-bar');
     currentTrade = d.active_trade;
@@ -3103,56 +3441,7 @@ $('chart-type').addEventListener('change', () => {
   if (scalperChartEngine) scalperChartEngine.setChartType(type);
 });
 
-function startCountdownTimer() {
-  setInterval(() => {
-    if (activeCandleOpenTime === null) {
-      const elLive = $('countdown-overlay-live');
-      const elScalper = $('countdown-overlay-scalper');
-      if (elLive) elLive.style.display = 'none';
-      if (elScalper) elScalper.style.display = 'none';
-      return;
-    }
-    
-    const tf = $('tf').value;
-    const duration = TF_DURATIONS[tf] || 300;
-    
-    const now = Math.floor(Date.now() / 1000);
-    const remaining = duration - (now % duration);
-    
-    const overlayId = activeTab === 'live-signal' ? 'countdown-overlay-live' : 'countdown-overlay-scalper';
-    const otherOverlayId = activeTab === 'live-signal' ? 'countdown-overlay-scalper' : 'countdown-overlay-live';
-    
-    const otherEl = $(otherOverlayId);
-    if (otherEl) otherEl.style.display = 'none';
-    
-    if (remaining > 0) {
-      let timeStr = "";
-      if (duration >= 86400) {
-        const hours = Math.floor(remaining / 3600);
-        const minutes = Math.floor((remaining % 3600) / 60);
-        timeStr = `${hours}h ${minutes}m`;
-      } else if (duration >= 3600) {
-        const hours = Math.floor(remaining / 3600);
-        const minutes = Math.floor((remaining % 3600) / 60);
-        const seconds = remaining % 60;
-        timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      } else {
-        const minutes = Math.floor(remaining / 60);
-        const seconds = remaining % 60;
-        timeStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      }
-      
-      const el = $(overlayId);
-      if (el) {
-        el.textContent = timeStr;
-        el.style.display = 'block';
-      }
-    } else {
-      const el = $(overlayId);
-      if (el) el.style.display = 'none';
-    }
-  }, 1000);
-}
+
 
 // -------------------------------------------------------------
 // Startup Bootstrapping
@@ -3323,6 +3612,94 @@ function toggleMagnetSnap() {
   });
 }
 window.toggleMagnetSnap = toggleMagnetSnap;
+
+// -------------------------------------------------------------
+// Drawing Toolbar Toggle & Settings & Setup Alerts
+// -------------------------------------------------------------
+const updateIdText = (id, text) => {
+  document.querySelectorAll('#' + id).forEach(el => {
+    el.textContent = text;
+  });
+};
+window.updateIdText = updateIdText;
+
+function toggleDrawingToolbar() {
+  const toolbars = document.querySelectorAll('.drawing-toolbar');
+  if (toolbars.length === 0) return;
+  const isHidden = toolbars[0].style.display === 'none';
+  
+  toolbars.forEach(tb => {
+    tb.style.display = isHidden ? 'flex' : 'none';
+  });
+  
+  const text = isHidden ? 'Hide Drawing Toolbar' : 'Show Drawing Toolbar';
+  const mobileTxtEl = document.getElementById('mobile-toggle-drawing-text');
+  if (mobileTxtEl) mobileTxtEl.textContent = text;
+  
+  const settingsChkEl = document.getElementById('settings-hide-toolbar');
+  if (settingsChkEl) settingsChkEl.checked = !isHidden;
+  
+  if (liveChartEngine) liveChartEngine.resize();
+  if (scalperChartEngine) scalperChartEngine.resize();
+  
+  localStorage.setItem('greeks_hide_drawing_toolbar', isHidden ? 'false' : 'true');
+}
+window.toggleDrawingToolbar = toggleDrawingToolbar;
+
+function loadToolbarSettings() {
+  const hide = localStorage.getItem('greeks_hide_drawing_toolbar') === 'true';
+  if (hide) {
+    document.querySelectorAll('.drawing-toolbar').forEach(tb => {
+      tb.style.display = 'none';
+    });
+    const mobileTxtEl = document.getElementById('mobile-toggle-drawing-text');
+    if (mobileTxtEl) mobileTxtEl.textContent = 'Show Drawing Toolbar';
+    const settingsChkEl = document.getElementById('settings-hide-toolbar');
+    if (settingsChkEl) settingsChkEl.checked = true;
+  }
+}
+window.loadToolbarSettings = loadToolbarSettings;
+
+function showSetupAlert(state) {
+  try {
+    playTune(3, 3);
+  } catch (e) {
+    console.error('Audio play error:', e);
+  }
+  
+  let popup = $('setup-alert-popup');
+  if (!popup) {
+    popup = document.createElement('div');
+    popup.id = 'setup-alert-popup';
+    popup.className = 'setup-alert-popup';
+    document.body.appendChild(popup);
+  }
+  
+  const isLong = state.includes('Long');
+  const typeClass = isLong ? 'long' : 'short';
+  
+  popup.innerHTML = `
+    <div class="setup-alert-content ${typeClass}">
+      <div class="setup-alert-header">Trade Setup Triggered</div>
+      <div class="setup-alert-title">${state}</div>
+      <div class="setup-alert-msg">A new Scalper Signal has been detected on the chart. Check entry coordinates and risk parameters.</div>
+      <button class="setup-alert-close-btn" onclick="closeSetupAlert()">Dismiss</button>
+    </div>
+  `;
+  popup.style.display = 'flex';
+  
+  if (window.setupAlertTimeout) clearTimeout(window.setupAlertTimeout);
+  window.setupAlertTimeout = setTimeout(() => {
+    closeSetupAlert();
+  }, 10000);
+}
+window.showSetupAlert = showSetupAlert;
+
+function closeSetupAlert() {
+  const popup = $('setup-alert-popup');
+  if (popup) popup.style.display = 'none';
+}
+window.closeSetupAlert = closeSetupAlert;
 
 // Reset view on active tab
 function resetActiveChartView() {
@@ -3549,42 +3926,11 @@ function submitAlertModal() {
 window.submitAlertModal = submitAlertModal;
 
 // Continuous 60fps loop for shaded risk-reward boxes to eliminate lagging
-function updateCandleTimerPosition() {
-  // Live Tab Timer next to current price tag on y-axis
-  const timerLive = $('countdown-overlay-live');
-  if (timerLive && liveChartEngine && liveCandles.length > 0) {
-    const lastCandle = liveCandles[liveCandles.length - 1];
-    const conv = liveChartEngine.getMainConverters();
-    const rect = liveChartEngine.getMainPaneRect();
-    if (conv && rect) {
-      const y = conv.priceToY(lastCandle.close);
-      if (y !== null) {
-        timerLive.style.top = (rect.y + y - 7) + 'px';
-        timerLive.style.right = '4px';
-      }
-    }
-  }
-  
-  // Scalper Tab Timer next to current price tag on y-axis
-  const timerScalper = $('countdown-overlay-scalper');
-  if (timerScalper && scalperChartEngine && scalperCandles.length > 0) {
-    const lastCandle = scalperCandles[scalperCandles.length - 1];
-    const conv = scalperChartEngine.getMainConverters();
-    const rect = scalperChartEngine.getMainPaneRect();
-    if (conv && rect) {
-      const y = conv.priceToY(lastCandle.close);
-      if (y !== null) {
-        timerScalper.style.top = (rect.y + y - 7) + 'px';
-        timerScalper.style.right = '4px';
-      }
-    }
-  }
-}
+
 
 function startShadedBoxesLoop() {
   function tick() {
     updateShadedBoxes();
-    updateCandleTimerPosition();
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
@@ -3738,7 +4084,10 @@ applySavedTheme();
       parsed = parsed.filter(x => x !== 'ema');
       parsed.push('ema9', 'ema15');
     }
+    parsed = parsed.filter(x => x !== 'volume');
     liveActiveIndicators = parsed;
+  } else {
+    liveActiveIndicators = ['ema9', 'ema15'];
   }
   const savedScalperInds = localStorage.getItem('greeks_active_indicators_scalper');
   if (savedScalperInds) {
@@ -3747,14 +4096,17 @@ applySavedTheme();
       parsed = parsed.filter(x => x !== 'ema');
       parsed.push('ema9', 'ema15');
     }
+    parsed = parsed.filter(x => x !== 'volume');
     scalperActiveIndicators = parsed;
+  } else {
+    scalperActiveIndicators = ['ema9', 'ema15'];
   }
 
   startShadedBoxesLoop();
   loadAlerts();
-load(true);
-schedule();
-startCountdownTimer();
+  loadToolbarSettings();
+  load(true);
+  schedule();
 </script>
 
   <!-- Mobile HUD Strip -->
