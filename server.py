@@ -227,7 +227,7 @@ def run_prediction(symbol_key, tf_key):
 
 @app.route("/")
 def index():
-    return render_template("dashboard.html")
+    return app.send_static_file("dashboard.html")
 
 
 def background_cache_worker():

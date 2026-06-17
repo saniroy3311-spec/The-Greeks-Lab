@@ -291,6 +291,9 @@
     background: var(--surface);
     color: var(--text);
     flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 30;
   }
   .chart-head .t, .scalper-chart-head .t {
     font-size: 12px;
@@ -897,6 +900,13 @@
   .alerts-table-wrapper, .scalper-table-wrapper {
     flex: 1;
     overflow-y: auto;
+    overflow-x: auto;
+  }
+  .res-win {
+    color: var(--up) !important;
+  }
+  .res-loss {
+    color: var(--down) !important;
   }
   .alerts-table, .scalper-table {
     width: 100%;
@@ -1544,6 +1554,15 @@
       height: 60% !important;
       border-bottom: 1px solid var(--border);
     }
+    #chart, #tv-chart {
+      height: calc(100% - 40px) !important;
+    }
+    .footer {
+      display: none !important;
+    }
+    .alerts-table, .scalper-table {
+      min-width: 650px !important;
+    }
     .alerts-card, .scalper-logs-card {
       height: 40% !important;
       display: block !important;
@@ -1946,13 +1965,13 @@
       <div class="sidebar-menu-list" style="padding: 4px 12px; display: flex; flex-direction: column; gap: 6px;">
         <span style="font-size: 11px; color: var(--muted); font-weight: 500;">Timeframe</span>
         <select id="sidebar-tf" class="form-select" onchange="setTimeframe(this.value)">
-          <option value="1m">1 minute</option>
-          <option value="3m">3 minutes</option>
-          <option value="5m" selected>5 minutes</option>
-          <option value="15m">15 minutes</option>
-          <option value="30m">30 minutes</option>
-          <option value="1h">1 hour</option>
-          <option value="1d">1 day</option>
+          <option value="1m">1m</option>
+          <option value="3m">3m</option>
+          <option value="5m" selected>5m</option>
+          <option value="15m">15m</option>
+          <option value="30m">30m</option>
+          <option value="1h">1h</option>
+          <option value="1d">1d</option>
         </select>
         <span style="font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 4px;">Candle Type</span>
         <select id="sidebar-chart-type" class="form-select" onchange="$('chart-type').value = this.value; $('chart-type').dispatchEvent(new Event('change'))">
@@ -2362,6 +2381,32 @@
                 <div class="overlay-stat"><span class="k">Expected move</span><span class="v" id="s-mv">—</span></div>
               </div>
             </div>
+
+            <!-- Future Predictions Card -->
+            <div class="overlay-card predictions-card" id="predictions-card" style="margin-top: 8px;">
+              <div class="overlay-card-header">
+                <span class="card-title">FUTURE 5-CANDLE FORECAST</span>
+              </div>
+              <div class="overlay-card-body" style="padding: 0; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                  <thead>
+                    <tr style="border-bottom: 1px solid var(--border); color: var(--muted); text-align: left;">
+                      <th style="padding: 4px 0; font-weight: 500;">Candle</th>
+                      <th style="padding: 4px 0; font-weight: 500; text-align: right;">Open</th>
+                      <th style="padding: 4px 0; font-weight: 500; text-align: right;">High</th>
+                      <th style="padding: 4px 0; font-weight: 500; text-align: right;">Low</th>
+                      <th style="padding: 4px 0; font-weight: 500; text-align: right;">Close</th>
+                      <th style="padding: 4px 0; font-weight: 500; text-align: center;">Dir</th>
+                    </tr>
+                  </thead>
+                  <tbody id="predictions-table-body" class="tnum">
+                    <tr>
+                      <td colspan="6" style="text-align: center; color: var(--muted); padding: 8px 0;">No predictions available</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2381,9 +2426,9 @@
             <tr>
               <th>Symbol</th>
               <th>Condition</th>
-              <th>Level</th>
+              <th style="text-align: right;">Level</th>
               <th>Message</th>
-              <th>Created</th>
+              <th style="text-align: right;">Created</th>
               <th>Status</th>
               <th>Action</th>
             </tr>
@@ -2514,11 +2559,11 @@
           <thead>
             <tr>
               <th>Type</th>
-              <th>Entry Time</th>
-              <th>Entry Price</th>
-              <th>Exit Time</th>
-              <th>Exit Price</th>
-              <th>Points</th>
+              <th style="text-align: right;">Entry Time</th>
+              <th style="text-align: right;">Entry Price</th>
+              <th style="text-align: right;">Exit Time</th>
+              <th style="text-align: right;">Exit Price</th>
+              <th style="text-align: right;">Points</th>
               <th>Result</th>
             </tr>
           </thead>
@@ -2866,9 +2911,9 @@ function renderAlertsTable() {
       <tr style="${alert.triggered ? 'opacity: 0.5;' : ''}">
         <td style="font-weight: 600;">${alert.symbol}</td>
         <td style="text-transform: capitalize;">${alert.condition}</td>
-        <td>${fmt(alert.price)}</td>
+        <td class="tnum" style="text-align: right;">${fmt(alert.price)}</td>
         <td>${alert.message || '—'}</td>
-        <td>${createdStr}</td>
+        <td class="tnum" style="text-align: right;">${createdStr}</td>
         <td>${statusBadge}</td>
         <td>
           <button class="delete-alert-btn" data-alert-id="${alert.id}" title="Delete Alert">❌</button>
@@ -3115,9 +3160,21 @@ async function load(isFirstLoad = false) {
       volume: c.volume || 0
     }));
 
-    liveChartEngine.setData(liveCandles);
+    window.lastPredictions = d.predicted || [];
+    const cleanPredicted = window.lastPredictions.map(p => ({
+      time: p.time * 1000,
+      open: p.open,
+      high: p.high,
+      low: p.low,
+      close: p.close,
+      volume: 0,
+      isPrediction: true
+    })).filter(p => p.time > (liveCandles.length > 0 ? liveCandles[liveCandles.length - 1].time : 0));
+
+    liveChartEngine.setData(liveCandles.concat(cleanPredicted));
     loadDrawings(liveChartEngine, 'live');
     updateChartIndicators(liveChartEngine, liveCandles, liveActiveIndicators);
+    renderPredictionsTable(window.lastPredictions);
     
     if (liveCandles.length > 0) {
       activeCandleOpenTime = d.candles[d.candles.length - 1].time;
@@ -3473,15 +3530,16 @@ async function loadScalper(isFirstLoad = false) {
               
           const typeClass = trade.type === 'Long' ? 'tr-long' : 'tr-short';
           const pointsStr = trade.points !== undefined ? `${trade.points >= 0 ? '+' : ''}${trade.points}` : '—';
+          const ptsClass = trade.result === 'Profit' ? 'res-win' : trade.result === 'Loss' ? 'res-loss' : '';
           
           return `
             <tr>
               <td class="${typeClass}">${trade.type}</td>
-              <td>${entryTimeStr}</td>
-              <td>${fmt(trade.entryPrice)}</td>
-              <td>${exitTimeStr}</td>
-              <td>${trade.exitPrice ? fmt(trade.exitPrice) : '—'}</td>
-              <td style="font-weight: 500;">${pointsStr}</td>
+              <td class="tnum" style="text-align: right;">${entryTimeStr}</td>
+              <td class="tnum" style="text-align: right;">${fmt(trade.entryPrice)}</td>
+              <td class="tnum" style="text-align: right;">${exitTimeStr}</td>
+              <td class="tnum" style="text-align: right;">${trade.exitPrice ? fmt(trade.exitPrice) : '—'}</td>
+              <td class="tnum ${ptsClass}" style="text-align: right; font-weight: 500;">${pointsStr}</td>
               <td>${resultBadge}</td>
             </tr>
           `;
@@ -3614,8 +3672,18 @@ function connectBtcWebSocket(tf) {
       }
     } else {
       if (liveChartEngine) {
-        liveChartEngine.updateLast(candle);
         updateLocalCandles(liveCandles, candle);
+        const cleanPredicted = (window.lastPredictions || []).map(p => ({
+          time: p.time * 1000,
+          open: p.open,
+          high: p.high,
+          low: p.low,
+          close: p.close,
+          volume: 0,
+          isPrediction: true
+        })).filter(p => p.time > (liveCandles.length > 0 ? liveCandles[liveCandles.length - 1].time : 0));
+        
+        liveChartEngine.setData(liveCandles.concat(cleanPredicted));
         updateChartIndicators(liveChartEngine, liveCandles, liveActiveIndicators);
         checkAlerts(candle);
       }
@@ -3691,6 +3759,40 @@ function setTimeframe(tfVal) {
   $('tf').dispatchEvent(new Event('change'));
 }
 window.setTimeframe = setTimeframe;
+
+function renderPredictionsTable(predicted) {
+  if (!predicted || predicted.length === 0) {
+    document.querySelectorAll('#predictions-table-body').forEach(tbody => {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align: center; color: var(--muted); padding: 8px 0;">No predictions available</td>
+        </tr>
+      `;
+    });
+    return;
+  }
+  
+  const next5 = predicted.slice(0, 5);
+  const rowsHtml = next5.map((c, idx) => {
+    const isUp = c.close >= c.open;
+    const arrow = isUp ? '<span style="color: var(--up);">↗</span>' : '<span style="color: var(--down);">↘</span>';
+    return `
+      <tr style="border-bottom: 1px dotted var(--border);">
+        <td style="padding: 4px 0; color: var(--muted);">+${idx + 1}</td>
+        <td class="tnum" style="padding: 4px 0; text-align: right;">${fmt(c.open)}</td>
+        <td class="tnum" style="padding: 4px 0; text-align: right;">${fmt(c.high)}</td>
+        <td class="tnum" style="padding: 4px 0; text-align: right;">${fmt(c.low)}</td>
+        <td class="tnum" style="padding: 4px 0; text-align: right; font-weight: 500;">${fmt(c.close)}</td>
+        <td style="padding: 4px 0; text-align: center; font-weight: bold;">${arrow}</td>
+      </tr>
+    `;
+  }).join('');
+  
+  document.querySelectorAll('#predictions-table-body').forEach(tbody => {
+    tbody.innerHTML = rowsHtml;
+  });
+}
+window.renderPredictionsTable = renderPredictionsTable;
 
 function toggleModal(id, show) {
   const modal = $(id);
@@ -4242,11 +4344,13 @@ function openMobileSheet() {
       const sigHtml = $('sig') ? $('sig').outerHTML : '';
       const echoesHtml = $('echoes-card') ? $('echoes-card').outerHTML : '';
       const statsHtml = $('stats-card') ? $('stats-card').outerHTML : '';
+      const predictionsHtml = $('predictions-card') ? $('predictions-card').outerHTML : '';
       content.innerHTML = `
         <div class="mobile-sheet-content-wrapper">
           ${sigHtml}
           ${echoesHtml}
           ${statsHtml}
+          ${predictionsHtml}
         </div>
       `;
       const mobileCanvas = content.querySelector('#echoes-sparkline');
