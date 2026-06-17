@@ -395,6 +395,7 @@
   
   /* Collapse Toggle Tab on overlays */
   .overlays-collapse-btn {
+    display: none;
     position: absolute;
     right: -24px;
     top: 50%;
@@ -1859,7 +1860,7 @@
           <span id="mobile-toggle-drawing-text" style="vertical-align: middle;">Hide Drawing Toolbar</span>
         </button>
         <button class="sidebar-menu-item" onclick="toggleSidebarDrawer(event); toggleTheme();">
-          <span style="margin-right: 8px; vertical-align: middle;">🌓</span>
+          <span id="global-theme-toggle" style="margin-right: 8px; vertical-align: middle;">🌙</span>
           <span style="vertical-align: middle;">Toggle Theme</span>
         </button>
         <button class="sidebar-menu-item" onclick="toggleSidebarDrawer(event); resetActiveChartView();">
@@ -2053,19 +2054,7 @@
       Alerts
     </button>
     
-    <div class="right-section">
-      <button class="top-btn-icon" onclick="toggleDrawingToolbar()" title="Toggle Drawing Toolbar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4Z"/></svg>
-      </button>
-      <button class="top-btn-icon" onclick="resetActiveChartView()" title="Reset View">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M16 3h5v5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 21H3v-5"></path></svg>
-      </button>
-      <button class="top-btn-icon" onclick="toggleFullscreen()" title="Toggle Fullscreen">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M8 3H5a2 2 0 0 0-2 2v3m18-5h-3a2 2 0 0 0-2 2v3m-8 13H5a2 2 0 0 1-2-2v-3m18 5h-3a2 2 0 0 1-2-2v-3"></path></svg>
-      </button>
-      <button class="top-btn-icon" id="global-theme-toggle" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
-
-    </div>
+    <!-- right-section removed to keep topbar extremely clean -->
   </div>
 
   <!-- Slide-Down Indicators Panel -->
@@ -3585,7 +3574,8 @@ function toggleTheme() {
   const isDark = document.body.classList.toggle('dark-theme');
   const theme = isDark ? 'dark' : 'light';
   localStorage.setItem('greeks_theme', theme);
-  $('global-theme-toggle').textContent = isDark ? '🌙' : '☀️';
+  const themeToggle = $('global-theme-toggle');
+  if (themeToggle) themeToggle.textContent = isDark ? '🌙' : '☀️';
   
   if (liveChartEngine) liveChartEngine.setTheme(theme);
   if (scalperChartEngine) scalperChartEngine.setTheme(theme);
@@ -3597,10 +3587,12 @@ function applySavedTheme() {
   const isDark = savedTheme === 'dark';
   if (isDark) {
     document.body.classList.add('dark-theme');
-    $('global-theme-toggle').textContent = '🌙';
+    const themeToggle = $('global-theme-toggle');
+    if (themeToggle) themeToggle.textContent = '🌙';
   } else {
     document.body.classList.remove('dark-theme');
-    $('global-theme-toggle').textContent = '☀️';
+    const themeToggle = $('global-theme-toggle');
+    if (themeToggle) themeToggle.textContent = '☀️';
   }
 }
 function loadChartSettings(engine) {
