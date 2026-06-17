@@ -305,6 +305,7 @@
   #chart, #tv-chart {
     width: 100%;
     height: 100%;
+    touch-action: none;
   }
 
   /* Side Drawing Toolbar */
@@ -322,6 +323,7 @@
     border-right: 1px solid var(--border);
     padding: 6px 0;
     box-shadow: 2px 0 6px rgba(0, 0, 0, 0.02);
+    pointer-events: auto;
   }
   body.dark-theme .drawing-toolbar {
     box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
@@ -2955,7 +2957,7 @@ function initLiveChart() {
   setupIndicatorToggles(liveChartEngine, () => liveCandles, 'live-indicator-toggles');
   setupDrawingToolbars(liveChartEngine, 'live-drawing-toolbar', 'live-clear-drawings', 'live');
   setupDrawingsStorage(liveChartEngine, 'live');
-    loadChartSettings(liveChartEngine);
+  loadChartSettings(liveChartEngine);
 }
 
 function initScalperChart() {
@@ -2981,38 +2983,14 @@ function initScalperChart() {
     onDrawingsChange: (drawings) => {
       localStorage.setItem(getDrawingsKey('scalper'), JSON.stringify(drawings));
       pushDrawingsState('scalper', drawings);
-    }
+    },
+    onRender: updateShadedBoxes
   });
   
-  // Keep shaded boxes in sync during user scroll/zoom/pan
-  container.addEventListener('mousedown', () => {
-    const onMouseMove = () => updateShadedBoxes();
-    const onMouseUp = () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-    };
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-  });
-  
-  container.addEventListener('wheel', () => {
-    requestAnimationFrame(updateShadedBoxes);
-  }, { passive: true });
-
-  container.addEventListener('touchstart', () => {
-    const onTouchMove = () => updateShadedBoxes();
-    const onTouchEnd = () => {
-      window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('touchend', onTouchEnd);
-    };
-    window.addEventListener('touchmove', onTouchMove);
-    window.addEventListener('touchend', onTouchEnd);
-  }, { passive: true });
-
   setupIndicatorToggles(scalperChartEngine, () => scalperCandles, 'scalper-indicator-toggles');
   setupDrawingToolbars(scalperChartEngine, 'scalper-drawing-toolbar', 'scalper-clear-drawings', 'scalper');
   setupDrawingsStorage(scalperChartEngine, 'scalper');
-    loadChartSettings(scalperChartEngine);
+  loadChartSettings(scalperChartEngine);
 }
 
 // -------------------------------------------------------------
