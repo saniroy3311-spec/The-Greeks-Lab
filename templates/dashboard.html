@@ -1564,10 +1564,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M8 3H5a2 2 0 0 0-2 2v3m18-5h-3a2 2 0 0 0-2 2v3m-8 13H5a2 2 0 0 1-2-2v-3m18 5h-3a2 2 0 0 1-2-2v-3"></path></svg>
       </button>
       <button class="top-btn-icon" id="global-theme-toggle" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
-      <div class="live-status-indicator">
-        <span class="dot active" id="dot"></span>
-        <span id="status">Loading…</span>
-      </div>
+
     </div>
   </div>
 
@@ -2439,7 +2436,7 @@ function initScalperChart() {
 // -------------------------------------------------------------
 async function load(isFirstLoad = false) {
   const sym = $('symbol').value, tf = $('tf').value;
-  $('status').textContent = 'Updating…';
+  if ($('status')) $('status').textContent = 'Updating…';
   $('err').style.display = 'none';
   try {
     initLiveChart();
@@ -2614,12 +2611,12 @@ async function load(isFirstLoad = false) {
 
     $('updated').textContent = 'Last update: ' + d.updated;
     $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · horizon ${d.pred_len}`;
-    $('status').textContent = 'Live';
+    if ($('status')) $('status').textContent = 'Live';
     connectBtcWebSocket(tf);
   } catch (e) {
     $('err').textContent = 'Error: ' + e.message + ' — is the market open and the server reachable?';
     $('err').style.display = 'block';
-    $('status').textContent = 'Error';
+    if ($('status')) $('status').textContent = 'Error';
   }
 }
 
@@ -2682,7 +2679,7 @@ function updateShadedBoxes() {
 
 async function loadScalper(isFirstLoad = false) {
   const sym = $('symbol').value, tf = $('tf').value;
-  $('status').textContent = 'Updating…';
+  if ($('status')) $('status').textContent = 'Updating…';
   $('err').style.display = 'none';
   
   try {
@@ -2810,11 +2807,11 @@ async function loadScalper(isFirstLoad = false) {
     connectBtcWebSocket(tf);
     $('updated').textContent = 'Last update: ' + d.updated;
     $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · EMA 9/15`;
-    $('status').textContent = 'Live';
+    if ($('status')) $('status').textContent = 'Live';
   } catch (e) {
     $('err').textContent = 'Error: ' + e.message;
     $('err').style.display = 'block';
-    $('status').textContent = 'Error';
+    if ($('status')) $('status').textContent = 'Error';
   }
 }
 
