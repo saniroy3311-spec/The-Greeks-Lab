@@ -2455,7 +2455,12 @@
       Alerts
     </button>
     
-    <!-- right-section removed to keep topbar extremely clean -->
+    <div class="right-section">
+      <div class="live-status-indicator">
+        <div class="dot active"></div>
+        <span id="updated-topbar">Last update: —</span>
+      </div>
+    </div>
   </div>
 
   <!-- Antigravity Radar Banner -->
@@ -2769,6 +2774,60 @@
                 <span class="card-title">ACTIVE POSITION</span>
               </div>
               <div id="scalper-info-text"></div>
+            </div>
+
+            <!-- Kronos Unified Forecast Card (Scalper) -->
+            <div class="overlay-card signal flat" id="scalper-sig" style="margin-top: 8px;">
+              <div class="sig-header-row" style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px;">
+                <div>
+                  <div class="sig-label">KRONOS PREDICTION</div>
+                  <div class="sig-dir" id="scalper-dir">—</div>
+                  <div class="sig-sub" style="font-size: 10px; color: var(--muted); margin-top: 2px;">Confidence <span id="scalper-conf">—</span></div>
+                </div>
+                <div style="text-align: right;">
+                  <div class="sig-label">ACTION</div>
+                  <div class="sig-action" id="scalper-act">—</div>
+                  <div class="sig-sub" id="scalper-bias" style="font-size: 10px; color: var(--muted); margin-top: 2px;">—</div>
+                </div>
+              </div>
+              <div class="sig-metrics-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div class="sig-metric-box">
+                  <div class="sig-metric-label">Current</div>
+                  <div class="sig-metric-val tnum" id="scalper-s-cur">—</div>
+                </div>
+                <div class="sig-metric-box">
+                  <div class="sig-metric-label">Predicted (5 bars)</div>
+                  <div class="sig-metric-val tnum" id="scalper-s-p5">—</div>
+                </div>
+                <div class="sig-metric-box">
+                  <div class="sig-metric-label">Predicted (end)</div>
+                  <div class="sig-metric-val tnum" id="scalper-s-pn">—</div>
+                </div>
+                <div class="sig-metric-box">
+                  <div class="sig-metric-label">Expected move</div>
+                  <div class="sig-metric-val tnum" id="scalper-s-mv">—</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Echoes Confirmation Card (Scalper) -->
+            <div class="overlay-card echoes-card flat" id="scalper-echoes-card" style="margin-top: 8px;">
+              <div class="overlay-card-header">
+                <span class="card-title">ECHOES CONFIRMATION</span>
+              </div>
+              <div>
+                <div class="sig-label">Echoes Status</div>
+                <div class="echoes-status" id="scalper-echoes-status">Scanning…</div>
+              </div>
+              <div class="echoes-stats-row">
+                <div class="echoes-stat"><span class="lbl">Median</span> <span id="scalper-echoes-median" class="val">—</span></div>
+                <div class="echoes-stat"><span class="lbl">Best</span> <span id="scalper-echoes-best" class="val text-up">—</span></div>
+                <div class="echoes-stat"><span class="lbl">Worst</span> <span id="scalper-echoes-worst" class="val text-down">—</span></div>
+              </div>
+              <div class="echoes-sparkline-container">
+                <canvas id="scalper-echoes-sparkline" width="160" height="35"></canvas>
+                <div class="sparkline-label">Query &<br>matches</div>
+              </div>
             </div>
 
             <!-- Future Predictions Card (Scalper) -->
@@ -3266,13 +3325,19 @@ function checkAlerts(candle) {
 // -------------------------------------------------------------
 // Echoes Similarity Search Visualizer (Sparkline)
 // -------------------------------------------------------------
-function drawEchoesSparkline(echoScan) {
-  window.lastEchoScan = echoScan;
-  const canvas = $('echoes-sparkline');
-  if (canvas) drawEchoesSparklineOnCanvas(canvas, echoScan);
-  
-  const mobileCanvas = document.querySelector('#mobile-sheet-content #echoes-sparkline');
-  if (mobileCanvas) drawEchoesSparklineOnCanvas(mobileCanvas, echoScan);
+function drawEchoesSparkline(echoScan, isScalper = false) {
+  if (!isScalper) {
+    window.lastEchoScan = echoScan;
+    const canvas = $('echoes-sparkline');
+    if (canvas) drawEchoesSparklineOnCanvas(canvas, echoScan);
+    
+    const mobileCanvas = document.querySelector('#mobile-sheet-content #echoes-sparkline');
+    if (mobileCanvas) drawEchoesSparklineOnCanvas(mobileCanvas, echoScan);
+  } else {
+    window.lastEchoScanScalper = echoScan;
+    const canvas = $('scalper-echoes-sparkline');
+    if (canvas) drawEchoesSparklineOnCanvas(canvas, echoScan);
+  }
 }
 
 function drawEchoesSparklineOnCanvas(canvas, echoScan) {
@@ -3677,7 +3742,9 @@ async function load(isFirstLoad = false) {
     renderAlertsTable();
     updateChartAlerts();
 
-    $('updated').textContent = 'Last update: ' + d.updated;
+    const timeText = 'Last update: ' + d.updated;
+    if ($('updated')) $('updated').textContent = timeText;
+    if ($('updated-topbar')) $('updated-topbar').textContent = timeText;
     $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · horizon ${d.pred_len}`;
     if ($('status')) $('status').textContent = 'Live';
     evaluateAntigravityAlerts(d, liveCandles);
@@ -3796,9 +3863,19 @@ async function loadScalper(isFirstLoad = false) {
     const serverCandleTime = lastServerCandle ? lastServerCandle.time * 1000 : 0;
     const isNewCandle = (window.lastLoadedScalperCandleTime !== serverCandleTime);
     
+    const cleanPredicted = (d.predicted || []).map(p => ({
+      time: p.time * 1000,
+      open: p.open,
+      high: p.high,
+      low: p.low,
+      close: p.close,
+      volume: 0,
+      isPrediction: true
+    })).filter(p => p.time > (scalperCandles.length > 0 ? scalperCandles[scalperCandles.length - 1].time : 0));
+
     if (isFirstLoad || isNewCandle) {
       window.lastLoadedScalperCandleTime = serverCandleTime;
-      scalperChartEngine.setData(scalperCandles);
+      scalperChartEngine.setData(scalperCandles.concat(cleanPredicted));
       loadDrawings(scalperChartEngine, 'scalper');
       if (isFirstLoad) {
         scalperChartEngine.resetView();
@@ -3806,6 +3883,126 @@ async function loadScalper(isFirstLoad = false) {
     }
     
     updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
+
+    // Update KRONOS PREDICTION card on Scalper tab
+    const scalperKlass = d.direction === 'Long' ? 'up' : d.direction === 'Short' ? 'down' : 'flat';
+    $('scalper-sig').className = 'overlay-card signal ' + scalperKlass;
+    updateIdText('scalper-dir', d.direction);
+    updateIdText('scalper-conf', d.confidence + '%');
+    updateIdText('scalper-act', d.action);
+    updateIdText('scalper-bias', d.bias);
+    updateIdText('scalper-s-cur', fmt(d.current));
+    updateIdText('scalper-s-p5', fmt(d.pred_5));
+    updateIdText('scalper-s-pn', fmt(d.pred_n));
+    updateIdText('scalper-s-mv', (d.move >= 0 ? '+' : '') + fmt(d.move) + '  (' + d.move_pct + '%)');
+
+    // Update ECHOES CONFIRMATION card on Scalper tab
+    const lastClose = scalperCandles[scalperCandles.length - 1].close;
+    const horizon = d.pred_len;
+    const echoScan = lab.buildEchoScan(scalperCandles, 30, horizon, 5);
+    const scalperEchoesCard = $('scalper-echoes-card');
+    
+    if (echoScan && echoScan.stats.count > 0) {
+      const count = echoScan.stats.count;
+      const up = echoScan.stats.upCount;
+      const rate = Math.round((up / count) * 100);
+      
+      let statusKlass = 'neutral';
+      let statusText = `${up} / ${count} UP (${rate}%)`;
+      if (rate >= 60) {
+        statusKlass = 'bullish';
+      } else if (rate <= 40) {
+        statusKlass = 'bearish';
+      }
+      
+      scalperEchoesCard.className = `overlay-card echoes-card ${statusKlass}`;
+      $('scalper-echoes-status').textContent = statusText;
+      $('scalper-echoes-median').textContent = `${echoScan.stats.medianEndPct >= 0 ? '+' : ''}${echoScan.stats.medianEndPct.toFixed(2)}%`;
+      $('scalper-echoes-best').textContent = `+${echoScan.stats.bestEndPct.toFixed(2)}%`;
+      $('scalper-echoes-worst').textContent = `${echoScan.stats.worstEndPct.toFixed(2)}%`;
+      
+      drawEchoesSparkline(echoScan, true);
+    } else {
+      scalperEchoesCard.className = `overlay-card echoes-card neutral`;
+      $('scalper-echoes-status').textContent = 'No past match';
+      $('scalper-echoes-median').textContent = '—';
+      $('scalper-echoes-best').textContent = '—';
+      $('scalper-echoes-worst').textContent = '—';
+    }
+
+    if (isFirstLoad || isNewCandle) {
+      // -------------------------------------------------------------
+      // Simulating the Oracle Probability Cone & AI Prediction Lines
+      // -------------------------------------------------------------
+      const oracleResult = lab.buildOracle(scalperCandles, horizon, 1000);
+      
+      let projLines = [];
+      let projBand = null;
+      
+      if (oracleResult) {
+        const upperPoints = [{ barOffset: 0, price: lastClose }];
+        const lowerPoints = [{ barOffset: 0, price: lastClose }];
+        const medianPoints = [{ barOffset: 0, price: lastClose }];
+        
+        oracleResult.bandsPct.forEach((band, idx) => {
+          const barOffset = idx + 1;
+          upperPoints.push({ barOffset, price: lastClose * (1 + band.p95 / 100) });
+          lowerPoints.push({ barOffset, price: lastClose * (1 + band.p5 / 100) });
+          medianPoints.push({ barOffset, price: lastClose * (1 + band.p50 / 100) });
+        });
+        
+        projBand = {
+          color: 'rgba(55, 138, 221, 0.12)',
+          opacity: 0.12,
+          upper: upperPoints,
+          lower: lowerPoints
+        };
+        
+        projLines.push({
+          id: 'oracle-median-scalper',
+          color: '#378add',
+          opacity: 0.8,
+          width: 1.5,
+          dashed: true,
+          points: medianPoints
+        });
+      }
+
+      // AI Prediction Line
+      const predPoints = [{ barOffset: 0, price: lastClose }];
+      (d.predicted || []).forEach((p, idx) => {
+        predPoints.push({ barOffset: idx + 1, price: p.close });
+      });
+      projLines.push({
+        id: 'kronos-prediction-scalper',
+        color: '#ef9f27',
+        opacity: 1,
+        width: 2.5,
+        points: predPoints
+      });
+
+      // Echo match aftermath lines
+      if (echoScan && echoScan.stats.count > 0) {
+        echoScan.results.forEach((res, i) => {
+          if (!res.aftermathPct) return;
+          const pts = [{ barOffset: 0, price: lastClose }];
+          res.aftermathPct.forEach((pct, offsetIdx) => {
+            pts.push({ barOffset: offsetIdx + 1, price: lastClose * (1 + pct / 100) });
+          });
+          
+          const isUp = res.aftermathPct[res.aftermathPct.length - 1] > 0;
+          projLines.push({
+            id: `echo-match-scalper-${i}`,
+            color: isUp ? '#1d9e75' : '#d85a30',
+            opacity: 0.15,
+            width: 1,
+            points: pts
+          });
+        });
+      }
+
+      scalperChartEngine.setProjections(projLines, projBand);
+    }
     
     window.currentPrice = d.current || (scalperCandles.length > 0 ? scalperCandles[scalperCandles.length - 1].close : 0);
     renderPredictionsTable(d.predicted || []);
@@ -3909,7 +4106,9 @@ async function loadScalper(isFirstLoad = false) {
     }
 
     connectBtcWebSocket(tf);
-    $('updated').textContent = 'Last update: ' + d.updated;
+    const timeText = 'Last update: ' + d.updated;
+    if ($('updated')) $('updated').textContent = timeText;
+    if ($('updated-topbar')) $('updated-topbar').textContent = timeText;
     $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · EMA 9/15`;
     if ($('status')) $('status').textContent = 'Live';
     evaluateAntigravityAlerts(d, scalperCandles);

@@ -594,6 +594,12 @@ def api_scalper(symbol, tf):
             "pred_len": cached_result.get("pred_len"),
             "predicted": cached_result.get("predicted", []),
             "current": cached_result.get("current"),
+            "confidence": cached_result.get("confidence"),
+            "action": cached_result.get("action"),
+            "bias": cached_result.get("bias"),
+            "pred_5": cached_result.get("pred_5"),
+            "pred_n": cached_result.get("pred_n"),
+            "move": cached_result.get("move"),
             "updated": time.strftime("%H:%M:%S")
         })
 
