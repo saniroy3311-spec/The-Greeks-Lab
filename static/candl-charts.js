@@ -1,18 +1,18 @@
 var Ys = Object.defineProperty;
 var $s = (t, e, n) => e in t ? Ys(t, e, { enumerable: !0, configurable: !0, writable: !0, value: n }) : t[e] = n;
-var ot = (t, e, n) => $s(t, typeof e != "symbol" ? e + "" : e, n);
+var it = (t, e, n) => $s(t, typeof e != "symbol" ? e + "" : e, n);
 import "react/jsx-runtime";
-const Os = 6, tn = 8, be = 7, zn = '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', nt = `10px ${zn}`, di = `11px ${zn}`, fe = `12px ${zn}`;
+const Os = 6, tn = 8, be = 7, zn = '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', nt = `10px ${zn}`, bi = `11px ${zn}`, he = `12px ${zn}`;
 function H(t) {
   return Math.max(Os, t.width / 2 + 3);
 }
 function w(t, e) {
   return { x: t.timeToX(e.time), y: t.priceToY(e.price) };
 }
-function yt(t, e) {
+function gt(t, e) {
   return t.points.map((n) => w(e, n));
 }
-function rt(t) {
+function lt(t) {
   const e = t.getTransform(), n = e.a !== 0 ? Math.abs(e.a) : 1, i = e.d !== 0 ? Math.abs(e.d) : 1;
   return { w: t.canvas.width / n, h: t.canvas.height / i };
 }
@@ -66,12 +66,12 @@ function Fe(t) {
   return isFinite(t) ? `${t >= 0 ? "+" : ""}${t.toFixed(2)}%` : "—";
 }
 const Bs = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-function dn(t) {
+function bn(t) {
   return t < 10 ? "0" + t : String(t);
 }
 function xn(t, e) {
-  const n = new Date(t), i = `${n.getDate()} ${Bs[n.getMonth()]} '${dn(n.getFullYear() % 100)}`;
-  return e >= 864e5 ? i : `${i} ${dn(n.getHours())}:${dn(n.getMinutes())}`;
+  const n = new Date(t), i = `${n.getDate()} ${Bs[n.getMonth()]} '${bn(n.getFullYear() % 100)}`;
+  return e >= 864e5 ? i : `${i} ${bn(n.getHours())}:${bn(n.getMinutes())}`;
 }
 function Mi(t) {
   const e = Math.abs(t), n = Math.floor(e / 6e4);
@@ -119,10 +119,10 @@ function At(t, e, n, i, o, s) {
   const r = Math.min(s, i / 2, o / 2);
   t.beginPath(), t.moveTo(e + r, n), t.arcTo(e + i, n, e + i, n + o, r), t.arcTo(e + i, n + o, e, n + o, r), t.arcTo(e, n + o, e, n, r), t.arcTo(e, n, e + i, n, r), t.closePath();
 }
-function bt(t, e) {
+function yt(t, e) {
   return Math.round(e) % 2 === 1 ? Math.round(t) + 0.5 : Math.round(t);
 }
-function v(t, e, n, i, o) {
+function W(t, e, n, i, o) {
   t.beginPath(), t.moveTo(e, n), t.lineTo(i, o), t.stroke();
 }
 function V(t, e, n, i) {
@@ -134,19 +134,19 @@ function en(t, e, n, i, o) {
 function to(t, e, n, i, o, s, r) {
   const l = i - e, c = o - n, a = Math.hypot(l, c);
   if (a < 1) return;
-  const f = Math.atan2(c, l), h = Math.min(s * 0.8, a / 2), u = l / a, p = c / a, g = r ? e + u * h : e, b = r ? n + p * h : n;
-  v(t, g, b, i - u * h, o - p * h), en(t, i, o, f, s), r && en(t, e, n, f + Math.PI, s);
+  const f = Math.atan2(c, l), h = Math.min(s * 0.8, a / 2), u = l / a, m = c / a, g = r ? e + u * h : e, d = r ? n + m * h : n;
+  W(t, g, d, i - u * h, o - m * h), en(t, i, o, f, s), r && en(t, e, n, f + Math.PI, s);
 }
-function kt(t, e, n, i, o, s = fe) {
+function kt(t, e, n, i, o, s = he) {
   if (i.length === 0) return;
   t.font = s;
   const r = 8, l = 4, a = (parseInt(s, 10) || 12) + 4;
   let f = 0;
-  for (const b of i) f = Math.max(f, t.measureText(b).width);
-  const h = f + r * 2, u = i.length * a + l * 2, p = e - h / 2, g = n - u / 2;
-  At(t, p, g, h, u, 4), t.fillStyle = o, t.fill(), t.fillStyle = Re(t, o), t.textAlign = "center", t.textBaseline = "middle";
-  for (let b = 0; b < i.length; b++)
-    t.fillText(i[b], e, g + l + a * (b + 0.5));
+  for (const d of i) f = Math.max(f, t.measureText(d).width);
+  const h = f + r * 2, u = i.length * a + l * 2, m = e - h / 2, g = n - u / 2;
+  At(t, m, g, h, u, 4), t.fillStyle = o, t.fill(), t.fillStyle = Re(t, o), t.textAlign = "center", t.textBaseline = "middle";
+  for (let d = 0; d < i.length; d++)
+    t.fillText(i[d], e, g + l + a * (d + 0.5));
 }
 function I(t, e, n, i) {
   const o = be / 2;
@@ -159,13 +159,13 @@ function I(t, e, n, i) {
     t.fillStyle = "#ffffff", t.fillRect(c - o, a - o, be, be), t.strokeStyle = e.color, t.strokeRect(c - o, a - o, be, be);
   }
 }
-function lt(t, e, n, i, o, s, r, l) {
+function at(t, e, n, i, o, s, r, l) {
   const c = o - n, a = s - i, f = c * c + a * a;
   let h = f === 0 ? 0 : ((t - n) * c + (e - i) * a) / f;
   return h = Math.max(r, Math.min(l, h)), Math.hypot(t - (n + h * c), e - (i + h * a));
 }
-function Z(t, e, n, i) {
-  return lt(t, e, n.x, n.y, i.x, i.y, 0, 1);
+function Q(t, e, n, i) {
+  return at(t, e, n.x, n.y, i.x, i.y, 0, 1);
 }
 function Kt(t, e, n) {
   let i = !1;
@@ -182,15 +182,15 @@ function an(t, e, n, i, o, s, r, l) {
   const c = n - t, a = i - e, f = Math.hypot(c, a);
   if (f < 1e-6) return null;
   const h = 1e6 / f;
-  let u = 0, p = 1;
+  let u = 0, m = 1;
   const g = [];
   if (c !== 0 && g.push((0 - t) / c, (o - t) / c), a !== 0 && g.push((0 - e) / a, (s - e) / a), g.length > 0) {
-    let b = g[0], A = g[0];
+    let d = g[0], k = g[0];
     for (const T of g)
-      b = Math.min(b, T), A = Math.max(A, T);
-    r && (u = Math.max(Math.min(0, b), -h)), p = Math.min(Math.max(1, A), h);
+      d = Math.min(d, T), k = Math.max(k, T);
+    r && (u = Math.max(Math.min(0, d), -h)), m = Math.min(Math.max(1, k), h);
   }
-  return [t + c * u, e + a * u, t + c * p, e + a * p];
+  return [t + c * u, e + a * u, t + c * m, e + a * m];
 }
 function Hs(t, e, n = 14) {
   if (t.length < n + 1) return null;
@@ -229,11 +229,11 @@ const Gs = {
   pointsNeeded: 2,
   render(t, e, n, i) {
     const o = w(n, e.points[0]), s = e.points[1] ? w(n, e.points[1]) : o;
-    v(t, o.x, o.y, s.x, s.y), i && I(t, e, n);
+    W(t, o.x, o.y, s.x, s.y), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     const o = w(i, t.points[0]), s = w(i, t.points[1]);
-    return lt(e, n, o.x, o.y, s.x, s.y, 0, 1) <= H(t);
+    return at(e, n, o.x, o.y, s.x, s.y, 0, 1) <= H(t);
   }
 }, qs = {
   id: "ray",
@@ -241,12 +241,12 @@ const Gs = {
   group: "lines",
   pointsNeeded: 2,
   render(t, e, n, i) {
-    const o = w(n, e.points[0]), s = e.points[1] ? w(n, e.points[1]) : o, { w: r, h: l } = rt(t), c = an(o.x, o.y, s.x, s.y, r, l, !1);
-    c ? v(t, c[0], c[1], c[2], c[3]) : V(t, o.x, o.y, e.width), i && I(t, e, n);
+    const o = w(n, e.points[0]), s = e.points[1] ? w(n, e.points[1]) : o, { w: r, h: l } = lt(t), c = an(o.x, o.y, s.x, s.y, r, l, !1);
+    c ? W(t, c[0], c[1], c[2], c[3]) : V(t, o.x, o.y, e.width), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     const o = w(i, t.points[0]), s = w(i, t.points[1]);
-    return lt(e, n, o.x, o.y, s.x, s.y, 0, Number.POSITIVE_INFINITY) <= H(t);
+    return at(e, n, o.x, o.y, s.x, s.y, 0, Number.POSITIVE_INFINITY) <= H(t);
   }
 }, Us = {
   id: "xline",
@@ -254,12 +254,12 @@ const Gs = {
   group: "lines",
   pointsNeeded: 2,
   render(t, e, n, i) {
-    const o = w(n, e.points[0]), s = e.points[1] ? w(n, e.points[1]) : o, { w: r, h: l } = rt(t), c = an(o.x, o.y, s.x, s.y, r, l, !0);
-    c ? v(t, c[0], c[1], c[2], c[3]) : V(t, o.x, o.y, e.width), i && I(t, e, n);
+    const o = w(n, e.points[0]), s = e.points[1] ? w(n, e.points[1]) : o, { w: r, h: l } = lt(t), c = an(o.x, o.y, s.x, s.y, r, l, !0);
+    c ? W(t, c[0], c[1], c[2], c[3]) : V(t, o.x, o.y, e.width), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     const o = w(i, t.points[0]), s = w(i, t.points[1]);
-    return lt(e, n, o.x, o.y, s.x, s.y, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY) <= H(t);
+    return at(e, n, o.x, o.y, s.x, s.y, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY) <= H(t);
   }
 }, js = {
   id: "hray",
@@ -267,9 +267,9 @@ const Gs = {
   group: "lines",
   pointsNeeded: 1,
   render(t, e, n, i, o) {
-    const s = w(n, e.points[0]), { w: r } = rt(t), l = bt(s.y, t.lineWidth);
+    const s = w(n, e.points[0]), { w: r } = lt(t), l = yt(s.y, t.lineWidth);
     if (s.x < r) {
-      v(t, s.x, l, r, l);
+      W(t, s.x, l, r, l);
       const c = Et(e.points[0].price, o.pricePrecision);
       eo(t, Math.max(s.x, r - Si(t, c) - 2), l, c, e.color);
     }
@@ -285,8 +285,8 @@ const Gs = {
   group: "lines",
   pointsNeeded: 1,
   render(t, e, n, i, o) {
-    const s = w(n, e.points[0]), { w: r } = rt(t), l = bt(s.y, t.lineWidth);
-    v(t, 0, l, r, l), eo(t, 2, l, Et(e.points[0].price, o.pricePrecision), e.color), i && I(t, e, n);
+    const s = w(n, e.points[0]), { w: r } = lt(t), l = yt(s.y, t.lineWidth);
+    W(t, 0, l, r, l), eo(t, 2, l, Et(e.points[0].price, o.pricePrecision), e.color), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     return Math.abs(n - i.priceToY(t.points[0].price)) <= H(t);
@@ -297,8 +297,8 @@ const Gs = {
   group: "lines",
   pointsNeeded: 1,
   render(t, e, n, i, o) {
-    const s = w(n, e.points[0]), { w: r, h: l } = rt(t), c = bt(s.x, t.lineWidth);
-    v(t, c, 0, c, l);
+    const s = w(n, e.points[0]), { w: r, h: l } = lt(t), c = yt(s.x, t.lineWidth);
+    W(t, c, 0, c, l);
     const a = xn(e.points[0].time, o.barMs), f = Si(t, a), h = Math.max(2, Math.min(r - f - 2, c - f / 2));
     eo(t, h, l - 10, a, e.color), i && I(t, e, n);
   },
@@ -327,13 +327,13 @@ const xs = {
     const l = w(n, s);
     if (r) {
       const c = Ro(o, l, w(n, r)), a = { x: o.x + c.x, y: o.y + c.y }, f = { x: l.x + c.x, y: l.y + c.y };
-      t.fillStyle = _(t, e.color, Qs), t.beginPath(), t.moveTo(o.x, o.y), t.lineTo(l.x, l.y), t.lineTo(f.x, f.y), t.lineTo(a.x, a.y), t.closePath(), t.fill(), v(t, a.x, a.y, f.x, f.y), t.save(), t.setLineDash([4, 4]), t.strokeStyle = _(t, e.color, 0.45), t.lineWidth = 1, v(t, o.x + c.x / 2, o.y + c.y / 2, l.x + c.x / 2, l.y + c.y / 2), t.restore();
+      t.fillStyle = _(t, e.color, Qs), t.beginPath(), t.moveTo(o.x, o.y), t.lineTo(l.x, l.y), t.lineTo(f.x, f.y), t.lineTo(a.x, a.y), t.closePath(), t.fill(), W(t, a.x, a.y, f.x, f.y), t.save(), t.setLineDash([4, 4]), t.strokeStyle = _(t, e.color, 0.45), t.lineWidth = 1, W(t, o.x + c.x / 2, o.y + c.y / 2, l.x + c.x / 2, l.y + c.y / 2), t.restore();
     }
-    v(t, o.x, o.y, l.x, l.y), i && I(t, e, n);
+    W(t, o.x, o.y, l.x, l.y), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     const o = w(i, t.points[0]), s = w(i, t.points[1]), r = Ro(o, s, w(i, t.points[2])), l = { x: o.x + r.x, y: o.y + r.y }, c = { x: s.x + r.x, y: s.y + r.y }, a = H(t);
-    return Z(e, n, o, s) <= a || Z(e, n, l, c) <= a ? !0 : Kt(e, n, [o, s, c, l]);
+    return Q(e, n, o, s) <= a || Q(e, n, l, c) <= a ? !0 : Kt(e, n, [o, s, c, l]);
   }
 };
 function Tn(t, e, n, i, o, s, r) {
@@ -359,24 +359,24 @@ const tr = {
     const r = Fo(e, n);
     if (!r) {
       const L = w(n, s);
-      v(t, o.x, o.y, L.x, L.y), i && I(t, e, n);
+      W(t, o.x, o.y, L.x, L.y), i && I(t, e, n);
       return;
     }
-    const { b: l, c, mid: a, dx: f, dy: h, len: u } = r, { w: p, h: g } = rt(t);
+    const { b: l, c, mid: a, dx: f, dy: h, len: u } = r, { w: m, h: g } = lt(t);
     if (u < 1e-6) {
-      v(t, l.x, l.y, c.x, c.y), i && I(t, e, n);
+      W(t, l.x, l.y, c.x, c.y), i && I(t, e, n);
       return;
     }
-    const b = Tn(l.x, l.y, f, h, p, g, u), A = Tn(c.x, c.y, f, h, p, g, u), T = Tn(o.x, o.y, f, h, p, g, u), P = { x: l.x + f * b, y: l.y + h * b }, N = { x: c.x + f * A, y: c.y + h * A };
-    t.fillStyle = _(t, e.color, zs), t.beginPath(), t.moveTo(l.x, l.y), t.lineTo(P.x, P.y), t.lineTo(N.x, N.y), t.lineTo(c.x, c.y), t.closePath(), t.fill(), t.strokeStyle = _(t, e.color, 0.85), v(t, l.x, l.y, P.x, P.y), v(t, c.x, c.y, N.x, N.y), t.save(), t.setLineDash([4, 4]), t.strokeStyle = _(t, e.color, 0.5), t.lineWidth = 1, v(t, l.x, l.y, c.x, c.y), t.restore(), t.strokeStyle = e.color, v(t, o.x, o.y, o.x + f * T, o.y + h * T), i && I(t, e, n);
+    const d = Tn(l.x, l.y, f, h, m, g, u), k = Tn(c.x, c.y, f, h, m, g, u), T = Tn(o.x, o.y, f, h, m, g, u), P = { x: l.x + f * d, y: l.y + h * d }, N = { x: c.x + f * k, y: c.y + h * k };
+    t.fillStyle = _(t, e.color, zs), t.beginPath(), t.moveTo(l.x, l.y), t.lineTo(P.x, P.y), t.lineTo(N.x, N.y), t.lineTo(c.x, c.y), t.closePath(), t.fill(), t.strokeStyle = _(t, e.color, 0.85), W(t, l.x, l.y, P.x, P.y), W(t, c.x, c.y, N.x, N.y), t.save(), t.setLineDash([4, 4]), t.strokeStyle = _(t, e.color, 0.5), t.lineWidth = 1, W(t, l.x, l.y, c.x, c.y), t.restore(), t.strokeStyle = e.color, W(t, o.x, o.y, o.x + f * T, o.y + h * T), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     const o = Fo(t, i);
     if (!o) return !1;
     const { a: s, b: r, c: l, dx: c, dy: a, len: f } = o, h = H(t);
-    if (f < 1e-6) return Z(e, n, r, l) <= h;
+    if (f < 1e-6) return Q(e, n, r, l) <= h;
     const u = Number.POSITIVE_INFINITY;
-    return lt(e, n, s.x, s.y, s.x + c, s.y + a, 0, u) <= h || lt(e, n, r.x, r.y, r.x + c, r.y + a, 0, u) <= h || lt(e, n, l.x, l.y, l.x + c, l.y + a, 0, u) <= h || Z(e, n, r, l) <= h;
+    return at(e, n, s.x, s.y, s.x + c, s.y + a, 0, u) <= h || at(e, n, r.x, r.y, r.x + c, r.y + a, 0, u) <= h || at(e, n, l.x, l.y, l.x + c, l.y + a, 0, u) <= h || Q(e, n, r, l) <= h;
   }
 }, er = [xs, tr], nr = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144], or = [0, 0.382, 0.618, 1, 1.618, 2.618, 4.236], ir = [0.236, 0.382, 0.5, 0.618, 0.786, 1];
 function Xt(t, e) {
@@ -471,20 +471,20 @@ function ki(t, e, n, i, o, s, r, l, c) {
   const a = (h) => s[h].color ?? r(h);
   for (let h = 0; h < s.length - 1; h++) {
     if (!s[h].visible || !s[h + 1].visible) continue;
-    const u = n.priceToY(l(s[h].ratio)), p = n.priceToY(l(s[h + 1].ratio));
-    t.fillStyle = _(t, a(h + 1), lr), t.fillRect(i, Math.min(u, p), o, Math.abs(p - u));
+    const u = n.priceToY(l(s[h].ratio)), m = n.priceToY(l(s[h + 1].ratio));
+    t.fillStyle = _(t, a(h + 1), lr), t.fillRect(i, Math.min(u, m), o, Math.abs(m - u));
   }
   const f = Math.max(1, e.width);
   t.font = nt, t.textAlign = "left", t.textBaseline = "bottom", t.lineWidth = f;
   for (let h = 0; h < s.length; h++) {
     const u = s[h];
     if (!u.visible) continue;
-    const p = l(u.ratio), g = bt(n.priceToY(p), f), b = a(h);
-    t.strokeStyle = b, v(t, i, g, i + o, g), t.fillStyle = b, t.fillText(`${u.label ?? u.ratio} — ${Et(p, c)}`, i + 4, g - 2);
+    const m = l(u.ratio), g = yt(n.priceToY(m), f), d = a(h);
+    t.strokeStyle = d, W(t, i, g, i + o, g), t.fillStyle = d, t.fillText(`${u.label ?? u.ratio} — ${Et(m, c)}`, i + 4, g - 2);
   }
 }
 function Hn(t, e, n, i, o, s) {
-  t.save(), t.setLineDash([4, 4]), t.strokeStyle = _(t, e, 0.55), t.lineWidth = 1, v(t, n, i, o, s), t.restore();
+  t.save(), t.setLineDash([4, 4]), t.strokeStyle = _(t, e, 0.55), t.lineWidth = 1, W(t, n, i, o, s), t.restore();
 }
 const cr = {
   id: "fib",
@@ -587,14 +587,14 @@ const fr = {
   group: "shapes",
   pointsNeeded: 3,
   render(t, e, n, i) {
-    const o = yt(e, n);
-    o.length === 1 ? V(t, o[0].x, o[0].y, e.width) : o.length === 2 ? v(t, o[0].x, o[0].y, o[1].x, o[1].y) : (t.beginPath(), t.moveTo(o[0].x, o[0].y), t.lineTo(o[1].x, o[1].y), t.lineTo(o[2].x, o[2].y), t.closePath(), t.fillStyle = _(t, e.color, no), t.fill(), t.lineJoin = "round", t.stroke()), i && I(t, e, n);
+    const o = gt(e, n);
+    o.length === 1 ? V(t, o[0].x, o[0].y, e.width) : o.length === 2 ? W(t, o[0].x, o[0].y, o[1].x, o[1].y) : (t.beginPath(), t.moveTo(o[0].x, o[0].y), t.lineTo(o[1].x, o[1].y), t.lineTo(o[2].x, o[2].y), t.closePath(), t.fillStyle = _(t, e.color, no), t.fill(), t.lineJoin = "round", t.stroke()), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
-    const o = yt(t, i);
+    const o = gt(t, i);
     if (Kt(e, n, o)) return !0;
     const s = H(t);
-    return Z(e, n, o[0], o[1]) <= s || Z(e, n, o[1], o[2]) <= s || Z(e, n, o[2], o[0]) <= s;
+    return Q(e, n, o[0], o[1]) <= s || Q(e, n, o[1], o[2]) <= s || Q(e, n, o[2], o[0]) <= s;
   }
 }, gr = {
   id: "arrow",
@@ -606,14 +606,14 @@ const fr = {
     if (f < 1)
       V(t, o.x, o.y, r);
     else {
-      const h = Math.atan2(a, c), u = c / f, p = a / f, g = Math.min(l * 0.7, f);
-      t.lineCap = "round", v(t, o.x, o.y, s.x - u * g, s.y - p * g), en(t, s.x, s.y, h, l);
+      const h = Math.atan2(a, c), u = c / f, m = a / f, g = Math.min(l * 0.7, f);
+      t.lineCap = "round", W(t, o.x, o.y, s.x - u * g, s.y - m * g), en(t, s.x, s.y, h, l);
     }
     i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     const o = w(i, t.points[0]), s = w(i, t.points[1]);
-    return Z(e, n, o, s) <= Math.max(H(t), 3 + t.width * 1.5);
+    return Q(e, n, o, s) <= Math.max(H(t), 3 + t.width * 1.5);
   }
 }, yr = {
   id: "brush",
@@ -622,7 +622,7 @@ const fr = {
   pointsNeeded: -1,
   // freehand: the engine streams points while dragging
   render(t, e, n, i) {
-    const o = yt(e, n);
+    const o = gt(e, n);
     if (o.length !== 0) {
       if (o.length === 1)
         V(t, o[0].x, o[0].y, Math.max(1.5, e.width));
@@ -635,10 +635,10 @@ const fr = {
     }
   },
   hitTest(t, e, n, i) {
-    const o = yt(t, i), s = H(t);
+    const o = gt(t, i), s = H(t);
     if (o.length === 1) return Math.hypot(e - o[0].x, n - o[0].y) <= s;
     for (let r = 0; r < o.length - 1; r++)
-      if (Z(e, n, o[r], o[r + 1]) <= s) return !0;
+      if (Q(e, n, o[r], o[r + 1]) <= s) return !0;
     return !1;
   },
   handleAt(t, e, n, i) {
@@ -650,10 +650,10 @@ const fr = {
     }
     return -1;
   }
-}, br = [ur, pr, mr, gr, yr], dr = 24, Tr = 3, Vn = 15, Gn = 8, qn = 6, Li = 12, ie = 6.5, Un = 15, Ge = /* @__PURE__ */ new Map();
+}, dr = [ur, pr, mr, gr, yr], br = 24, Tr = 3, Vn = 15, Gn = 8, qn = 6, Li = 12, ie = 6.5, Un = 15, Ge = /* @__PURE__ */ new Map();
 function Ii(t) {
   var s;
-  const e = (t.text ?? "").trim(), n = e.length === 0, i = wi(n ? "Note" : e, dr, Tr), o = typeof ((s = t.props) == null ? void 0 : s.emoji) == "string" ? t.props.emoji.trim() : "";
+  const e = (t.text ?? "").trim(), n = e.length === 0, i = wi(n ? "Note" : e, br, Tr), o = typeof ((s = t.props) == null ? void 0 : s.emoji) == "string" ? t.props.emoji.trim() : "";
   return o.length > 0 && (i[0] = `${o} ${i[0]}`), { lines: i, placeholder: n };
 }
 function Mr(t, e, n) {
@@ -673,13 +673,13 @@ const wr = {
     const o = w(n, e.points[0]), s = o.y - Un;
     t.beginPath(), t.moveTo(o.x, o.y), t.quadraticCurveTo(o.x - ie, o.y - 9, o.x - ie, s), t.arc(o.x, s, ie, Math.PI, 0, !1), t.quadraticCurveTo(o.x + ie, o.y - 9, o.x, o.y), t.closePath(), t.fillStyle = e.color, t.fill(), t.beginPath(), t.arc(o.x, s, 2.4, 0, Math.PI * 2), t.fillStyle = "#ffffff", t.fill();
     const { lines: r, placeholder: l } = Ii(e);
-    t.font = di;
+    t.font = bi;
     let c = 0;
-    for (const p of r) c = Math.max(c, t.measureText(p).width);
+    for (const m of r) c = Math.max(c, t.measureText(m).width);
     const a = c + Gn * 2, f = r.length * Vn + qn * 2, h = o.x + Li, u = s - f / 2;
     Ge.size > 512 && Ge.clear(), Ge.set(e.id, { x: h, y: u, w: a, h: f }), At(t, h, u, a, f, 6), t.fillStyle = _(t, e.color, 0.14), t.fill(), t.lineWidth = 1, t.strokeStyle = i ? e.color : _(t, e.color, 0.35), t.stroke(), t.fillStyle = l ? _(t, e.color, 0.55) : e.color, t.textAlign = "left", t.textBaseline = "middle";
-    for (let p = 0; p < r.length; p++)
-      t.fillText(r[p], h + Gn, u + qn + Vn * (p + 0.5));
+    for (let m = 0; m < r.length; m++)
+      t.fillText(r[m], h + Gn, u + qn + Vn * (m + 0.5));
   },
   hitTest(t, e, n, i) {
     const o = w(i, t.points[0]);
@@ -764,10 +764,10 @@ const Ir = {
     }
     const r = w(n, e.points[1]), l = Ni(e);
     oo(t, s, r, l), t.strokeStyle = l, t.fillStyle = l, t.lineWidth = Math.max(1, e.width), to(t, s.x, s.y, r.x, r.y, 7, !1);
-    const c = Ci(e), a = Ri(e, o.barMs), f = c === null ? jn(a) : `${Fe(c)} · ${jn(a)}`, h = [], u = Hs(o.candles, Math.max(e.points[0].time, e.points[1].time), 14), p = Math.abs(e.points[1].price - e.points[0].price);
-    if (u !== null && u > 0 && h.push(`${(p / u).toFixed(1)}× ATR`), c !== null) {
-      const b = Vs(o.candles, a, Math.abs(c));
-      b !== null && h.push(`${Xs(b)} %ile`);
+    const c = Ci(e), a = Ri(e, o.barMs), f = c === null ? jn(a) : `${Fe(c)} · ${jn(a)}`, h = [], u = Hs(o.candles, Math.max(e.points[0].time, e.points[1].time), 14), m = Math.abs(e.points[1].price - e.points[0].price);
+    if (u !== null && u > 0 && h.push(`${(m / u).toFixed(1)}× ATR`), c !== null) {
+      const d = Vs(o.candles, a, Math.abs(c));
+      d !== null && h.push(`${Xs(d)} %ile`);
     }
     const g = h.length > 0 ? [f, h.join(" · ")] : [f];
     kt(t, (s.x + r.x) / 2, (s.y + r.y) / 2, g, l), i && I(t, e, n);
@@ -775,7 +775,7 @@ const Ir = {
   hitTest(t, e, n, i) {
     return Dt(e, n, w(i, t.points[0]), w(i, t.points[1]), 6);
   }
-}, Rr = [Ir, Nr, Cr], Mt = 6, Vt = 8, de = 7, Fr = '500 11px -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', wn = 17, Wo = 5, _r = 3, Fi = "rgba(24, 28, 38, 0.92)";
+}, Rr = [Ir, Nr, Cr], Mt = 6, Vt = 8, Te = 7, Fr = '500 11px -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', wn = 17, Wo = 5, _r = 3, Fi = "rgba(24, 28, 38, 0.92)";
 function Er(t) {
   const e = t.getTransform(), n = e.a !== 0 ? Math.abs(e.a) : 1, i = e.d !== 0 ? Math.abs(e.d) : 1;
   return { w: t.canvas.width / n, h: t.canvas.height / i };
@@ -818,7 +818,7 @@ function Wr(t, e, n, i, o, s) {
   const r = Math.min(s, i / 2, o / 2);
   t.beginPath(), t.moveTo(e + r, n), t.arcTo(e + i, n, e + i, n + o, r), t.arcTo(e + i, n + o, e, n + o, r), t.arcTo(e, n + o, e, n, r), t.arcTo(e, n, e + i, n, r), t.closePath();
 }
-function ut(t, e) {
+function pt(t, e) {
   return Math.round(e) % 2 === 1 ? Math.round(t) + 0.5 : Math.round(t);
 }
 function Gt(t, e, n, i, o) {
@@ -829,9 +829,9 @@ function St(t, e, n, i, o, s = "left") {
   const r = Math.ceil(t.measureText(i).width) + Wo * 2, l = s === "left" ? e : s === "right" ? e - r : e - r / 2, c = n - wn / 2;
   return Wr(t, l, c, r, wn, _r), t.fillStyle = o, t.fill(), t.fillStyle = vr(t, o), t.textAlign = "left", t.textBaseline = "middle", t.fillText(i, l + Wo, n + 0.5), { x: l, y: c, w: r, h: wn };
 }
-function le(t, e, n, i) {
-  const o = de / 2;
-  t.lineWidth = 1, t.fillStyle = "#ffffff", t.fillRect(e - o, n - o, de, de), t.strokeStyle = i, t.strokeRect(e - o, n - o, de, de);
+function ae(t, e, n, i) {
+  const o = Te / 2;
+  t.lineWidth = 1, t.fillStyle = "#ffffff", t.fillRect(e - o, n - o, Te, Te), t.strokeStyle = i, t.strokeRect(e - o, n - o, Te, Te);
 }
 function qt(t, e) {
   if (!Number.isFinite(t)) return String(t);
@@ -947,19 +947,19 @@ function Xo(t) {
       n.save();
       const c = r.pricePrecision, a = Sn(i, o, r);
       if (!a) {
-        const K = o.timeToX(l.time), x = ut(o.priceToY(l.price), 1);
+        const K = o.timeToX(l.time), x = pt(o.priceToY(l.price), 1);
         n.lineWidth = 1, n.strokeStyle = i.color, n.setLineDash([4, 3]), Gt(n, K, x, K + 120, x), n.setLineDash([]), St(n, K + 126, x, `Entry ${qt(l.price, c)}`, i.color, "left"), n.restore();
         return;
       }
-      const { x0: f, x1: h, yEntry: u, yStop: p, yTarget: g } = a, b = h - f;
-      n.fillStyle = Ut(n, Ue, Oo), n.fillRect(f, Math.min(u, p), b, Math.abs(p - u)), n.fillStyle = Ut(n, je, Oo), n.fillRect(f, Math.min(u, g), b, Math.abs(g - u));
-      const A = Math.max(1, i.width);
-      n.lineWidth = A, n.strokeStyle = Ue, Gt(n, f, ut(p, A), h, ut(p, A)), n.strokeStyle = je, Gt(n, f, ut(g, A), h, ut(g, A)), n.strokeStyle = i.color, Gt(n, f, ut(u, A), h, ut(u, A));
+      const { x0: f, x1: h, yEntry: u, yStop: m, yTarget: g } = a, d = h - f;
+      n.fillStyle = Ut(n, Ue, Oo), n.fillRect(f, Math.min(u, m), d, Math.abs(m - u)), n.fillStyle = Ut(n, je, Oo), n.fillRect(f, Math.min(u, g), d, Math.abs(g - u));
+      const k = Math.max(1, i.width);
+      n.lineWidth = k, n.strokeStyle = Ue, Gt(n, f, pt(m, k), h, pt(m, k)), n.strokeStyle = je, Gt(n, f, pt(g, k), h, pt(g, k)), n.strokeStyle = i.color, Gt(n, f, pt(u, k), h, pt(u, k));
       const T = l.price !== 0 ? l.price : 1, P = (a.stop.price - l.price) / T * 100, N = (a.target.price - l.price) / T * 100;
       St(n, h + 6, u, `Entry ${qt(l.price, c)}`, i.color, "left"), St(
         n,
         h + 6,
-        p,
+        m,
         `Stop ${qt(a.stop.price, c)} · ${Do(P)}`,
         Ue,
         "left"
@@ -971,7 +971,7 @@ function Xo(t) {
         je,
         "left"
       );
-      const L = nn(i, "stake", 1e3), D = Math.abs(P), O = Math.abs(N), G = D > 0 ? O / D : 0, U = L * D / 100, j = L * O / 100;
+      const L = nn(i, "stake", 1e3), $ = Math.abs(P), O = Math.abs(N), G = $ > 0 ? O / $ : 0, U = L * $ / 100, j = L * O / 100;
       St(
         n,
         (f + h) / 2,
@@ -979,7 +979,7 @@ function Xo(t) {
         `R:R 1:${G.toFixed(1)} · risk $${Yo(U)} · reward $${Yo(j)}`,
         Fi,
         "center"
-      ), s && (le(n, h, u, i.color), le(n, h, p, Ue), le(n, h, g, je)), n.restore();
+      ), s && (ae(n, h, u, i.color), ae(n, h, m, Ue), ae(n, h, g, je)), n.restore();
     },
     hitTest(n, i, o, s, r) {
       const l = Sn(n, s, r);
@@ -1040,10 +1040,10 @@ const jr = {
     const s = e.points[0];
     if (!s) return;
     t.save();
-    const { w: r } = Er(t), l = Math.max(nn(e, "heightPct", Pn), 1e-4), [c, a] = Go(s.price, l), f = n.priceToY(a), h = n.priceToY(c), u = Math.min(f, h), p = Math.max(Math.abs(h - f), 1), g = Ur(o.candles, c, a), b = Vr + Math.min(g, Ho) / Ho * Gr;
-    t.fillStyle = Ut(t, e.color, b), t.fillRect(0, u, r, p), t.lineWidth = 1, t.strokeStyle = Ut(t, e.color, 0.85), Gt(t, 0, ut(u, 1), r, ut(u, 1)), Gt(t, 0, ut(u + p, 1), r, ut(u + p, 1));
-    const A = u + p / 2, T = `${g >= qr ? "★ " : ""}${g} ${g === 1 ? "touch" : "touches"}`;
-    St(t, 6, A, T, e.color, "left"), St(t, r - 4, A, qt(s.price, o.pricePrecision), e.color, "right"), i && le(t, n.timeToX(s.time), n.priceToY(s.price), e.color), t.restore();
+    const { w: r } = Er(t), l = Math.max(nn(e, "heightPct", Pn), 1e-4), [c, a] = Go(s.price, l), f = n.priceToY(a), h = n.priceToY(c), u = Math.min(f, h), m = Math.max(Math.abs(h - f), 1), g = Ur(o.candles, c, a), d = Vr + Math.min(g, Ho) / Ho * Gr;
+    t.fillStyle = Ut(t, e.color, d), t.fillRect(0, u, r, m), t.lineWidth = 1, t.strokeStyle = Ut(t, e.color, 0.85), Gt(t, 0, pt(u, 1), r, pt(u, 1)), Gt(t, 0, pt(u + m, 1), r, pt(u + m, 1));
+    const k = u + m / 2, T = `${g >= qr ? "★ " : ""}${g} ${g === 1 ? "touch" : "touches"}`;
+    St(t, 6, k, T, e.color, "left"), St(t, r - 4, k, qt(s.price, o.pricePrecision), e.color, "right"), i && ae(t, n.timeToX(s.time), n.priceToY(s.price), e.color), t.restore();
   },
   hitTest(t, e, n, i) {
     const o = t.points[0];
@@ -1076,21 +1076,21 @@ function Uo(t, e, n, i, o) {
   if (t.length > 0 && o > i) {
     const a = (o - i) / Nt, f = on(t, e), h = on(t, n + 1) - 1;
     for (let u = f; u <= h; u++) {
-      const p = t[u];
-      if (!(p.volume > 0)) continue;
-      const g = Math.max(p.low, i), b = Math.min(p.high, o);
-      if (b < g) continue;
-      const A = p.high - p.low;
-      if (A <= 0) {
-        const N = An(Math.floor((p.close - i) / a));
-        s[N] += p.volume, r += p.volume;
+      const m = t[u];
+      if (!(m.volume > 0)) continue;
+      const g = Math.max(m.low, i), d = Math.min(m.high, o);
+      if (d < g) continue;
+      const k = m.high - m.low;
+      if (k <= 0) {
+        const N = An(Math.floor((m.close - i) / a));
+        s[N] += m.volume, r += m.volume;
         continue;
       }
-      const T = An(Math.floor((g - i) / a)), P = An(Math.ceil((b - i) / a) - 1);
+      const T = An(Math.floor((g - i) / a)), P = An(Math.ceil((d - i) / a) - 1);
       for (let N = T; N <= P; N++) {
-        const L = i + N * a, D = Math.min(b, L + a) - Math.max(g, L);
-        if (D > 0) {
-          const O = p.volume * (D / A);
+        const L = i + N * a, $ = Math.min(d, L + a) - Math.max(g, L);
+        if ($ > 0) {
+          const O = m.volume * ($ / k);
           s[N] += O, r += O;
         }
       }
@@ -1118,18 +1118,18 @@ const Zr = {
     const a = Uo(o.candles, s.tLo, s.tHi, s.pLo, s.pHi);
     if (a.max > 0 && s.pHi > s.pLo) {
       const f = (s.pHi - s.pLo) / Nt;
-      for (let p = 0; p < Nt; p++) {
-        const g = a.rows[p];
+      for (let m = 0; m < Nt; m++) {
+        const g = a.rows[m];
         if (g <= 0) continue;
-        const b = n.priceToY(s.pLo + (p + 1) * f), A = n.priceToY(s.pLo + p * f), T = Math.min(b, A), P = Math.max(Math.abs(A - b) - 1, 1), N = g / a.max * r;
-        t.fillStyle = Ut(t, e.color, p === a.pocIndex ? Kr : Jr), t.fillRect(s.left, T + 0.5, N, P);
+        const d = n.priceToY(s.pLo + (m + 1) * f), k = n.priceToY(s.pLo + m * f), T = Math.min(d, k), P = Math.max(Math.abs(k - d) - 1, 1), N = g / a.max * r;
+        t.fillStyle = Ut(t, e.color, m === a.pocIndex ? Kr : Jr), t.fillRect(s.left, T + 0.5, N, P);
       }
-      const h = s.pLo + (a.pocIndex + 0.5) * f, u = ut(n.priceToY(h), 1);
+      const h = s.pLo + (a.pocIndex + 0.5) * f, u = pt(n.priceToY(h), 1);
       t.lineWidth = 1, t.strokeStyle = e.color, t.setLineDash([4, 3]), Gt(t, s.left, u, s.right, u), t.setLineDash([]), St(t, s.right + 6, u, `POC ${qt(h, o.pricePrecision)}`, e.color, "left");
     }
     if (a.total > 0 && St(t, s.left + 4, s.bottom - 11, `Σ ${Ei(a.total)}`, Fi, "left"), i)
       for (const f of e.points)
-        le(t, n.timeToX(f.time), n.priceToY(f.price), e.color);
+        ae(t, n.timeToX(f.time), n.priceToY(f.price), e.color);
     t.restore();
   },
   hitTest(t, e, n, i, o) {
@@ -1154,8 +1154,8 @@ function kn(t, e) {
   const i = t.length - n, o = new Float64Array(i), s = new Float64Array(i);
   let r = 0, l = 0, c = 0, a = 0;
   for (let f = 0; f < i; f++) {
-    const h = t[n + f], u = (h.high + h.low + h.close) / 3, p = h.volume > 0 ? h.volume : 0;
-    if (r += u * p, l += u * u * p, c += p, a += u, c > 0) {
+    const h = t[n + f], u = (h.high + h.low + h.close) / 3, m = h.volume > 0 ? h.volume : 0;
+    if (r += u * m, l += u * u * m, c += m, a += u, c > 0) {
       const g = r / c;
       o[f] = g, s[f] = Math.sqrt(Math.max(0, l / c - g * g));
     } else
@@ -1207,7 +1207,7 @@ const tl = {
       `AVWAP ${qt(r.vwap[r.n - 1], o.pricePrecision)}`,
       e.color,
       "left"
-    ), i && le(t, l[0], n.priceToY(r.vwap[0]), e.color), t.restore();
+    ), i && ae(t, l[0], n.priceToY(r.vwap[0]), e.color), t.restore();
   },
   hitTest(t, e, n, i, o) {
     const s = t.points[0];
@@ -1219,10 +1219,10 @@ const tl = {
     if (r.n === 1) return Math.hypot(e - a, n - i.priceToY(r.vwap[0])) <= c;
     let h = vi(l, i.xToTime(e)) - r.start;
     h < 0 && (h = 0), h > r.n - 1 && (h = r.n - 1);
-    const u = Math.max(0, h - 2), p = Math.min(r.n - 2, h + 1);
-    for (let g = u; g <= p; g++) {
-      const b = i.timeToX(l[r.start + g].time), A = i.timeToX(l[r.start + g + 1].time), T = i.priceToY(r.vwap[g]), P = i.priceToY(r.vwap[g + 1]);
-      if (Yr(e, n, b, T, A, P) <= c) return !0;
+    const u = Math.max(0, h - 2), m = Math.min(r.n - 2, h + 1);
+    for (let g = u; g <= m; g++) {
+      const d = i.timeToX(l[r.start + g].time), k = i.timeToX(l[r.start + g + 1].time), T = i.priceToY(r.vwap[g]), P = i.priceToY(r.vwap[g + 1]);
+      if (Yr(e, n, d, T, k, P) <= c) return !0;
     }
     return !1;
   },
@@ -1259,7 +1259,7 @@ function Di(t, e) {
   return Math.atan2(-(e.y - t.y), e.x - t.x) * 180 / Math.PI;
 }
 function io(t, e, n, i, o, s, r = 0.5) {
-  t.save(), t.setLineDash([4, 4]), t.strokeStyle = _(t, e, r), t.lineWidth = 1, v(t, n, i, o, s), t.restore();
+  t.save(), t.setLineDash([4, 4]), t.strokeStyle = _(t, e, r), t.lineWidth = 1, W(t, n, i, o, s), t.restore();
 }
 function Qe(t, e, n, i, o, s, r) {
   let l = 1;
@@ -1277,14 +1277,14 @@ const fl = {
       return;
     }
     const l = w(n, r), a = r.price >= e.points[0].price ? nl : ol;
-    t.strokeStyle = a, t.lineWidth = Math.max(1, e.width), v(t, s.x, s.y, l.x, l.y);
-    const f = r.price - e.points[0].price, h = cl(e.points[0].price, r.price), u = ll(e, o.barMs), p = Di(s, l), b = `${h === null ? `Δ ${Ie(f, o.pricePrecision)}` : `Δ ${Ie(f, o.pricePrecision)}  ${Fe(h)}`}  ·  ${al(u)}  ·  ${p.toFixed(0)}°`;
-    kt(t, (s.x + l.x) / 2, (s.y + l.y) / 2, [b], a), i && I(t, e, n);
+    t.strokeStyle = a, t.lineWidth = Math.max(1, e.width), W(t, s.x, s.y, l.x, l.y);
+    const f = r.price - e.points[0].price, h = cl(e.points[0].price, r.price), u = ll(e, o.barMs), m = Di(s, l), d = `${h === null ? `Δ ${Ie(f, o.pricePrecision)}` : `Δ ${Ie(f, o.pricePrecision)}  ${Fe(h)}`}  ·  ${al(u)}  ·  ${m.toFixed(0)}°`;
+    kt(t, (s.x + l.x) / 2, (s.y + l.y) / 2, [d], a), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     if (!t.points[1]) return !1;
     const o = w(i, t.points[0]), s = w(i, t.points[1]);
-    return lt(e, n, o.x, o.y, s.x, s.y, 0, 1) <= H(t);
+    return at(e, n, o.x, o.y, s.x, s.y, 0, 1) <= H(t);
   }
 }, hl = {
   id: "crossline",
@@ -1292,8 +1292,8 @@ const fl = {
   group: "lines",
   pointsNeeded: 1,
   render(t, e, n, i, o) {
-    const s = w(n, e.points[0]), { w: r, h: l } = rt(t), c = bt(s.x, t.lineWidth), a = bt(s.y, t.lineWidth);
-    v(t, 0, a, r, a), v(t, c, 0, c, l);
+    const s = w(n, e.points[0]), { w: r, h: l } = lt(t), c = yt(s.x, t.lineWidth), a = yt(s.y, t.lineWidth);
+    W(t, 0, a, r, a), W(t, c, 0, c, l);
     const f = Et(e.points[0].price, o.pricePrecision);
     Zo(t, Math.max(2, r - Qo(t, f) - 2), a, f, e.color);
     const h = xn(e.points[0].time, o.barMs), u = Qo(t, h);
@@ -1315,20 +1315,20 @@ const fl = {
       return;
     }
     const r = w(n, s);
-    v(t, o.x, o.y, r.x, r.y);
+    W(t, o.x, o.y, r.x, r.y);
     const l = r.x >= o.x ? 1 : -1, c = Math.min(34, Math.max(16, Math.hypot(r.x - o.x, r.y - o.y) * 0.45));
     io(t, e.color, o.x, o.y, o.x + l * c, o.y, 0.5);
     const a = Math.atan2(r.y - o.y, r.x - o.x), f = l > 0 ? 0 : Math.PI;
     t.save(), t.beginPath(), t.strokeStyle = _(t, e.color, 0.7), t.lineWidth = 1, t.setLineDash([]);
     const h = l > 0 ? a < f : a > f;
     t.arc(o.x, o.y, c, f, a, h), t.stroke(), t.restore();
-    const u = Di(o, r), p = (f + a) / 2, g = o.x + Math.cos(p) * (c + 12), b = o.y + Math.sin(p) * (c + 12);
-    kt(t, g, b, [`${u.toFixed(0)}°`], e.color, di), i && I(t, e, n);
+    const u = Di(o, r), m = (f + a) / 2, g = o.x + Math.cos(m) * (c + 12), d = o.y + Math.sin(m) * (c + 12);
+    kt(t, g, d, [`${u.toFixed(0)}°`], e.color, bi), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     if (!t.points[1]) return !1;
     const o = w(i, t.points[0]), s = w(i, t.points[1]);
-    return lt(e, n, o.x, o.y, s.x, s.y, 0, 1) <= H(t);
+    return at(e, n, o.x, o.y, s.x, s.y, 0, 1) <= H(t);
   }
 }, pl = {
   id: "channeldisjoint",
@@ -1344,17 +1344,17 @@ const fl = {
     const r = w(n, s), l = e.points[2], c = e.points[3];
     if (l && c) {
       const a = w(n, l), f = w(n, c);
-      t.fillStyle = _(t, e.color, Wi), t.beginPath(), t.moveTo(o.x, o.y), t.lineTo(r.x, r.y), t.lineTo(f.x, f.y), t.lineTo(a.x, a.y), t.closePath(), t.fill(), v(t, a.x, a.y, f.x, f.y);
+      t.fillStyle = _(t, e.color, Wi), t.beginPath(), t.moveTo(o.x, o.y), t.lineTo(r.x, r.y), t.lineTo(f.x, f.y), t.lineTo(a.x, a.y), t.closePath(), t.fill(), W(t, a.x, a.y, f.x, f.y);
     } else if (l) {
       const a = w(n, l);
       V(t, a.x, a.y, e.width);
     }
-    v(t, o.x, o.y, r.x, r.y), i && I(t, e, n);
+    W(t, o.x, o.y, r.x, r.y), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     if (!t.points[3]) return !1;
     const o = w(i, t.points[0]), s = w(i, t.points[1]), r = w(i, t.points[2]), l = w(i, t.points[3]), c = H(t);
-    return Z(e, n, o, s) <= c || Z(e, n, r, l) <= c ? !0 : Kt(e, n, [o, s, l, r]);
+    return Q(e, n, o, s) <= c || Q(e, n, r, l) <= c ? !0 : Kt(e, n, [o, s, l, r]);
   }
 }, ml = {
   id: "channelflat",
@@ -1370,14 +1370,14 @@ const fl = {
     const r = w(n, s), l = e.points[2];
     if (l) {
       const c = n.priceToY(l.price), a = { x: o.x, y: c }, f = { x: r.x, y: c };
-      t.fillStyle = _(t, e.color, Wi), t.beginPath(), t.moveTo(o.x, o.y), t.lineTo(r.x, r.y), t.lineTo(f.x, f.y), t.lineTo(a.x, a.y), t.closePath(), t.fill(), v(t, a.x, a.y, f.x, f.y);
+      t.fillStyle = _(t, e.color, Wi), t.beginPath(), t.moveTo(o.x, o.y), t.lineTo(r.x, r.y), t.lineTo(f.x, f.y), t.lineTo(a.x, a.y), t.closePath(), t.fill(), W(t, a.x, a.y, f.x, f.y);
     }
-    v(t, o.x, o.y, r.x, r.y), i && I(t, e, n);
+    W(t, o.x, o.y, r.x, r.y), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     if (!t.points[2]) return !1;
     const o = w(i, t.points[0]), s = w(i, t.points[1]), r = i.priceToY(t.points[2].price), l = { x: o.x, y: r }, c = { x: s.x, y: r }, a = H(t);
-    return Z(e, n, o, s) <= a || Z(e, n, l, c) <= a ? !0 : Kt(e, n, [o, s, c, l]);
+    return Q(e, n, o, s) <= a || Q(e, n, l, c) <= a ? !0 : Kt(e, n, [o, s, c, l]);
   }
 };
 function jo(t, e) {
@@ -1403,14 +1403,14 @@ function Jo(t, e) {
   }
   const u = l * f - c * c;
   if (Math.abs(u) < 1e-12) return null;
-  const p = (l * h - c * a) / u, g = (a - p * c) / l;
-  let b = 0;
+  const m = (l * h - c * a) / u, g = (a - m * c) / l;
+  let d = 0;
   for (let T = s; T <= r; T++) {
-    const P = T - s, N = n[T].close - (g + p * P);
-    b += N * N;
+    const P = T - s, N = n[T].close - (g + m * P);
+    d += N * N;
   }
-  const A = Math.sqrt(b / l);
-  return { i0: s, i1: r, slope: p, intercept: g, sigma: A };
+  const k = Math.sqrt(d / l);
+  return { i0: s, i1: r, slope: m, intercept: g, sigma: k };
 }
 const gl = {
   id: "regression",
@@ -1428,8 +1428,8 @@ const gl = {
       io(t, e.color, s.x, s.y, l.x, l.y, 0.6), i && I(t, e, n);
       return;
     }
-    const { candles: a } = o, { i0: f, i1: h, slope: u, intercept: p, sigma: g } = c, b = (x) => p + u * x, A = n.timeToX(a[f].time), T = n.timeToX(a[h].time), P = h - f, N = n.priceToY(b(0)), L = n.priceToY(b(P)), D = 2 * g, O = n.priceToY(b(0) + D), G = n.priceToY(b(P) + D), U = n.priceToY(b(0) - D), j = n.priceToY(b(P) - D);
-    t.fillStyle = _(t, e.color, sl), t.beginPath(), t.moveTo(A, O), t.lineTo(T, G), t.lineTo(T, j), t.lineTo(A, U), t.closePath(), t.fill(), t.save(), t.strokeStyle = _(t, e.color, 0.6), t.lineWidth = 1, v(t, A, O, T, G), v(t, A, U, T, j), t.restore(), t.strokeStyle = e.color, t.lineWidth = Math.max(1, e.width), v(t, A, N, T, L);
+    const { candles: a } = o, { i0: f, i1: h, slope: u, intercept: m, sigma: g } = c, d = (x) => m + u * x, k = n.timeToX(a[f].time), T = n.timeToX(a[h].time), P = h - f, N = n.priceToY(d(0)), L = n.priceToY(d(P)), $ = 2 * g, O = n.priceToY(d(0) + $), G = n.priceToY(d(P) + $), U = n.priceToY(d(0) - $), j = n.priceToY(d(P) - $);
+    t.fillStyle = _(t, e.color, sl), t.beginPath(), t.moveTo(k, O), t.lineTo(T, G), t.lineTo(T, j), t.lineTo(k, U), t.closePath(), t.fill(), t.save(), t.strokeStyle = _(t, e.color, 0.6), t.lineWidth = 1, W(t, k, O, T, G), W(t, k, U, T, j), t.restore(), t.strokeStyle = e.color, t.lineWidth = Math.max(1, e.width), W(t, k, N, T, L);
     const K = `${Ie(u, o.pricePrecision)}/bar`;
     kt(t, T + 4 + yl(t, K), L, [K], e.color, nt), i && I(t, e, n);
   },
@@ -1437,38 +1437,38 @@ const gl = {
     if (!t.points[1]) return !1;
     const s = Jo(t, o);
     if (!s) return !1;
-    const { candles: r } = o, { i0: l, i1: c, slope: a, intercept: f, sigma: h } = s, u = (L) => f + a * L, p = i.timeToX(r[l].time), g = i.timeToX(r[c].time), b = c - l, A = H(t);
-    if (e < Math.min(p, g) - A || e > Math.max(p, g) + A) return !1;
+    const { candles: r } = o, { i0: l, i1: c, slope: a, intercept: f, sigma: h } = s, u = (L) => f + a * L, m = i.timeToX(r[l].time), g = i.timeToX(r[c].time), d = c - l, k = H(t);
+    if (e < Math.min(m, g) - k || e > Math.max(m, g) + k) return !1;
     const T = [
-      { x: p, y: i.priceToY(u(0) + 2 * h) },
-      { x: g, y: i.priceToY(u(b) + 2 * h) }
+      { x: m, y: i.priceToY(u(0) + 2 * h) },
+      { x: g, y: i.priceToY(u(d) + 2 * h) }
     ], P = [
-      { x: p, y: i.priceToY(u(0) - 2 * h) },
-      { x: g, y: i.priceToY(u(b) - 2 * h) }
+      { x: m, y: i.priceToY(u(0) - 2 * h) },
+      { x: g, y: i.priceToY(u(d) - 2 * h) }
     ], N = [
-      { x: p, y: i.priceToY(u(0)) },
-      { x: g, y: i.priceToY(u(b)) }
+      { x: m, y: i.priceToY(u(0)) },
+      { x: g, y: i.priceToY(u(d)) }
     ];
-    return Z(e, n, T[0], T[1]) <= A || Z(e, n, P[0], P[1]) <= A || Z(e, n, N[0], N[1]) <= A ? !0 : Kt(e, n, [T[0], T[1], P[1], P[0]]);
+    return Q(e, n, T[0], T[1]) <= k || Q(e, n, P[0], P[1]) <= k || Q(e, n, N[0], N[1]) <= k ? !0 : Kt(e, n, [T[0], T[1], P[1], P[0]]);
   }
 };
 function yl(t, e) {
   return t.font = nt, (t.measureText(e).width + 16) / 2;
 }
 function so(t, e, n, i, o) {
-  const { origin: s, b: r, c: l, target: c } = i, a = c.x - s.x, f = c.y - s.y, h = Math.hypot(a, f), { w: u, h: p } = rt(t);
+  const { origin: s, b: r, c: l, target: c } = i, a = c.x - s.x, f = c.y - s.y, h = Math.hypot(a, f), { w: u, h: m } = lt(t);
   if (h < 1e-6) {
-    v(t, r.x, r.y, l.x, l.y), o && I(t, e, n);
+    W(t, r.x, r.y, l.x, l.y), o && I(t, e, n);
     return;
   }
-  const g = Qe(s.x, s.y, a, f, u, p, h), b = Qe(r.x, r.y, a, f, u, p, h), A = Qe(l.x, l.y, a, f, u, p, h), T = { x: r.x + a * b, y: r.y + f * b }, P = { x: l.x + a * A, y: l.y + f * A };
-  t.fillStyle = _(t, e.color, il), t.beginPath(), t.moveTo(r.x, r.y), t.lineTo(T.x, T.y), t.lineTo(P.x, P.y), t.lineTo(l.x, l.y), t.closePath(), t.fill(), t.save(), t.strokeStyle = _(t, e.color, 0.85), t.lineWidth = Math.max(1, e.width), v(t, r.x, r.y, T.x, T.y), v(t, l.x, l.y, P.x, P.y), t.restore(), io(t, e.color, r.x, r.y, l.x, l.y, 0.5), t.strokeStyle = e.color, t.lineWidth = Math.max(1, e.width), v(t, s.x, s.y, s.x + a * g, s.y + f * g), o && I(t, e, n);
+  const g = Qe(s.x, s.y, a, f, u, m, h), d = Qe(r.x, r.y, a, f, u, m, h), k = Qe(l.x, l.y, a, f, u, m, h), T = { x: r.x + a * d, y: r.y + f * d }, P = { x: l.x + a * k, y: l.y + f * k };
+  t.fillStyle = _(t, e.color, il), t.beginPath(), t.moveTo(r.x, r.y), t.lineTo(T.x, T.y), t.lineTo(P.x, P.y), t.lineTo(l.x, l.y), t.closePath(), t.fill(), t.save(), t.strokeStyle = _(t, e.color, 0.85), t.lineWidth = Math.max(1, e.width), W(t, r.x, r.y, T.x, T.y), W(t, l.x, l.y, P.x, P.y), t.restore(), io(t, e.color, r.x, r.y, l.x, l.y, 0.5), t.strokeStyle = e.color, t.lineWidth = Math.max(1, e.width), W(t, s.x, s.y, s.x + a * g, s.y + f * g), o && I(t, e, n);
 }
 function ro(t, e, n, i, o) {
   const { origin: s, b: r, c: l, target: c } = o, a = c.x - s.x, f = c.y - s.y, h = H(t);
-  if (Math.hypot(a, f) < 1e-6) return Z(e, n, r, l) <= h;
+  if (Math.hypot(a, f) < 1e-6) return Q(e, n, r, l) <= h;
   const u = Number.POSITIVE_INFINITY;
-  return lt(e, n, s.x, s.y, s.x + a, s.y + f, 0, u) <= h || lt(e, n, r.x, r.y, r.x + a, r.y + f, 0, u) <= h || lt(e, n, l.x, l.y, l.x + a, l.y + f, 0, u) <= h || Z(e, n, r, l) <= h;
+  return at(e, n, s.x, s.y, s.x + a, s.y + f, 0, u) <= h || at(e, n, r.x, r.y, r.x + a, r.y + f, 0, u) <= h || at(e, n, l.x, l.y, l.x + a, l.y + f, 0, u) <= h || Q(e, n, r, l) <= h;
 }
 function Pt(t, e) {
   return { x: (t.x + e.x) / 2, y: (t.y + e.y) / 2 };
@@ -1476,7 +1476,7 @@ function Pt(t, e) {
 function Je(t, e, n) {
   return { x: t.x + (e.x - t.x) * n, y: t.y + (e.y - t.y) * n };
 }
-function he(t, e) {
+function ue(t, e) {
   return !t.points[1] || !t.points[2] ? null : { a: w(e, t.points[0]), b: w(e, t.points[1]), c: w(e, t.points[2]) };
 }
 function lo(t, e, n, i) {
@@ -1485,22 +1485,22 @@ function lo(t, e, n, i) {
     return V(t, o.x, o.y, e.width), i && I(t, e, n), !0;
   if (!e.points[2]) {
     const r = w(n, s);
-    return v(t, o.x, o.y, r.x, r.y), i && I(t, e, n), !0;
+    return W(t, o.x, o.y, r.x, r.y), i && I(t, e, n), !0;
   }
   return !1;
 }
-const bl = {
+const dl = {
   id: "pitchforkschiff",
   label: "Schiff Pitchfork",
   group: "channels",
   pointsNeeded: 3,
   render(t, e, n, i) {
     if (lo(t, e, n, i)) return;
-    const { a: o, b: s, c: r } = he(e, n);
+    const { a: o, b: s, c: r } = ue(e, n);
     so(t, e, n, { origin: Pt(o, s), b: s, c: r, target: Pt(s, r) }, i);
   },
   hitTest(t, e, n, i) {
-    const o = he(t, i);
+    const o = ue(t, i);
     return o ? ro(t, e, n, i, {
       origin: Pt(o.a, o.b),
       b: o.b,
@@ -1508,18 +1508,18 @@ const bl = {
       target: Pt(o.b, o.c)
     }) : !1;
   }
-}, dl = {
+}, bl = {
   id: "pitchforkmod",
   label: "Modified Schiff Pitchfork",
   group: "channels",
   pointsNeeded: 3,
   render(t, e, n, i) {
     if (lo(t, e, n, i)) return;
-    const { a: o, b: s, c: r } = he(e, n), l = Pt(s, r);
+    const { a: o, b: s, c: r } = ue(e, n), l = Pt(s, r);
     so(t, e, n, { origin: Pt(o, l), b: s, c: r, target: l }, i);
   },
   hitTest(t, e, n, i) {
-    const o = he(t, i);
+    const o = ue(t, i);
     if (!o) return !1;
     const s = Pt(o.b, o.c);
     return ro(t, e, n, i, { origin: Pt(o.a, s), b: o.b, c: o.c, target: s });
@@ -1531,7 +1531,7 @@ const bl = {
   pointsNeeded: 3,
   render(t, e, n, i) {
     if (lo(t, e, n, i)) return;
-    const { a: o, b: s, c: r } = he(e, n);
+    const { a: o, b: s, c: r } = ue(e, n);
     so(
       t,
       e,
@@ -1541,7 +1541,7 @@ const bl = {
     );
   },
   hitTest(t, e, n, i) {
-    const o = he(t, i);
+    const o = ue(t, i);
     return o ? ro(t, e, n, i, {
       origin: o.a,
       b: Je(o.b, o.c, 0.25),
@@ -1576,19 +1576,19 @@ const bl = {
       V(t, o.x, o.y, e.width), i && I(t, e, n);
       return;
     }
-    const r = w(n, s), { w: l, h: c } = rt(t), a = r.x - o.x, f = r.y - o.y;
+    const r = w(n, s), { w: l, h: c } = lt(t), a = r.x - o.x, f = r.y - o.y;
     if (Math.abs(a) < 1e-6 && Math.abs(f) < 1e-6) {
       V(t, o.x, o.y, e.width), i && I(t, e, n);
       return;
     }
     t.save(), t.lineWidth = 1, t.font = nt, t.textBaseline = "middle";
     for (let h = 0; h < In.length; h++) {
-      const u = In[h], p = a, g = f * u.mult, b = Math.hypot(p, g);
-      if (b < 1e-6) continue;
-      const A = Qe(o.x, o.y, p, g, l, c, b), T = o.x + p * A, P = o.y + g * A, N = u.mult === 1;
-      t.strokeStyle = N ? e.color : _(t, Ko[h], 0.85), v(t, o.x, o.y, T, P);
-      const L = Math.min(A, 0.42 * Math.min(l, c) / b), D = o.x + p * L, O = o.y + g * L;
-      D > 2 && D < l - 24 && O > 8 && O < c - 8 && (t.fillStyle = _(t, N ? e.color : Ko[h], 0.8), t.textAlign = p >= 0 ? "left" : "right", t.fillText(u.label, D + (p >= 0 ? 3 : -3), O - 6));
+      const u = In[h], m = a, g = f * u.mult, d = Math.hypot(m, g);
+      if (d < 1e-6) continue;
+      const k = Qe(o.x, o.y, m, g, l, c, d), T = o.x + m * k, P = o.y + g * k, N = u.mult === 1;
+      t.strokeStyle = N ? e.color : _(t, Ko[h], 0.85), W(t, o.x, o.y, T, P);
+      const L = Math.min(k, 0.42 * Math.min(l, c) / d), $ = o.x + m * L, O = o.y + g * L;
+      $ > 2 && $ < l - 24 && O > 8 && O < c - 8 && (t.fillStyle = _(t, N ? e.color : Ko[h], 0.8), t.textAlign = m >= 0 ? "left" : "right", t.fillText(u.label, $ + (m >= 0 ? 3 : -3), O - 6));
     }
     t.restore(), i && I(t, e, n);
   },
@@ -1597,7 +1597,7 @@ const bl = {
     const o = w(i, t.points[0]), s = w(i, t.points[1]), r = s.x - o.x, l = s.y - o.y, c = H(t), a = Number.POSITIVE_INFINITY;
     for (const f of In) {
       const h = r, u = l * f.mult;
-      if (!(Math.hypot(h, u) < 1e-6) && lt(e, n, o.x, o.y, o.x + h, o.y + u, 0, a) <= c)
+      if (!(Math.hypot(h, u) < 1e-6) && at(e, n, o.x, o.y, o.x + h, o.y + u, 0, a) <= c)
         return !0;
     }
     return !1;
@@ -1615,12 +1615,12 @@ const bl = {
     }
     const r = w(n, s), l = Math.min(o.x, r.x), c = Math.max(o.x, r.x), a = Math.min(o.y, r.y), f = Math.max(o.y, r.y), h = c - l, u = f - a;
     t.fillStyle = _(t, e.color, rl), t.fillRect(l, a, h, u), t.save(), t.lineWidth = 1, t.strokeStyle = _(t, e.color, 0.4), t.font = nt, t.fillStyle = _(t, e.color, 0.7), t.textBaseline = "top";
-    for (const p of wl) {
-      if (p === 0 || p === 1) continue;
-      const g = l + h * p, b = a + u * p;
-      v(t, g, a, g, f), v(t, l, b, c, b);
+    for (const m of wl) {
+      if (m === 0 || m === 1) continue;
+      const g = l + h * m, d = a + u * m;
+      W(t, g, a, g, f), W(t, l, d, c, d);
     }
-    t.strokeStyle = _(t, e.color, 0.55), v(t, l, a, c, f), v(t, l, f, c, a), t.restore(), t.strokeStyle = e.color, t.lineWidth = Math.max(1, e.width), t.strokeRect(l, a, h, u), i && I(t, e, n);
+    t.strokeStyle = _(t, e.color, 0.55), W(t, l, a, c, f), W(t, l, f, c, a), t.restore(), t.strokeStyle = e.color, t.lineWidth = Math.max(1, e.width), t.strokeRect(l, a, h, u), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     return t.points[1] ? Dt(e, n, w(i, t.points[0]), w(i, t.points[1]), H(t)) : !1;
@@ -1643,14 +1643,14 @@ const Pl = [
   pl,
   ml,
   gl,
-  bl,
   dl,
+  bl,
   Tl,
   Ml,
   Sl
-], Yi = 0.07, pe = 0.85, Al = 0.55, $i = /* @__PURE__ */ new Set([0.382, 0.5, 0.618]);
-function ae(t, e, n, i) {
-  t.save(), t.setLineDash([4, 4]), t.strokeStyle = _(t, e, Al), t.lineWidth = 1, v(t, n.x, n.y, i.x, i.y), t.restore();
+], Yi = 0.07, me = 0.85, Al = 0.55, $i = /* @__PURE__ */ new Set([0.382, 0.5, 0.618]);
+function ce(t, e, n, i) {
+  t.save(), t.setLineDash([4, 4]), t.strokeStyle = _(t, e, Al), t.lineWidth = 1, W(t, n.x, n.y, i.x, i.y), t.restore();
 }
 const kl = {
   id: "fibtimezone",
@@ -1663,14 +1663,14 @@ const kl = {
       V(t, o.x, o.y, e.width), i && I(t, e, n);
       return;
     }
-    const r = e.points[1].time - e.points[0].time, { w: l, h: c } = rt(t), a = Math.max(1, e.width);
+    const r = e.points[1].time - e.points[0].time, { w: l, h: c } = lt(t), a = Math.max(1, e.width);
     t.lineWidth = a, t.font = nt, t.textAlign = "center", t.textBaseline = "bottom";
     for (const f of et(e, "fibtimezone")) {
       if (!f.visible) continue;
-      const h = f.ratio, u = bt(n.timeToX(e.points[0].time + r * h), a);
+      const h = f.ratio, u = yt(n.timeToX(e.points[0].time + r * h), a);
       if (u < -2 || u > l + 2) continue;
-      const p = h === 0 || h === 1;
-      t.strokeStyle = _(t, f.color ?? e.color, p ? pe : 0.6), v(t, u, 0, u, c), t.fillStyle = _(t, f.color ?? e.color, 0.95), t.fillText(f.label ?? String(h), u, c - 4);
+      const m = h === 0 || h === 1;
+      t.strokeStyle = _(t, f.color ?? e.color, m ? me : 0.6), W(t, u, 0, u, c), t.fillStyle = _(t, f.color ?? e.color, 0.95), t.fillText(f.label ?? String(h), u, c - 4);
     }
     i && I(t, e, n);
   },
@@ -1693,14 +1693,14 @@ const kl = {
       V(t, o.x, o.y, e.width), i && I(t, e, n);
       return;
     }
-    const r = w(n, s), { w: l, h: c } = rt(t), a = r.x - o.x, f = r.y - o.y;
+    const r = w(n, s), { w: l, h: c } = lt(t), a = r.x - o.x, f = r.y - o.y;
     t.font = nt, t.textAlign = "left", t.textBaseline = "middle", t.lineWidth = Math.max(1, e.width);
     for (const h of et(e, "fibfan")) {
       if (!h.visible) continue;
-      const u = h.ratio, p = o.y + f * u, g = o.x + a, b = an(o.x, o.y, g, p, l, c, !1);
-      b && (t.strokeStyle = _(t, h.color ?? e.color, pe), v(t, b[0], b[1], b[2], b[3]), (h.label ?? $i.has(u)) && (t.fillStyle = _(t, h.color ?? e.color, 0.95), t.fillText(h.label ?? String(u), g + 4, p)));
+      const u = h.ratio, m = o.y + f * u, g = o.x + a, d = an(o.x, o.y, g, m, l, c, !1);
+      d && (t.strokeStyle = _(t, h.color ?? e.color, me), W(t, d[0], d[1], d[2], d[3]), (h.label ?? $i.has(u)) && (t.fillStyle = _(t, h.color ?? e.color, 0.95), t.fillText(h.label ?? String(u), g + 4, m)));
     }
-    ae(t, e.color, o, r), i && I(t, e, n);
+    ce(t, e.color, o, r), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     if (!t.points[1]) return !1;
@@ -1738,22 +1738,22 @@ const Nl = {
     }
     const l = w(n, r), c = e.points[2];
     if (!c) {
-      v(t, s.x, s.y, l.x, l.y), i && I(t, e, n);
+      W(t, s.x, s.y, l.x, l.y), i && I(t, e, n);
       return;
     }
     const a = zo(s, l, w(n, c)), f = Math.max(1, e.width), h = et(e, "fibchannel");
     for (let u = 0; u < h.length - 1; u++) {
       if (!h[u].visible || !h[u + 1].visible) continue;
-      const p = h[u].ratio, g = h[u + 1].ratio;
-      t.fillStyle = _(t, h[u + 1].color ?? e.color, Yi), t.beginPath(), t.moveTo(s.x + a.x * p, s.y + a.y * p), t.lineTo(l.x + a.x * p, l.y + a.y * p), t.lineTo(l.x + a.x * g, l.y + a.y * g), t.lineTo(s.x + a.x * g, s.y + a.y * g), t.closePath(), t.fill();
+      const m = h[u].ratio, g = h[u + 1].ratio;
+      t.fillStyle = _(t, h[u + 1].color ?? e.color, Yi), t.beginPath(), t.moveTo(s.x + a.x * m, s.y + a.y * m), t.lineTo(l.x + a.x * m, l.y + a.y * m), t.lineTo(l.x + a.x * g, l.y + a.y * g), t.lineTo(s.x + a.x * g, s.y + a.y * g), t.closePath(), t.fill();
     }
     t.font = nt, t.textAlign = "left", t.textBaseline = "bottom", t.lineWidth = f;
     for (const u of h) {
       if (!u.visible) continue;
-      const p = u.ratio, g = { x: s.x + a.x * p, y: s.y + a.y * p }, b = { x: l.x + a.x * p, y: l.y + a.y * p }, A = p === 0 || p === 1;
-      t.strokeStyle = _(t, u.color ?? e.color, A ? pe : 0.6), v(t, g.x, g.y, b.x, b.y);
-      const T = e.points[0].price + (e.points[2].price - e.points[0].price) * p;
-      t.fillStyle = _(t, u.color ?? e.color, 0.95), t.fillText(`${u.label ?? p} — ${Et(T, o.pricePrecision)}`, b.x + 4, b.y - 2);
+      const m = u.ratio, g = { x: s.x + a.x * m, y: s.y + a.y * m }, d = { x: l.x + a.x * m, y: l.y + a.y * m }, k = m === 0 || m === 1;
+      t.strokeStyle = _(t, u.color ?? e.color, k ? me : 0.6), W(t, g.x, g.y, d.x, d.y);
+      const T = e.points[0].price + (e.points[2].price - e.points[0].price) * m;
+      t.fillStyle = _(t, u.color ?? e.color, 0.95), t.fillText(`${u.label ?? m} — ${Et(T, o.pricePrecision)}`, d.x + 4, d.y - 2);
     }
     i && I(t, e, n);
   },
@@ -1790,15 +1790,15 @@ const Rl = {
     for (let h = f.length - 1; h >= 0; h--) {
       const u = f[h];
       if (!u.visible || u.ratio <= 0) continue;
-      const p = c * u.ratio;
-      p < 0.5 || (t.beginPath(), t.ellipse(s.x, s.y, p, p, 0, 0, Math.PI * 2), t.fillStyle = _(t, u.color ?? e.color, Yi), t.fill());
+      const m = c * u.ratio;
+      m < 0.5 || (t.beginPath(), t.ellipse(s.x, s.y, m, m, 0, 0, Math.PI * 2), t.fillStyle = _(t, u.color ?? e.color, Yi), t.fill());
     }
     for (const h of f) {
       if (!h.visible || h.ratio <= 0) continue;
       const u = c * h.ratio;
-      u < 0.5 || (t.beginPath(), t.ellipse(s.x, s.y, u, u, 0, 0, Math.PI * 2), t.strokeStyle = _(t, h.color ?? e.color, h.ratio === 1 ? pe : 0.6), t.stroke(), t.fillStyle = _(t, h.color ?? e.color, 0.95), t.fillText(h.label ?? String(h.ratio), s.x, s.y - u - 2));
+      u < 0.5 || (t.beginPath(), t.ellipse(s.x, s.y, u, u, 0, 0, Math.PI * 2), t.strokeStyle = _(t, h.color ?? e.color, h.ratio === 1 ? me : 0.6), t.stroke(), t.fillStyle = _(t, h.color ?? e.color, 0.95), t.fillText(h.label ?? String(h.ratio), s.x, s.y - u - 2));
     }
-    ae(t, e.color, s, l), i && I(t, e, n);
+    ce(t, e.color, s, l), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     if (!t.points[1]) return !1;
@@ -1821,15 +1821,15 @@ const Rl = {
     }
     const r = w(n, s), l = e.points[2];
     if (!l) {
-      ae(t, e.color, o, r), i && I(t, e, n);
+      ce(t, e.color, o, r), i && I(t, e, n);
       return;
     }
-    const c = w(n, l), a = e.points[1].time - e.points[0].time, { w: f, h } = rt(t), u = Math.max(1, e.width);
-    ae(t, e.color, o, r), ae(t, e.color, r, c), t.lineWidth = u, t.font = nt, t.textAlign = "center", t.textBaseline = "bottom";
-    for (const p of et(e, "fibtimeext")) {
-      if (!p.visible) continue;
-      const g = p.ratio, b = bt(n.timeToX(e.points[2].time + a * g), u);
-      b < -2 || b > f + 2 || (t.strokeStyle = _(t, p.color ?? e.color, g === 0 || g === 1 ? pe : 0.6), v(t, b, 0, b, h), t.fillStyle = _(t, p.color ?? e.color, 0.95), t.fillText(p.label ?? String(g), b, h - 4));
+    const c = w(n, l), a = e.points[1].time - e.points[0].time, { w: f, h } = lt(t), u = Math.max(1, e.width);
+    ce(t, e.color, o, r), ce(t, e.color, r, c), t.lineWidth = u, t.font = nt, t.textAlign = "center", t.textBaseline = "bottom";
+    for (const m of et(e, "fibtimeext")) {
+      if (!m.visible) continue;
+      const g = m.ratio, d = yt(n.timeToX(e.points[2].time + a * g), u);
+      d < -2 || d > f + 2 || (t.strokeStyle = _(t, m.color ?? e.color, g === 0 || g === 1 ? me : 0.6), W(t, d, 0, d, h), t.fillStyle = _(t, m.color ?? e.color, 0.95), t.fillText(m.label ?? String(g), d, h - 4));
     }
     i && I(t, e, n);
   },
@@ -1856,13 +1856,13 @@ const Rl = {
     t.lineWidth = h, t.font = nt, t.textAlign = "center", t.textBaseline = "middle";
     for (const u of et(e, "fibwedge")) {
       if (!u.visible) continue;
-      const p = u.ratio, g = l * p;
-      if (!(g < 0.5) && (t.beginPath(), t.ellipse(o.x, o.y, g, g, 0, a, f), t.strokeStyle = _(t, u.color ?? e.color, p === 1 ? pe : 0.6), t.stroke(), u.label ?? $i.has(p))) {
-        const b = o.x + Math.cos(c) * g, A = o.y + Math.sin(c) * g;
-        t.fillStyle = _(t, u.color ?? e.color, 0.95), t.fillText(u.label ?? String(p), b, A);
+      const m = u.ratio, g = l * m;
+      if (!(g < 0.5) && (t.beginPath(), t.ellipse(o.x, o.y, g, g, 0, a, f), t.strokeStyle = _(t, u.color ?? e.color, m === 1 ? me : 0.6), t.stroke(), u.label ?? $i.has(m))) {
+        const d = o.x + Math.cos(c) * g, k = o.y + Math.sin(c) * g;
+        t.fillStyle = _(t, u.color ?? e.color, 0.95), t.fillText(u.label ?? String(m), d, k);
       }
     }
-    ae(t, e.color, o, r), i && I(t, e, n);
+    ce(t, e.color, o, r), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     if (!t.points[1]) return !1;
@@ -1903,7 +1903,7 @@ function vt(t, e, n, i, o) {
   const s = Math.hypot(n.x, n.y) || 1;
   Xi(t, e.x + n.x / s * xo, e.y + n.y / s * xo, i, o);
 }
-function me(t) {
+function ge(t) {
   let e = 0, n = 0;
   for (const i of t)
     e += i.x, n += i.y;
@@ -1928,13 +1928,13 @@ function ke(t, e) {
 }
 function Zt(t, e, n, i) {
   if (t.points.length < 2) return !1;
-  const o = yt(t, i), s = H(t);
+  const o = gt(t, i), s = H(t);
   for (let r = 0; r < o.length - 1; r++)
-    if (Z(e, n, o[r], o[r + 1]) <= s) return !0;
+    if (Q(e, n, o[r], o[r + 1]) <= s) return !0;
   return !1;
 }
 function _e(t, e, n, i = !0) {
-  const o = yt(e, n);
+  const o = gt(e, n);
   return o.length === 1 ? (V(t, o[0].x, o[0].y, e.width), o) : (i && Bi(t, o), sn(t, e, o), o);
 }
 function Hi(t, e, n) {
@@ -1953,7 +1953,7 @@ const vl = {
   group: "patterns",
   pointsNeeded: 4,
   render(t, e, n, i) {
-    const o = _e(t, e, n), s = ["A", "B", "C", "D"], r = me(o);
+    const o = _e(t, e, n), s = ["A", "B", "C", "D"], r = ge(o);
     for (let l = 0; l < o.length; l++)
       vt(t, o[l], Wt(o[l], r), s[l], e.color);
     o.length >= 3 && Ae(t, o[1], o[2], ke(wt(e, 1, 2), wt(e, 0, 1)), e.color), o.length >= 4 && Ae(t, o[2], o[3], `CD ${ke(wt(e, 2, 3), wt(e, 0, 1))}`, e.color), i && I(t, e, n);
@@ -1963,13 +1963,13 @@ const vl = {
   }
 };
 function Gi(t, e, n, i, o) {
-  const s = yt(e, n);
+  const s = gt(e, n);
   if (s.length === 1) {
     V(t, s[0].x, s[0].y, e.width), i && I(t, e, n);
     return;
   }
   s.length >= 4 && Nn(t, s[1], s[2], s[3], e.color), s.length >= 3 && Nn(t, s[0], s[1], s[2], e.color), s.length >= 5 && Nn(t, s[2], s[3], s[4], e.color), Bi(t, s), sn(t, e, s);
-  const r = ["X", "A", "B", "C", "D"], l = me(s);
+  const r = ["X", "A", "B", "C", "D"], l = ge(s);
   for (let c = 0; c < s.length; c++)
     vt(t, s[c], Wt(s[c], l), r[c], e.color);
   if (s.length >= 3 && Ae(t, s[1], s[2], ke(wt(e, 1, 2), wt(e, 0, 1)), e.color), s.length >= 4 && Ae(t, s[2], s[3], ke(wt(e, 2, 3), wt(e, 1, 2)), e.color), s.length >= 5) {
@@ -2008,10 +2008,10 @@ const Wl = {
   render(t, e, n, i) {
     const o = _e(t, e, n);
     if (o.length >= 5) {
-      const l = o[2], c = o[4], { w: a, h: f } = rt(t), h = an(l.x, l.y, c.x, c.y, a, f, !0);
-      h && (t.save(), t.setLineDash([5, 4]), t.strokeStyle = _(t, e.color, 0.6), t.lineWidth = Math.max(1, e.width), v(t, h[0], h[1], h[2], h[3]), t.restore());
+      const l = o[2], c = o[4], { w: a, h: f } = lt(t), h = an(l.x, l.y, c.x, c.y, a, f, !0);
+      h && (t.save(), t.setLineDash([5, 4]), t.strokeStyle = _(t, e.color, 0.6), t.lineWidth = Math.max(1, e.width), W(t, h[0], h[1], h[2], h[3]), t.restore());
     }
-    const s = me(o), r = [
+    const s = ge(o), r = [
       [1, "LS"],
       [3, "H"],
       [5, "RS"]
@@ -2034,7 +2034,7 @@ const Wl = {
   group: "patterns",
   pointsNeeded: 7,
   render(t, e, n, i) {
-    const o = _e(t, e, n), s = me(o), r = {
+    const o = _e(t, e, n), s = ge(o), r = {
       1: "1",
       2: "A",
       3: "2",
@@ -2057,7 +2057,7 @@ const Wl = {
   pointsNeeded: 6,
   defaultProps: { showConnector: !0, waveDegree: "" },
   render(t, e, n, i) {
-    const o = _e(t, e, n, Hi(e, "showConnector", !0)), s = me(o);
+    const o = _e(t, e, n, Hi(e, "showConnector", !0)), s = ge(o);
     for (let l = 1; l < o.length; l++)
       vt(t, o[l], Wt(o[l], s), String(l), e.color);
     const r = Vi(e, "waveDegree");
@@ -2073,7 +2073,7 @@ const Wl = {
   pointsNeeded: 4,
   defaultProps: { showConnector: !0, waveDegree: "" },
   render(t, e, n, i) {
-    const o = _e(t, e, n, Hi(e, "showConnector", !0)), s = ["", "A", "B", "C"], r = me(o);
+    const o = _e(t, e, n, Hi(e, "showConnector", !0)), s = ["", "A", "B", "C"], r = ge(o);
     for (let c = 1; c < o.length; c++)
       vt(t, o[c], Wt(o[c], r), s[c], e.color);
     const l = Vi(e, "waveDegree");
@@ -2095,28 +2095,28 @@ const Hl = {
   group: "patterns",
   pointsNeeded: 4,
   render(t, e, n, i) {
-    const o = yt(e, n);
+    const o = gt(e, n);
     if (o.length === 1) {
       V(t, o[0].x, o[0].y, e.width), i && I(t, e, n);
       return;
     }
     if (o.length === 2) {
-      v(t, o[0].x, o[0].y, o[1].x, o[1].y), sn(t, e, o), i && I(t, e, n);
+      W(t, o[0].x, o[0].y, o[1].x, o[1].y), sn(t, e, o), i && I(t, e, n);
       return;
     }
     if (o.length >= 4) {
       const s = Xl(o[0], o[2], o[1], o[3]);
       t.fillStyle = _(t, e.color, Oi), t.beginPath(), t.moveTo(o[0].x, o[0].y), t.lineTo(o[1].x, o[1].y), t.lineTo(o[3].x, o[3].y), t.lineTo(o[2].x, o[2].y), t.closePath(), t.fill(), t.strokeStyle = e.color, t.lineWidth = Math.max(1, e.width);
       const r = s ?? o[2], l = s ?? o[3];
-      v(t, o[0].x, o[0].y, r.x, r.y), v(t, o[1].x, o[1].y, l.x, l.y);
+      W(t, o[0].x, o[0].y, r.x, r.y), W(t, o[1].x, o[1].y, l.x, l.y);
     } else
-      v(t, o[0].x, o[0].y, o[2].x, o[2].y), v(t, o[0].x, o[0].y, o[1].x, o[1].y);
+      W(t, o[0].x, o[0].y, o[2].x, o[2].y), W(t, o[0].x, o[0].y, o[1].x, o[1].y);
     sn(t, e, o), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     if (t.points.length < 4) return !1;
-    const o = yt(t, i), s = H(t);
-    return Z(e, n, o[0], o[2]) <= s || Z(e, n, o[1], o[3]) <= s;
+    const o = gt(t, i), s = H(t);
+    return Q(e, n, o[0], o[2]) <= s || Q(e, n, o[1], o[3]) <= s;
   }
 }, Vl = [
   vl,
@@ -2133,12 +2133,12 @@ function ti(t, e) {
   if (!n || !i || !o) return null;
   const s = w(e, n), r = w(e, i), l = w(e, o), c = r.x - s.x, a = r.y - s.y, f = Math.hypot(c, a);
   if (f < 1e-6) return null;
-  const h = -a / f, u = c / f, p = (l.x - s.x) * h + (l.y - s.y) * u, g = h * p, b = u * p;
+  const h = -a / f, u = c / f, m = (l.x - s.x) * h + (l.y - s.y) * u, g = h * m, d = u * m;
   return [
     s,
     r,
-    { x: r.x + g, y: r.y + b },
-    { x: s.x + g, y: s.y + b }
+    { x: r.x + g, y: r.y + d },
+    { x: s.x + g, y: s.y + d }
   ];
 }
 function ei(t, e) {
@@ -2151,9 +2151,9 @@ function ei(t, e) {
 }
 function ji(t, e, n, i, o, s, r, l, c) {
   const a = l.priceToY(i), f = l.priceToY(o), h = l.priceToY(s), u = l.priceToY(r);
-  t.strokeStyle = _(t, c, Gl), t.lineWidth = 1, v(t, e, f, e, h);
-  const p = Math.min(a, u), g = Math.max(a, u), b = Math.max(g - p, 1);
-  t.fillStyle = _(t, c, ql), t.fillRect(e - n, p, n * 2, b), t.strokeRect(e - n, p, n * 2, b);
+  t.strokeStyle = _(t, c, Gl), t.lineWidth = 1, W(t, e, f, e, h);
+  const m = Math.min(a, u), g = Math.max(a, u), d = Math.max(g - m, 1);
+  t.fillStyle = _(t, c, ql), t.fillRect(e - n, m, n * 2, d), t.strokeRect(e - n, m, n * 2, d);
 }
 const Ul = {
   id: "rotrect",
@@ -2168,12 +2168,12 @@ const Ul = {
     }
     const r = w(n, s);
     if (!e.points[2]) {
-      v(t, o.x, o.y, r.x, r.y), i && I(t, e, n);
+      W(t, o.x, o.y, r.x, r.y), i && I(t, e, n);
       return;
     }
     const l = ti(e, n);
     if (!l) {
-      v(t, o.x, o.y, r.x, r.y), i && I(t, e, n);
+      W(t, o.x, o.y, r.x, r.y), i && I(t, e, n);
       return;
     }
     t.beginPath(), t.moveTo(l[0].x, l[0].y);
@@ -2186,7 +2186,7 @@ const Ul = {
     if (Kt(e, n, o)) return !0;
     const s = H(t);
     for (let r = 0; r < o.length; r++)
-      if (Z(e, n, o[r], o[(r + 1) % o.length]) <= s) return !0;
+      if (Q(e, n, o[r], o[(r + 1) % o.length]) <= s) return !0;
     return !1;
   }
 }, jl = {
@@ -2221,7 +2221,7 @@ const Ul = {
     }
     const c = w(n, s);
     if (!r) {
-      v(t, c.x, c.y, l.x, l.y), i && I(t, e, n);
+      W(t, c.x, c.y, l.x, l.y), i && I(t, e, n);
       return;
     }
     const a = w(n, r), f = Math.max(Math.hypot(l.x - c.x, l.y - c.y), 0.5), h = Math.atan2(l.y - c.y, l.x - c.x), u = Math.atan2(a.y - c.y, a.x - c.x);
@@ -2232,10 +2232,10 @@ const Ul = {
     const o = w(i, t.points[1]), s = w(i, t.points[0]), r = w(i, t.points[2]), l = Math.hypot(s.x - o.x, s.y - o.y);
     if (Math.abs(Math.hypot(e - o.x, n - o.y) - l) > H(t)) return !1;
     let a = Math.atan2(s.y - o.y, s.x - o.x), f = Math.atan2(r.y - o.y, r.x - o.x), h = Math.atan2(n - o.y, e - o.x);
-    const u = (b) => b < 0 ? b + Math.PI * 2 : b;
+    const u = (d) => d < 0 ? d + Math.PI * 2 : d;
     a = u(a), f = u(f), h = u(h);
-    const p = u(f - a);
-    return u(h - a) <= p;
+    const m = u(f - a);
+    return u(h - a) <= m;
   }
 }, Kl = {
   id: "curve",
@@ -2250,20 +2250,20 @@ const Ul = {
     }
     const r = w(n, s), l = e.points[2];
     if (!l) {
-      v(t, o.x, o.y, r.x, r.y), i && I(t, e, n);
+      W(t, o.x, o.y, r.x, r.y), i && I(t, e, n);
       return;
     }
     const c = w(n, l);
-    t.beginPath(), t.moveTo(o.x, o.y), t.quadraticCurveTo(r.x, r.y, c.x, c.y), t.lineCap = "round", t.stroke(), i && (t.save(), t.setLineDash([3, 3]), t.lineWidth = 1, t.strokeStyle = _(t, e.color, 0.5), v(t, o.x, o.y, r.x, r.y), v(t, c.x, c.y, r.x, r.y), t.restore(), I(t, e, n));
+    t.beginPath(), t.moveTo(o.x, o.y), t.quadraticCurveTo(r.x, r.y, c.x, c.y), t.lineCap = "round", t.stroke(), i && (t.save(), t.setLineDash([3, 3]), t.lineWidth = 1, t.strokeStyle = _(t, e.color, 0.5), W(t, o.x, o.y, r.x, r.y), W(t, c.x, c.y, r.x, r.y), t.restore(), I(t, e, n));
   },
   hitTest(t, e, n, i) {
     if (!t.points[2]) return !1;
     const o = w(i, t.points[0]), s = w(i, t.points[1]), r = w(i, t.points[2]), l = H(t), c = 24;
     let a = o.x, f = o.y;
     for (let h = 1; h <= c; h++) {
-      const u = h / c, p = 1 - u, g = p * p * o.x + 2 * p * u * s.x + u * u * r.x, b = p * p * o.y + 2 * p * u * s.y + u * u * r.y;
-      if (Z(e, n, { x: a, y: f }, { x: g, y: b }) <= l) return !0;
-      a = g, f = b;
+      const u = h / c, m = 1 - u, g = m * m * o.x + 2 * m * u * s.x + u * u * r.x, d = m * m * o.y + 2 * m * u * s.y + u * u * r.y;
+      if (Q(e, n, { x: a, y: f }, { x: g, y: d }) <= l) return !0;
+      a = g, f = d;
     }
     return !1;
   }
@@ -2276,7 +2276,7 @@ const Ul = {
   // is a fixed 4-vertex open polyline. See file notes.
   pointsNeeded: 4,
   render(t, e, n, i) {
-    const o = yt(e, n);
+    const o = gt(e, n);
     if (o.length !== 0) {
       if (o.length === 1)
         V(t, o[0].x, o[0].y, e.width);
@@ -2290,9 +2290,9 @@ const Ul = {
   },
   hitTest(t, e, n, i) {
     if (t.points.length < 4) return !1;
-    const o = yt(t, i), s = H(t);
+    const o = gt(t, i), s = H(t);
     for (let r = 0; r < o.length - 1; r++)
-      if (Z(e, n, o[r], o[r + 1]) <= s) return !0;
+      if (Q(e, n, o[r], o[r + 1]) <= s) return !0;
     return !1;
   }
 };
@@ -2317,14 +2317,14 @@ const Ql = {
       return;
     }
     const r = w(n, e.points[1]), l = e.points[1].price - e.points[0].price, c = e.points[1].price + Math.abs(l) * 0.25, a = e.points[1].price - Math.abs(l) * 0.25, f = n.priceToY(c), h = n.priceToY(a);
-    t.beginPath(), t.moveTo(s.x, s.y), t.lineTo(r.x, f), t.lineTo(r.x, h), t.closePath(), t.fillStyle = _(t, e.color, Ui), t.fill(), t.save(), t.setLineDash([2, 3]), t.lineWidth = 1, t.strokeStyle = _(t, e.color, cn), v(t, s.x, s.y, r.x, f), v(t, s.x, s.y, r.x, h), t.restore(), t.save(), t.setLineDash([5, 4]), t.lineWidth = Math.max(1, e.width), t.strokeStyle = e.color, v(t, s.x, s.y, r.x, r.y), t.restore();
-    const u = Ji(e), p = Ki(e, o.barMs), g = u === null ? `${p} bars` : `${Fe(u)} · ${p} bars`;
+    t.beginPath(), t.moveTo(s.x, s.y), t.lineTo(r.x, f), t.lineTo(r.x, h), t.closePath(), t.fillStyle = _(t, e.color, Ui), t.fill(), t.save(), t.setLineDash([2, 3]), t.lineWidth = 1, t.strokeStyle = _(t, e.color, cn), W(t, s.x, s.y, r.x, f), W(t, s.x, s.y, r.x, h), t.restore(), t.save(), t.setLineDash([5, 4]), t.lineWidth = Math.max(1, e.width), t.strokeStyle = e.color, W(t, s.x, s.y, r.x, r.y), t.restore();
+    const u = Ji(e), m = Ki(e, o.barMs), g = u === null ? `${m} bars` : `${Fe(u)} · ${m} bars`;
     kt(t, r.x, r.y, [g], e.color), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     if (!t.points[1]) return !1;
     const o = w(i, t.points[0]), s = w(i, t.points[1]), r = t.points[1].price - t.points[0].price, l = i.priceToY(t.points[1].price + Math.abs(r) * 0.25), c = i.priceToY(t.points[1].price - Math.abs(r) * 0.25), a = [o, { x: s.x, y: l }, { x: s.x, y: c }];
-    return Kt(e, n, a) ? !0 : Z(e, n, o, s) <= H(t);
+    return Kt(e, n, a) ? !0 : Q(e, n, o, s) <= H(t);
   }
 }, zl = {
   id: "barspattern",
@@ -2346,17 +2346,17 @@ const Ql = {
     ), t.restore(), l.length > 0 && o.barMs > 0) {
       const c = Math.min(e.points[0].time, e.points[1].time), a = Math.max(e.points[0].time, e.points[1].time), f = ei(l, c), h = ei(l, a + 1), u = l.slice(f, h);
       if (u.length > 0) {
-        const p = l[l.length - 1], g = p.time + o.barMs, b = p.close - u[0].open, A = n.timeToX(g), T = n.timeToX(g + o.barMs), P = Math.max(1, Math.abs(T - A) * 0.32);
+        const m = l[l.length - 1], g = m.time + o.barMs, d = m.close - u[0].open, k = n.timeToX(g), T = n.timeToX(g + o.barMs), P = Math.max(1, Math.abs(T - k) * 0.32);
         for (let N = 0; N < u.length; N++) {
-          const L = u[N], D = n.timeToX(g + N * o.barMs);
+          const L = u[N], $ = n.timeToX(g + N * o.barMs);
           ji(
             t,
-            D,
+            $,
             P,
-            L.open + b,
-            L.high + b,
-            L.low + b,
-            L.close + b,
+            L.open + d,
+            L.high + d,
+            L.low + d,
+            L.close + d,
             n,
             e.color
           );
@@ -2364,7 +2364,7 @@ const Ql = {
         kt(
           t,
           n.timeToX(g + (u.length - 1) * o.barMs),
-          n.priceToY(u[u.length - 1].close + b),
+          n.priceToY(u[u.length - 1].close + d),
           [`${u.length} bars →`],
           e.color
         );
@@ -2387,14 +2387,14 @@ const Ql = {
       return;
     }
     const r = w(n, e.points[1]);
-    t.save(), t.setLineDash([2, 3]), t.lineWidth = 1, t.strokeStyle = _(t, e.color, cn), v(t, s.x, s.y, r.x, r.y), t.restore();
+    t.save(), t.setLineDash([2, 3]), t.lineWidth = 1, t.strokeStyle = _(t, e.color, cn), W(t, s.x, s.y, r.x, r.y), t.restore();
     const l = o.barMs;
     if (l > 0) {
-      const c = e.points[0].time, a = e.points[1].time, f = e.points[0].price, h = e.points[1].price, u = Math.max(1, Math.round(Math.abs(a - c) / l)), p = a >= c ? 1 : -1, g = n.timeToX(c), b = n.timeToX(c + p * l), A = Math.max(1, Math.abs(b - g) * 0.32);
+      const c = e.points[0].time, a = e.points[1].time, f = e.points[0].price, h = e.points[1].price, u = Math.max(1, Math.round(Math.abs(a - c) / l)), m = a >= c ? 1 : -1, g = n.timeToX(c), d = n.timeToX(c + m * l), k = Math.max(1, Math.abs(d - g) * 0.32);
       let T = f;
       for (let P = 1; P <= u; P++) {
-        const N = P / u, L = f + (h - f) * N, D = T, G = Math.abs(L - D) * 0.6 + Math.abs(h - f) / u / 4, U = (P % 2 === 0 ? 1 : -1) * G, j = Math.max(D, L) + Math.abs(U) * 0.5 + G * 0.3, K = Math.min(D, L) - Math.abs(U) * 0.5 - G * 0.3, x = n.timeToX(c + p * P * l);
-        ji(t, x, A, D, j, K, L, n, e.color), T = L;
+        const N = P / u, L = f + (h - f) * N, $ = T, G = Math.abs(L - $) * 0.6 + Math.abs(h - f) / u / 4, U = (P % 2 === 0 ? 1 : -1) * G, j = Math.max($, L) + Math.abs(U) * 0.5 + G * 0.3, K = Math.min($, L) - Math.abs(U) * 0.5 - G * 0.3, x = n.timeToX(c + m * P * l);
+        ji(t, x, k, $, j, K, L, n, e.color), T = L;
       }
       kt(t, r.x, r.y, [`ghost ×${u}`], e.color);
     }
@@ -2416,7 +2416,7 @@ const Ql = {
     }
     const r = w(n, e.points[1]), l = Math.min(s.x, r.x), c = Math.min(s.y, r.y), a = Math.abs(r.x - s.x), f = Math.abs(r.y - s.y);
     t.fillStyle = _(t, e.color, Ui), t.fillRect(l, c, a, f), t.save(), t.setLineDash([4, 4]), t.lineWidth = 1, t.strokeStyle = _(t, e.color, cn), t.strokeRect(l, c, a, f), t.restore();
-    const h = e.points[1].price - e.points[0].price, u = Ji(e), p = Ki(e, o.barMs), g = Math.abs(e.points[1].time - e.points[0].time), b = Ie(h, o.pricePrecision), A = u === null ? "" : ` (${Fe(u)})`, T = p === 1 ? "1 bar" : `${p} bars`, P = `Δ ${b}${A} · ${T} · ${Mi(g)}`;
+    const h = e.points[1].price - e.points[0].price, u = Ji(e), m = Ki(e, o.barMs), g = Math.abs(e.points[1].time - e.points[0].time), d = Ie(h, o.pricePrecision), k = u === null ? "" : ` (${Fe(u)})`, T = m === 1 ? "1 bar" : `${m} bars`, P = `Δ ${d}${k} · ${T} · ${Mi(g)}`;
     kt(t, (s.x + r.x) / 2, (s.y + r.y) / 2, [P], e.color), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
@@ -2432,7 +2432,7 @@ const Ql = {
   zl,
   xl,
   ta
-], na = 26, oa = 3, ce = 16, ao = 8, co = 6, ia = "#089981", sa = "#f23645", ra = new Set(
+], na = 26, oa = 3, fe = 16, ao = 8, co = 6, ia = "#089981", sa = "#f23645", ra = new Set(
   ["#2962ff", "#787b86", "#5d606b", "#b2b5be", "#ffffff", "#000000"].map((t) => t.toLowerCase())
 );
 function la(t) {
@@ -2448,22 +2448,22 @@ function jt(t, e) {
   return s.length > 0 && o.length > 0 && (o[0] = `${s} ${o[0]}`), { lines: o, isPlaceholder: i };
 }
 function fo(t, e) {
-  t.font = fe;
+  t.font = he;
   let n = 0;
   for (const i of e) n = Math.max(n, t.measureText(i).width);
-  return { w: n + ao * 2, h: e.length * ce + co * 2 };
+  return { w: n + ao * 2, h: e.length * fe + co * 2 };
 }
 function ho(t) {
   let e = 0;
   for (const n of t) e = Math.max(e, n.length);
-  return { w: e * 7 + ao * 2, h: t.length * ce + co * 2 };
+  return { w: e * 7 + ao * 2, h: t.length * fe + co * 2 };
 }
 function uo(t, e, n, i, o, s) {
-  t.font = fe, t.fillStyle = s ? _(t, o, 0.55) : o, t.textAlign = "left", t.textBaseline = "middle";
+  t.font = he, t.fillStyle = s ? _(t, o, 0.55) : o, t.textAlign = "left", t.textBaseline = "middle";
   for (let r = 0; r < e.length; r++)
-    t.fillText(e[r], n + ao, i + co + ce * (r + 0.5));
+    t.fillText(e[r], n + ao, i + co + fe * (r + 0.5));
 }
-function ue(t, e, n, i) {
+function pe(t, e, n, i) {
   return t >= n.x - i && t <= n.x + n.w + i && e >= n.y - i && e <= n.y + n.h + i;
 }
 const aa = {
@@ -2478,9 +2478,9 @@ const aa = {
   },
   hitTest(t, e, n, i) {
     const o = w(i, t.points[0]), s = _t.get(t.id);
-    if (s) return ue(e, n, s, 2);
+    if (s) return pe(e, n, s, 2);
     const { lines: r } = jt(t, "Text"), { w: l, h: c } = ho(r);
-    return ue(e, n, { x: o.x, y: o.y, w: l, h: c }, 2);
+    return pe(e, n, { x: o.x, y: o.y, w: l, h: c }, 2);
   }
 }, ca = {
   id: "callout",
@@ -2494,12 +2494,12 @@ const aa = {
       t.fillStyle = e.color, t.beginPath(), t.arc(o.x, o.y, Math.max(2, e.width + 1), 0, Math.PI * 2), t.fill(), i && I(t, e, n);
       return;
     }
-    const s = w(n, e.points[1]), { lines: r, isPlaceholder: l } = jt(e, "Callout"), { w: c, h: a } = fo(t, r), f = s.x - c / 2, h = s.y - a / 2, u = Ee(e.id, { x: f, y: h, w: c, h: a }), p = ni(u, o.x, o.y);
+    const s = w(n, e.points[1]), { lines: r, isPlaceholder: l } = jt(e, "Callout"), { w: c, h: a } = fo(t, r), f = s.x - c / 2, h = s.y - a / 2, u = Ee(e.id, { x: f, y: h, w: c, h: a }), m = ni(u, o.x, o.y);
     t.lineWidth = Math.max(1, e.width), t.strokeStyle = e.color, t.fillStyle = e.color;
-    const g = Math.hypot(o.x - p.x, o.y - p.y);
+    const g = Math.hypot(o.x - m.x, o.y - m.y);
     if (g > 1) {
-      const b = Math.atan2(o.y - p.y, o.x - p.x), A = 7, T = (o.x - p.x) / g, P = (o.y - p.y) / g;
-      v(t, p.x, p.y, o.x - T * Math.min(A * 0.7, g), o.y - P * Math.min(A * 0.7, g)), en(t, o.x, o.y, b, A);
+      const d = Math.atan2(o.y - m.y, o.x - m.x), k = 7, T = (o.x - m.x) / g, P = (o.y - m.y) / g;
+      W(t, m.x, m.y, o.x - T * Math.min(k * 0.7, g), o.y - P * Math.min(k * 0.7, g)), en(t, o.x, o.y, d, k);
     }
     At(t, u.x, u.y, u.w, u.h, 6), t.fillStyle = _(t, e.color, 0.14), t.fill(), t.lineWidth = 1, t.strokeStyle = i ? e.color : _(t, e.color, 0.5), t.stroke(), uo(t, r, u.x, u.y, e.color, l), i && I(t, e, n);
   },
@@ -2510,7 +2510,7 @@ const aa = {
       const { lines: c } = jt(t, "Callout"), { w: a, h: f } = ho(c);
       r = { x: s.x - a / 2, y: s.y - f / 2, w: a, h: f };
     }
-    if (ue(e, n, r, 2)) return !0;
+    if (pe(e, n, r, 2)) return !0;
     const l = ni(r, o.x, o.y);
     return fa(e, n, l, o) <= Math.max(6, t.width / 2 + 3);
   }
@@ -2526,7 +2526,7 @@ function fa(t, e, n, i) {
   let l = r === 0 ? 0 : ((t - n.x) * o + (e - n.y) * s) / r;
   return l = Math.max(0, Math.min(1, l)), Math.hypot(t - (n.x + l * o), e - (n.y + l * s));
 }
-const Te = 9, oi = 12, ha = {
+const Me = 9, oi = 12, ha = {
   id: "comment",
   label: "Comment",
   group: "annotate",
@@ -2536,7 +2536,7 @@ const Te = 9, oi = 12, ha = {
     const o = w(n, e.points[0]), { lines: s, isPlaceholder: r } = jt(e, "Comment"), { w: l, h: c } = fo(t, s), a = o.x - l / 2, f = o.y - oi - c, h = Ee(e.id, { x: a, y: f, w: l, h: c });
     At(t, h.x, h.y, h.w, h.h, 7), t.fillStyle = _(t, e.color, 0.14), t.fill(), t.lineWidth = 1, t.strokeStyle = i ? e.color : _(t, e.color, 0.5), t.stroke();
     const u = Math.min(Math.max(o.x, h.x + 8), h.x + h.w - 8);
-    t.beginPath(), t.moveTo(u - Te / 2, h.y + h.h - 0.5), t.lineTo(u + Te / 2, h.y + h.h - 0.5), t.lineTo(o.x, o.y), t.closePath(), t.fillStyle = _(t, e.color, 0.14), t.fill(), t.strokeStyle = i ? e.color : _(t, e.color, 0.5), t.beginPath(), t.moveTo(u - Te / 2, h.y + h.h - 0.5), t.lineTo(o.x, o.y), t.lineTo(u + Te / 2, h.y + h.h - 0.5), t.stroke(), uo(t, s, h.x, h.y, e.color, r), i && I(t, e, n);
+    t.beginPath(), t.moveTo(u - Me / 2, h.y + h.h - 0.5), t.lineTo(u + Me / 2, h.y + h.h - 0.5), t.lineTo(o.x, o.y), t.closePath(), t.fillStyle = _(t, e.color, 0.14), t.fill(), t.strokeStyle = i ? e.color : _(t, e.color, 0.5), t.beginPath(), t.moveTo(u - Me / 2, h.y + h.h - 0.5), t.lineTo(o.x, o.y), t.lineTo(u + Me / 2, h.y + h.h - 0.5), t.stroke(), uo(t, s, h.x, h.y, e.color, r), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     const o = w(i, t.points[0]);
@@ -2545,7 +2545,7 @@ const Te = 9, oi = 12, ha = {
       const { lines: r } = jt(t, "Comment"), { w: l, h: c } = ho(r);
       s = { x: o.x - l / 2, y: o.y - oi - c, w: l, h: c };
     }
-    return ue(e, n, s, 2) ? !0 : Math.abs(e - o.x) <= Te && n >= s.y + s.h - 2 && n <= o.y + 2;
+    return pe(e, n, s, 2) ? !0 : Math.abs(e - o.x) <= Me && n >= s.y + s.h - 2 && n <= o.y + 2;
   }
 }, Ht = 14, ua = {
   id: "pricelabel",
@@ -2553,14 +2553,14 @@ const Te = 9, oi = 12, ha = {
   group: "annotate",
   pointsNeeded: 1,
   render(t, e, n, i, o) {
-    const s = w(n, e.points[0]), r = bt(s.y, t.lineWidth), l = Et(e.points[0].price, o.pricePrecision);
-    t.lineWidth = Math.max(1, e.width), t.strokeStyle = e.color, v(t, s.x - Ht / 2, r, s.x + Ht / 2, r), t.font = fe;
+    const s = w(n, e.points[0]), r = yt(s.y, t.lineWidth), l = Et(e.points[0].price, o.pricePrecision);
+    t.lineWidth = Math.max(1, e.width), t.strokeStyle = e.color, W(t, s.x - Ht / 2, r, s.x + Ht / 2, r), t.font = he;
     const c = 6, a = t.measureText(l).width + c * 2, f = 18, h = s.x + Ht / 2 + 4, u = r - f / 2;
     Ee(e.id, { x: s.x - Ht / 2, y: u, w: Ht / 2 + 4 + a, h: f }), At(t, h, u, a, f, 3), t.fillStyle = e.color, t.fill(), t.fillStyle = Re(t, e.color), t.textAlign = "left", t.textBaseline = "middle", t.fillText(l, h + c, r + 0.5), i && I(t, e, n);
   },
   hitTest(t, e, n, i, o) {
     const s = w(i, t.points[0]), r = _t.get(t.id);
-    if (r) return ue(e, n, r, 2);
+    if (r) return pe(e, n, r, 2);
     const l = Et(t.points[0].price, o.pricePrecision).length * 7 + 12 + Ht;
     return e >= s.x - Ht / 2 - 2 && e <= s.x + l && Math.abs(n - s.y) <= 11;
   }
@@ -2571,21 +2571,21 @@ const Te = 9, oi = 12, ha = {
   pointsNeeded: 1,
   defaultProps: { emoji: "" },
   render(t, e, n, i, o) {
-    const s = w(n, e.points[0]), { h: r } = rt(t), l = bt(s.x, t.lineWidth);
-    t.lineWidth = Math.max(1, e.width), t.strokeStyle = e.color, v(t, l, r, l, s.y);
+    const s = w(n, e.points[0]), { h: r } = lt(t), l = yt(s.x, t.lineWidth);
+    t.lineWidth = Math.max(1, e.width), t.strokeStyle = e.color, W(t, l, r, l, s.y);
     const { lines: c, isPlaceholder: a } = jt(e, "Signpost"), f = xn(e.points[0].time, o.barMs);
-    t.font = fe;
+    t.font = he;
     let h = t.measureText(f).width;
     for (const P of c) h = Math.max(h, t.measureText(P).width);
-    const u = h + Cn * 2, g = (c.length + 1) * ce + Rn * 2, b = l, A = s.y - g, T = Ee(e.id, { x: b, y: A, w: u, h: g });
-    At(t, T.x, T.y, T.w, T.h, 4), t.fillStyle = _(t, e.color, 0.16), t.fill(), t.lineWidth = 1, t.strokeStyle = i ? e.color : _(t, e.color, 0.55), t.stroke(), t.font = fe, t.textAlign = "left", t.textBaseline = "middle";
+    const u = h + Cn * 2, g = (c.length + 1) * fe + Rn * 2, d = l, k = s.y - g, T = Ee(e.id, { x: d, y: k, w: u, h: g });
+    At(t, T.x, T.y, T.w, T.h, 4), t.fillStyle = _(t, e.color, 0.16), t.fill(), t.lineWidth = 1, t.strokeStyle = i ? e.color : _(t, e.color, 0.55), t.stroke(), t.font = he, t.textAlign = "left", t.textBaseline = "middle";
     for (let P = 0; P < c.length; P++)
-      t.fillStyle = a ? _(t, e.color, 0.55) : e.color, t.fillText(c[P], T.x + Cn, T.y + Rn + ce * (P + 0.5));
-    t.fillStyle = _(t, e.color, 0.7), t.fillText(f, T.x + Cn, T.y + Rn + ce * (c.length + 0.5)), i && I(t, e, n);
+      t.fillStyle = a ? _(t, e.color, 0.55) : e.color, t.fillText(c[P], T.x + Cn, T.y + Rn + fe * (P + 0.5));
+    t.fillStyle = _(t, e.color, 0.7), t.fillText(f, T.x + Cn, T.y + Rn + fe * (c.length + 0.5)), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     const o = w(i, t.points[0]), s = _t.get(t.id);
-    return s && ue(e, n, s, 2) ? !0 : Math.abs(e - o.x) <= Math.max(6, t.width / 2 + 3) && n >= o.y - 2;
+    return s && pe(e, n, s, 2) ? !0 : Math.abs(e - o.x) <= Math.max(6, t.width / 2 + 3) && n >= o.y - 2;
   }
 }, Ne = 13;
 function Zi(t, e) {
@@ -2627,14 +2627,14 @@ const ma = {
   group: "annotate",
   pointsNeeded: 1,
   render(t, e, n, i) {
-    const o = w(n, e.points[0]), s = bt(o.x, t.lineWidth), r = o.y - ii;
-    t.lineWidth = Math.max(1.5, e.width), t.strokeStyle = e.color, t.lineCap = "round", v(t, s, o.y, s, r), t.beginPath(), t.moveTo(s, r), t.lineTo(s + si, r + Fn / 2), t.lineTo(s, r + Fn), t.closePath(), t.fillStyle = e.color, t.fill(), i && I(t, e, n);
+    const o = w(n, e.points[0]), s = yt(o.x, t.lineWidth), r = o.y - ii;
+    t.lineWidth = Math.max(1.5, e.width), t.strokeStyle = e.color, t.lineCap = "round", W(t, s, o.y, s, r), t.beginPath(), t.moveTo(s, r), t.lineTo(s + si, r + Fn / 2), t.lineTo(s, r + Fn), t.closePath(), t.fillStyle = e.color, t.fill(), i && I(t, e, n);
   },
   hitTest(t, e, n, i) {
     const o = w(i, t.points[0]), s = o.y - ii, r = Math.abs(e - o.x) <= Math.max(6, t.width / 2 + 3) && n >= s - 2 && n <= o.y + 2, l = e >= o.x - 2 && e <= o.x + si + 2 && n >= s - 2 && n <= s + Fn + 2;
     return r || l;
   }
-}, ba = [
+}, da = [
   aa,
   ca,
   ha,
@@ -2643,11 +2643,11 @@ const ma = {
   ma,
   ga,
   ya
-], da = [
+], ba = [
   ...Zs,
   ...er,
   ...hr,
-  ...br,
+  ...dr,
   ...Sr,
   ...Rr,
   ...el,
@@ -2655,8 +2655,8 @@ const ma = {
   ...El,
   ...Vl,
   ...ea,
-  ...ba
-], Jt = da.reduce(
+  ...da
+], Jt = ba.reduce(
   (t, e) => (t[e.id] = e, t),
   {}
 ), Ta = [
@@ -2764,7 +2764,7 @@ const ma = {
     id: e,
     label: Jt[e].label
   }))
-})), bf = Sa.flatMap(
+})), Mf = Sa.flatMap(
   (t) => t.tools
 );
 function po(t) {
@@ -2826,7 +2826,7 @@ const La = /* @__PURE__ */ new Set([
   "pnf",
   "range"
 ]);
-function Me(t) {
+function se(t) {
   return La.has(t);
 }
 function Ia(t) {
@@ -2895,8 +2895,8 @@ function Ra(t, e = 3) {
   for (let o = 0; o < n; o++) {
     const s = t[o], r = s.close;
     if (i.length === 0) {
-      const g = s.close >= s.open, b = Math.min(s.open, s.close), A = Math.max(s.open, s.close);
-      i.push({ time: s.time, open: g ? b : A, high: A, low: b, close: g ? A : b, volume: s.volume });
+      const g = s.close >= s.open, d = Math.min(s.open, s.close), k = Math.max(s.open, s.close);
+      i.push({ time: s.time, open: g ? d : k, high: k, low: d, close: g ? k : d, volume: s.volume });
       continue;
     }
     const l = i[i.length - 1], c = l.close >= l.open;
@@ -2904,8 +2904,8 @@ function Ra(t, e = 3) {
     const h = Math.max(0, i.length - e);
     for (let g = h; g < i.length; g++)
       a = Math.max(a, i[g].high), f = Math.min(f, i[g].low);
-    const u = Math.max(l.open, l.close), p = Math.min(l.open, l.close);
-    r > u ? i.push({ time: s.time, open: u, high: r, low: u, close: r, volume: s.volume }) : r < p ? i.push({ time: s.time, open: p, high: p, low: r, close: r, volume: s.volume }) : c && r < f ? i.push({ time: s.time, open: p, high: p, low: r, close: r, volume: s.volume }) : !c && r > a && i.push({ time: s.time, open: u, high: r, low: u, close: r, volume: s.volume });
+    const u = Math.max(l.open, l.close), m = Math.min(l.open, l.close);
+    r > u ? i.push({ time: s.time, open: u, high: r, low: u, close: r, volume: s.volume }) : r < m ? i.push({ time: s.time, open: m, high: m, low: r, close: r, volume: s.volume }) : c && r < f ? i.push({ time: s.time, open: m, high: m, low: r, close: r, volume: s.volume }) : !c && r > a && i.push({ time: s.time, open: u, high: r, low: u, close: r, volume: s.volume });
   }
   return i;
 }
@@ -2918,16 +2918,16 @@ function _a(t, e, n = 3) {
   const o = n >= 1 ? Math.floor(n) : 3, s = t[0].close, r = (u) => Math.floor((u - s) / e), l = [];
   let c = 0, a = r(t[0].close), f = a, h = t[0].time;
   for (let u = 0; u < i; u++) {
-    const p = t[u], g = r(p.high), b = r(p.low);
+    const m = t[u], g = r(m.high), d = r(m.low);
     if (c === 0) {
-      g > a ? (c = 1, a = g, h = p.time) : b < f && (c = -1, f = b, h = p.time);
+      g > a ? (c = 1, a = g, h = m.time) : d < f && (c = -1, f = d, h = m.time);
       continue;
     }
-    c === 1 ? g > a ? (a = g, h = p.time) : b <= a - o && (l.push({ dir: 1, top: a, bottom: f, time: h }), c = -1, f = b, a = a - 1, h = p.time) : b < f ? (f = b, h = p.time) : g >= f + o && (l.push({ dir: -1, top: a, bottom: f, time: h }), c = 1, a = g, f = f + 1, h = p.time);
+    c === 1 ? g > a ? (a = g, h = m.time) : d <= a - o && (l.push({ dir: 1, top: a, bottom: f, time: h }), c = -1, f = d, a = a - 1, h = m.time) : d < f ? (f = d, h = m.time) : g >= f + o && (l.push({ dir: -1, top: a, bottom: f, time: h }), c = 1, a = g, f = f + 1, h = m.time);
   }
   return c !== 0 && l.push({ dir: c, top: a, bottom: f, time: h }), l.map((u) => {
-    const p = s + u.bottom * e, g = s + (u.top + 1) * e, b = u.dir === 1 ? p : g, A = u.dir === 1 ? g : p;
-    return { time: u.time, open: b, high: g, low: p, close: A, volume: 0 };
+    const m = s + u.bottom * e, g = s + (u.top + 1) * e, d = u.dir === 1 ? m : g, k = u.dir === 1 ? g : m;
+    return { time: u.time, open: d, high: g, low: m, close: k, volume: 0 };
   });
 }
 function Ea(t) {
@@ -2970,16 +2970,16 @@ function Wa(t, e) {
     r >= l ? a = !0 : r <= c && (a = !1), o[o.length - 1] = { time: h, price: r, thick: a };
   };
   for (let h = 1; h < n; h++) {
-    const u = t[h], p = u.close;
+    const u = t[h], m = u.close;
     if (s === 0) {
-      if (p >= r * (1 + i))
-        s = 1, r = p;
-      else if (p <= r * (1 - i))
-        s = -1, r = p;
+      if (m >= r * (1 + i))
+        s = 1, r = m;
+      else if (m <= r * (1 - i))
+        s = -1, r = m;
       else
         continue;
       o.push({ time: u.time, price: r, thick: a }), f(u.time);
-    } else s === 1 ? p > r ? (r = p, f(u.time)) : p <= r * (1 - i) && (l = r, r = p, s = -1, o.push({ time: u.time, price: r, thick: a }), f(u.time)) : p < r ? (r = p, f(u.time)) : p >= r * (1 + i) && (c = r, r = p, s = 1, o.push({ time: u.time, price: r, thick: a }), f(u.time));
+    } else s === 1 ? m > r ? (r = m, f(u.time)) : m <= r * (1 - i) && (l = r, r = m, s = -1, o.push({ time: u.time, price: r, thick: a }), f(u.time)) : m < r ? (r = m, f(u.time)) : m >= r * (1 + i) && (c = r, r = m, s = 1, o.push({ time: u.time, price: r, thick: a }), f(u.time));
   }
   return o;
 }
@@ -3014,16 +3014,16 @@ const Da = {
     crosshairTagText: "#ffffff",
     guide: "rgba(120, 123, 134, 0.5)"
   }
-}, Yt = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-class Ya {
+}, Yt = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', Ya = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+class $a {
   constructor() {
     /** Candle open times, ascending (epoch ms). */
-    ot(this, "times", []);
+    it(this, "times", []);
     /** Estimated uniform bar interval (ms), used to extrapolate beyond the data. */
-    ot(this, "intervalMs", 6e4);
+    it(this, "intervalMs", 6e4);
     /** Plot-area width in CSS px (excludes the price axis column). */
-    ot(this, "plotWidth", 0);
-    ot(this, "view", { start: -80, end: 80 });
+    it(this, "plotWidth", 0);
+    it(this, "view", { start: -80, end: 80 });
   }
   setTimes(e) {
     if (this.times = e, e.length >= 2) {
@@ -3179,12 +3179,12 @@ function Se(t, e) {
     maximumFractionDigits: e
   }) : "—";
 }
-function $a(t) {
+function Oa(t) {
   if (!isFinite(t)) return "—";
   const e = Math.abs(t);
   return e >= 1e12 ? (t / 1e12).toFixed(2) + "T" : e >= 1e9 ? (t / 1e9).toFixed(2) + "B" : e >= 1e6 ? (t / 1e6).toFixed(2) + "M" : e >= 1e3 ? (t / 1e3).toFixed(2) + "K" : e >= 100 ? t.toFixed(0) : e >= 1 ? t.toFixed(2) : t.toFixed(4);
 }
-function Oa(t) {
+function Ba(t) {
   let e = 1;
   for (; ; ) {
     for (const n of [1, 2, 5]) {
@@ -3194,10 +3194,10 @@ function Oa(t) {
     e *= 10;
   }
 }
-function Ba(t) {
+function Xa(t) {
   const e = t.barSpacing();
   if (!(e > 0) || t.plotWidth <= 0) return [];
-  const n = Oa(Math.max(1, Math.ceil(90 / e))), i = [], o = Math.ceil(t.view.start / n) * n;
+  const n = Ba(Math.max(1, Math.ceil(90 / e))), i = [], o = Math.ceil(t.view.start / n) * n;
   for (let s = o; s < t.view.end; s += n) {
     const r = t.centerX(s);
     r < -1 || r > t.plotWidth + 1 || i.push({ index: s, x: r, time: t.indexToTime(s) });
@@ -3208,11 +3208,11 @@ const Kn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"
 function Le(t) {
   return t < 10 ? "0" + t : String(t);
 }
-function Xa(t, e, n) {
+function Ha(t, e, n) {
   const i = new Date(t), o = e !== null ? new Date(e) : null;
   return n >= 864e5 ? o && i.getFullYear() !== o.getFullYear() ? String(i.getFullYear()) : !o || i.getMonth() !== o.getMonth() ? Kn[i.getMonth()] : String(i.getDate()) : !o || i.getDate() !== o.getDate() || i.getMonth() !== o.getMonth() || i.getFullYear() !== o.getFullYear() ? `${i.getDate()} ${Kn[i.getMonth()]}` : `${Le(i.getHours())}:${Le(i.getMinutes())}`;
 }
-function Ha(t, e) {
+function Va(t, e) {
   const n = new Date(t), i = `${n.getDate()} ${Kn[n.getMonth()]} '${Le(n.getFullYear() % 100)}`;
   return e >= 864e5 ? i : `${i}  ${Le(n.getHours())}:${Le(n.getMinutes())}`;
 }
@@ -3226,7 +3226,7 @@ function Ce(t, e) {
   const i = parseInt(n[1], 16);
   return `rgba(${i >> 16 & 255}, ${i >> 8 & 255}, ${i & 255}, ${e})`;
 }
-function Va(t, e, n, i) {
+function Ga(t, e, n, i) {
   t.fillStyle = e.grid;
   for (const o of n)
     t.fillRect(Math.round(o.x), 0, 1, i);
@@ -3236,38 +3236,38 @@ function ci(t, e, n, i, o) {
   for (const s of o)
     t.fillRect(0, Math.round(i.priceToY(s)), n, 1);
 }
-function Ga(t, e, n, i) {
+function qa(t, e, n, i) {
   t.fillStyle = e.separator, t.fillRect(0, n, i, 1);
 }
-function qa(t, e, n, i, o, s) {
+function Ua(t, e, n, i, o, s) {
   t.fillStyle = e.axisLine, t.fillRect(n, 0, 1, s), t.fillRect(0, i, o, 1);
 }
 function vn(t, e, n, i, o, s, r) {
   const l = o.barSpacing(), c = $t(l);
   for (let a = n; a <= i; a++) {
-    const f = e[a], h = f.close >= f.open ? r.up : r.down, u = o.centerX(a), p = Math.round(u), g = Math.round(s.priceToY(f.high)), b = Math.round(s.priceToY(f.low)), A = t.globalAlpha;
-    f.isPrediction && (t.globalAlpha = 0.4), t.fillStyle = h, t.fillRect(p, g, 1, Math.max(1, b - g));
+    const f = e[a], h = f.close >= f.open ? r.up : r.down, u = o.centerX(a), m = Math.round(u), g = Math.round(s.priceToY(f.high)), d = Math.round(s.priceToY(f.low)), k = t.globalAlpha;
+    f.isPrediction && (t.globalAlpha = 0.4), t.fillStyle = h, t.fillRect(m, g, 1, Math.max(1, d - g));
     const T = Math.round(s.priceToY(f.open)), P = Math.round(s.priceToY(f.close));
-    t.fillRect(Math.round(u - c / 2), Math.min(T, P), c, Math.max(1, Math.abs(P - T))), f.isPrediction && (t.globalAlpha = A);
+    t.fillRect(Math.round(u - c / 2), Math.min(T, P), c, Math.max(1, Math.abs(P - T))), f.isPrediction && (t.globalAlpha = k);
   }
 }
-function Ua(t, e, n, i, o, s, r) {
+function ja(t, e, n, i, o, s, r) {
   const l = o.barSpacing(), c = $t(l);
   let a = 0;
   for (let f = n; f <= i; f++)
     e[f].volume > a && (a = e[f].volume);
   for (let f = n; f <= i; f++) {
-    const h = e[f], u = h.close >= h.open ? r.up : r.down, p = o.centerX(f), g = Math.round(p), b = Math.round(s.priceToY(h.high)), A = Math.round(s.priceToY(h.low));
-    t.fillStyle = u, t.fillRect(g, b, 1, Math.max(1, A - b));
+    const h = e[f], u = h.close >= h.open ? r.up : r.down, m = o.centerX(f), g = Math.round(m), d = Math.round(s.priceToY(h.high)), k = Math.round(s.priceToY(h.low));
+    t.fillStyle = u, t.fillRect(g, d, 1, Math.max(1, k - d));
     const T = a > 0 ? h.volume / a : 1, P = Math.max(1, Math.round(c * T)), N = Math.round(s.priceToY(h.open)), L = Math.round(s.priceToY(h.close));
-    t.fillRect(Math.round(p - P / 2), Math.min(N, L), P, Math.max(1, Math.abs(L - N)));
+    t.fillRect(Math.round(m - P / 2), Math.min(N, L), P, Math.max(1, Math.abs(L - N)));
   }
 }
-function ja(t, e, n, i, o, s, r) {
+function Ja(t, e, n, i, o, s, r) {
   const l = o.barSpacing(), c = Math.max(1, Math.floor($t(l) / 2));
   for (let a = n; a <= i; a++) {
-    const f = e[a], h = f.close >= f.open ? r.up : r.down, u = Math.round(o.centerX(a)), p = Math.round(s.priceToY(f.high)), g = Math.round(s.priceToY(f.low)), b = t.globalAlpha;
-    f.isPrediction && (t.globalAlpha = 0.4), t.fillStyle = h, t.fillRect(u, p, 1, Math.max(1, g - p)), t.fillRect(u - c, Math.round(s.priceToY(f.open)), c, 1), t.fillRect(u + 1, Math.round(s.priceToY(f.close)), c, 1), f.isPrediction && (t.globalAlpha = b);
+    const f = e[a], h = f.close >= f.open ? r.up : r.down, u = Math.round(o.centerX(a)), m = Math.round(s.priceToY(f.high)), g = Math.round(s.priceToY(f.low)), d = t.globalAlpha;
+    f.isPrediction && (t.globalAlpha = 0.4), t.fillStyle = h, t.fillRect(u, m, 1, Math.max(1, g - m)), t.fillRect(u - c, Math.round(s.priceToY(f.open)), c, 1), t.fillRect(u + 1, Math.round(s.priceToY(f.close)), c, 1), f.isPrediction && (t.globalAlpha = d);
   }
 }
 function rn(t, e, n, i, o, s) {
@@ -3278,48 +3278,48 @@ function rn(t, e, n, i, o, s) {
     c === r ? t.moveTo(a, f) : t.lineTo(a, f);
   }
 }
-function Ja(t, e, n, i, o, s, r) {
+function Ka(t, e, n, i, o, s, r) {
   n > i || (rn(t, e, n, i, o, s), t.strokeStyle = r.accent, t.lineWidth = 2, t.lineJoin = "round", t.lineCap = "round", t.stroke());
 }
-function Ka(t, e, n, i, o, s, r) {
+function Za(t, e, n, i, o, s, r) {
   if (n > i) return;
   const l = Math.max(0, n - 1), c = Math.min(e.length - 1, i + 1), a = t.createLinearGradient(0, s.top, 0, s.bottom);
   a.addColorStop(0, Ce(r.accent, 0.28)), a.addColorStop(1, Ce(r.accent, 0.02)), rn(t, e, n, i, o, s), t.lineTo(o.centerX(c), s.bottom), t.lineTo(o.centerX(l), s.bottom), t.closePath(), t.fillStyle = a, t.fill(), rn(t, e, n, i, o, s), t.strokeStyle = r.accent, t.lineWidth = 2, t.lineJoin = "round", t.lineCap = "round", t.stroke();
 }
-function Za(t, e, n, i, o, s, r) {
+function Qa(t, e, n, i, o, s, r) {
   if (n > i) return;
   const l = Math.max(0, n - 1), c = Math.min(e.length - 1, i + 1), a = Math.min(i, e.length - 1), f = a > 0 ? e[a - 1].close : e[a].open, u = e[a].close >= f ? r.up : r.down;
   t.beginPath();
-  for (let p = l; p <= c; p++) {
-    const g = o.centerX(p), b = s.priceToY(e[p].high);
-    p === l ? t.moveTo(g, b) : t.lineTo(g, b);
+  for (let m = l; m <= c; m++) {
+    const g = o.centerX(m), d = s.priceToY(e[m].high);
+    m === l ? t.moveTo(g, d) : t.lineTo(g, d);
   }
-  for (let p = c; p >= l; p--)
-    t.lineTo(o.centerX(p), s.priceToY(e[p].low));
+  for (let m = c; m >= l; m--)
+    t.lineTo(o.centerX(m), s.priceToY(e[m].low));
   t.closePath(), t.fillStyle = Ce(u, 0.16), t.fill(), t.beginPath();
-  for (let p = l; p <= c; p++) {
-    const g = o.centerX(p), b = s.priceToY(e[p].close);
-    p === l ? t.moveTo(g, b) : t.lineTo(g, b);
+  for (let m = l; m <= c; m++) {
+    const g = o.centerX(m), d = s.priceToY(e[m].close);
+    m === l ? t.moveTo(g, d) : t.lineTo(g, d);
   }
   t.strokeStyle = u, t.lineWidth = 2, t.lineJoin = "round", t.lineCap = "round", t.stroke();
 }
-function Qa(t, e, n, i, o, s, r) {
+function za(t, e, n, i, o, s, r) {
   const l = o.barSpacing(), c = $t(l);
   for (let a = n; a <= i; a++) {
-    const f = e[a], h = f.close >= f.open, u = h ? r.up : r.down, p = o.centerX(a), g = Math.round(p), b = Math.round(s.priceToY(f.high)), A = Math.round(s.priceToY(f.low)), T = t.globalAlpha;
-    f.isPrediction && (t.globalAlpha = 0.4), t.fillStyle = u, t.fillRect(g, b, 1, Math.max(1, A - b));
-    const P = Math.round(s.priceToY(f.open)), N = Math.round(s.priceToY(f.close)), L = Math.round(p - c / 2), D = Math.min(P, N), O = Math.max(1, Math.abs(N - P));
-    h ? (t.strokeStyle = u, t.lineWidth = 1, t.strokeRect(L + 0.5, D + 0.5, Math.max(1, c - 1), Math.max(1, O - 1))) : t.fillRect(L, D, c, O), f.isPrediction && (t.globalAlpha = T);
-  }
-}
-function za(t, e, n, i, o, s, r) {
-  const l = o.barSpacing(), c = Math.max(1, Math.floor($t(l) / 2));
-  for (let a = n; a <= i; a++) {
-    const f = e[a], h = f.close >= f.open ? r.up : r.down, u = Math.round(o.centerX(a)), p = Math.round(s.priceToY(f.high)), g = Math.round(s.priceToY(f.low));
-    t.fillStyle = h, t.fillRect(u, p, 1, Math.max(1, g - p)), t.fillRect(u + 1, Math.round(s.priceToY(f.close)), c, 1);
+    const f = e[a], h = f.close >= f.open, u = h ? r.up : r.down, m = o.centerX(a), g = Math.round(m), d = Math.round(s.priceToY(f.high)), k = Math.round(s.priceToY(f.low)), T = t.globalAlpha;
+    f.isPrediction && (t.globalAlpha = 0.4), t.fillStyle = u, t.fillRect(g, d, 1, Math.max(1, k - d));
+    const P = Math.round(s.priceToY(f.open)), N = Math.round(s.priceToY(f.close)), L = Math.round(m - c / 2), $ = Math.min(P, N), O = Math.max(1, Math.abs(N - P));
+    h ? (t.strokeStyle = u, t.lineWidth = 1, t.strokeRect(L + 0.5, $ + 0.5, Math.max(1, c - 1), Math.max(1, O - 1))) : t.fillRect(L, $, c, O), f.isPrediction && (t.globalAlpha = T);
   }
 }
 function xa(t, e, n, i, o, s, r) {
+  const l = o.barSpacing(), c = Math.max(1, Math.floor($t(l) / 2));
+  for (let a = n; a <= i; a++) {
+    const f = e[a], h = f.close >= f.open ? r.up : r.down, u = Math.round(o.centerX(a)), m = Math.round(s.priceToY(f.high)), g = Math.round(s.priceToY(f.low));
+    t.fillStyle = h, t.fillRect(u, m, 1, Math.max(1, g - m)), t.fillRect(u + 1, Math.round(s.priceToY(f.close)), c, 1);
+  }
+}
+function tc(t, e, n, i, o, s, r) {
   if (!(n > i)) {
     rn(t, e, n, i, o, s), t.strokeStyle = r.accent, t.lineWidth = 2, t.lineJoin = "round", t.lineCap = "round", t.stroke(), t.fillStyle = r.accent;
     for (let l = n; l <= i; l++) {
@@ -3328,7 +3328,7 @@ function xa(t, e, n, i, o, s, r) {
     }
   }
 }
-function tc(t, e, n, i, o, s, r) {
+function ec(t, e, n, i, o, s, r) {
   if (n > i) return;
   const l = Math.max(0, n - 1), c = Math.min(e.length - 1, i + 1);
   t.beginPath();
@@ -3340,27 +3340,27 @@ function tc(t, e, n, i, o, s, r) {
   }
   t.strokeStyle = r.accent, t.lineWidth = 2, t.lineJoin = "miter", t.lineCap = "butt", t.stroke();
 }
-function ec(t, e, n, i, o, s, r, l) {
+function nc(t, e, n, i, o, s, r, l) {
   if (n > i) return;
   const c = Math.max(0, n - 1), a = Math.min(e.length - 1, i + 1), f = s.priceToY(l), h = () => {
     t.beginPath();
     for (let g = c; g <= a; g++) {
-      const b = o.centerX(g), A = s.priceToY(e[g].close);
-      g === c ? t.moveTo(b, A) : t.lineTo(b, A);
+      const d = o.centerX(g), k = s.priceToY(e[g].close);
+      g === c ? t.moveTo(d, k) : t.lineTo(d, k);
     }
-  }, u = o.centerX(c), p = o.centerX(a);
-  t.save(), t.beginPath(), t.rect(0, s.top, o.plotWidth, Math.max(0, f - s.top)), t.clip(), h(), t.lineTo(p, f), t.lineTo(u, f), t.closePath(), t.fillStyle = Ce(r.up, 0.2), t.fill(), t.restore(), t.save(), t.beginPath(), t.rect(0, f, o.plotWidth, Math.max(0, s.bottom - f)), t.clip(), h(), t.lineTo(p, f), t.lineTo(u, f), t.closePath(), t.fillStyle = Ce(r.down, 0.2), t.fill(), t.restore(), t.lineWidth = 2, t.lineJoin = "round", t.lineCap = "round", t.save(), t.beginPath(), t.rect(0, s.top, o.plotWidth, Math.max(0, f - s.top)), t.clip(), h(), t.strokeStyle = r.up, t.stroke(), t.restore(), t.save(), t.beginPath(), t.rect(0, f, o.plotWidth, Math.max(0, s.bottom - f)), t.clip(), h(), t.strokeStyle = r.down, t.stroke(), t.restore();
+  }, u = o.centerX(c), m = o.centerX(a);
+  t.save(), t.beginPath(), t.rect(0, s.top, o.plotWidth, Math.max(0, f - s.top)), t.clip(), h(), t.lineTo(m, f), t.lineTo(u, f), t.closePath(), t.fillStyle = Ce(r.up, 0.2), t.fill(), t.restore(), t.save(), t.beginPath(), t.rect(0, f, o.plotWidth, Math.max(0, s.bottom - f)), t.clip(), h(), t.lineTo(m, f), t.lineTo(u, f), t.closePath(), t.fillStyle = Ce(r.down, 0.2), t.fill(), t.restore(), t.lineWidth = 2, t.lineJoin = "round", t.lineCap = "round", t.save(), t.beginPath(), t.rect(0, s.top, o.plotWidth, Math.max(0, f - s.top)), t.clip(), h(), t.strokeStyle = r.up, t.stroke(), t.restore(), t.save(), t.beginPath(), t.rect(0, f, o.plotWidth, Math.max(0, s.bottom - f)), t.clip(), h(), t.strokeStyle = r.down, t.stroke(), t.restore();
 }
-function nc(t, e, n, i, o, s, r) {
+function oc(t, e, n, i, o, s, r) {
   const l = o.barSpacing(), c = $t(l), a = s.bottom;
   for (let f = n; f <= i; f++) {
     const h = e[f], u = f > 0 ? e[f - 1].close : h.open;
     t.fillStyle = h.close >= u ? r.up : r.down;
-    const p = Math.round(s.priceToY(h.close)), g = Math.min(p, a);
+    const m = Math.round(s.priceToY(h.close)), g = Math.min(m, a);
     t.fillRect(Math.round(o.centerX(f) - c / 2), g, c, Math.max(1, Math.round(a - g)));
   }
 }
-function oc(t, e, n, i, o, s, r) {
+function ic(t, e, n, i, o, s, r) {
   for (let l = n; l <= i; l++) {
     const c = e[l];
     t.fillStyle = c.close >= c.open ? r.up : r.down;
@@ -3368,31 +3368,31 @@ function oc(t, e, n, i, o, s, r) {
     t.fillRect(a, f, 1, Math.max(1, h - f));
   }
 }
-function ic(t, e, n, i, o, s, r) {
+function sc(t, e, n, i, o, s, r) {
   const l = o.barSpacing(), c = $t(l);
   for (let a = n; a <= i; a++) {
     const f = e[a], h = f.close >= f.open;
     t.fillStyle = h ? r.up : r.down;
-    const u = Math.round(s.priceToY(Math.max(f.open, f.close))), p = Math.round(s.priceToY(Math.min(f.open, f.close)));
-    t.fillRect(Math.round(o.centerX(a) - c / 2), u, c, Math.max(1, p - u));
+    const u = Math.round(s.priceToY(Math.max(f.open, f.close))), m = Math.round(s.priceToY(Math.min(f.open, f.close)));
+    t.fillRect(Math.round(o.centerX(a) - c / 2), u, c, Math.max(1, m - u));
   }
 }
-function sc(t, e, n, i, o, s, r, l) {
+function rc(t, e, n, i, o, s, r, l) {
   if (!(l > 0) || !isFinite(l)) return;
   const c = o.barSpacing(), a = $t(c), f = Math.max(1.5, a / 2 - 1);
   t.save(), t.lineWidth = Math.max(1.5, Math.min(2.5, a / 6)), t.lineCap = "round";
   for (let h = n; h <= i; h++) {
-    const u = e[h], p = u.close >= u.open;
-    t.strokeStyle = p ? r.up : r.down;
-    const g = o.centerX(h), b = Math.max(1, Math.round((u.high - u.low) / l));
-    for (let A = 0; A < b; A++) {
-      const T = s.priceToY(u.low + (A + 1) * l), P = s.priceToY(u.low + A * l), N = (T + P) / 2, L = Math.min(f, Math.abs(P - T) / 2 - 0.5);
-      L <= 0.5 || (t.beginPath(), p ? (t.moveTo(g - L, N - L), t.lineTo(g + L, N + L), t.moveTo(g + L, N - L), t.lineTo(g - L, N + L), t.stroke()) : (t.arc(g, N, L, 0, Math.PI * 2), t.stroke()));
+    const u = e[h], m = u.close >= u.open;
+    t.strokeStyle = m ? r.up : r.down;
+    const g = o.centerX(h), d = Math.max(1, Math.round((u.high - u.low) / l));
+    for (let k = 0; k < d; k++) {
+      const T = s.priceToY(u.low + (k + 1) * l), P = s.priceToY(u.low + k * l), N = (T + P) / 2, L = Math.min(f, Math.abs(P - T) / 2 - 0.5);
+      L <= 0.5 || (t.beginPath(), m ? (t.moveTo(g - L, N - L), t.lineTo(g + L, N + L), t.moveTo(g + L, N - L), t.lineTo(g - L, N + L), t.stroke()) : (t.arc(g, N, L, 0, Math.PI * 2), t.stroke()));
     }
   }
   t.restore();
 }
-function rc(t, e, n, i, o) {
+function lc(t, e, n, i, o) {
   if (!(e.length < 2)) {
     t.save(), t.strokeStyle = o.accent, t.lineJoin = "round", t.lineCap = "butt";
     for (let s = 1; s < e.length; s++) {
@@ -3405,17 +3405,17 @@ function rc(t, e, n, i, o) {
 function fi(t, e, n, i, o, s) {
   const r = e.style ?? "line", l = Math.min(i, e.values.length - 1);
   if (r === "histogram") {
-    const h = o.barSpacing(), u = Math.max(1, Math.floor(h * 0.6) || 1), p = Math.min(Math.max(s.priceToY(0), s.top), s.bottom);
+    const h = o.barSpacing(), u = Math.max(1, Math.floor(h * 0.6) || 1), m = Math.min(Math.max(s.priceToY(0), s.top), s.bottom);
     t.fillStyle = e.color;
     for (let g = Math.max(0, n); g <= l; g++) {
-      const b = e.values[g];
-      if (b == null || !isFinite(b)) continue;
-      const A = s.priceToY(b);
+      const d = e.values[g];
+      if (d == null || !isFinite(d)) continue;
+      const k = s.priceToY(d);
       t.fillRect(
         Math.round(o.centerX(g) - u / 2),
-        Math.round(Math.min(A, p)),
+        Math.round(Math.min(k, m)),
         u,
-        Math.max(1, Math.round(Math.abs(p - A)))
+        Math.max(1, Math.round(Math.abs(m - k)))
       );
     }
     return;
@@ -3429,12 +3429,12 @@ function fi(t, e, n, i, o, s) {
       f = !1;
       continue;
     }
-    const p = o.centerX(h), g = s.priceToY(u);
-    f ? t.lineTo(p, g) : (t.moveTo(p, g), f = !0);
+    const m = o.centerX(h), g = s.priceToY(u);
+    f ? t.lineTo(m, g) : (t.moveTo(m, g), f = !0);
   }
   t.strokeStyle = e.color, t.lineWidth = 1.5, t.lineJoin = "round", t.stroke();
 }
-function lc(t, e, n, i, o, s) {
+function ac(t, e, n, i, o, s) {
   const r = (l) => o.centerX(i + l);
   if (t.save(), t.lineJoin = "round", t.lineCap = "round", n && n.upper.length >= 2 && n.lower.length >= 2) {
     t.beginPath();
@@ -3459,19 +3459,19 @@ function lc(t, e, n, i, o, s) {
     }
   t.restore();
 }
-function ac(t, e, n, i, o, s, r, l, c) {
+function cc(t, e, n, i, o, s, r, l, c) {
   const a = n ? 0.4 : 1;
   if (t.save(), t.globalAlpha = a, r) {
-    const b = Math.round(o) + 0.5;
-    t.strokeStyle = e, t.lineWidth = 1, t.setLineDash([5, 4]), t.beginPath(), t.moveTo(0, b), t.lineTo(l, b), t.stroke(), t.setLineDash([]);
+    const d = Math.round(o) + 0.5;
+    t.strokeStyle = e, t.lineWidth = 1, t.setLineDash([5, 4]), t.beginPath(), t.moveTo(0, d), t.lineTo(l, d), t.stroke(), t.setLineDash([]);
   }
-  const f = 18, h = Math.round(s), u = 14, p = l + 1, g = c - 1;
-  return t.fillStyle = e, t.fillRect(p, h - f / 2, g, f), cc(t, p + u / 2 + 2, h, "#ffffff"), t.font = Yt, t.fillStyle = "#ffffff", t.textAlign = "left", t.textBaseline = "middle", t.fillText(i, p + u + 4, h + 0.5), t.restore(), { x: p, y: h - f / 2, width: g, height: f };
+  const f = 18, h = Math.round(s), u = 14, m = l + 1, g = c - 1;
+  return t.fillStyle = e, t.fillRect(m, h - f / 2, g, f), fc(t, m + u / 2 + 2, h, "#ffffff"), t.font = Yt, t.fillStyle = "#ffffff", t.textAlign = "left", t.textBaseline = "middle", t.fillText(i, m + u + 4, h + 0.5), t.restore(), { x: m, y: h - f / 2, width: g, height: f };
 }
-function cc(t, e, n, i) {
+function fc(t, e, n, i) {
   t.save(), t.fillStyle = i, t.strokeStyle = i, t.lineWidth = 1, t.lineJoin = "round", t.beginPath(), t.moveTo(e, n - 5), t.lineTo(e, n - 4), t.moveTo(e - 3.5, n + 2), t.quadraticCurveTo(e - 3.5, n - 4, e, n - 4), t.quadraticCurveTo(e + 3.5, n - 4, e + 3.5, n + 2), t.lineTo(e - 3.5, n + 2), t.closePath(), t.fill(), t.beginPath(), t.arc(e, n + 3.2, 1, 0, Math.PI * 2), t.fill(), t.restore();
 }
-function fc(t, e, n, i, o) {
+function hc(t, e, n, i, o) {
   t.save(), t.strokeStyle = e.guide, t.lineWidth = 1, t.setLineDash([4, 4]);
   for (const s of o) {
     const r = Math.round(i.priceToY(s)) + 0.5;
@@ -3491,7 +3491,7 @@ function ui(t, e, n, i) {
   for (const o of i)
     t.fillText(o.label, n + 7, o.y);
 }
-function hc(t, e, n, i) {
+function uc(t, e, n, i) {
   t.font = Yt, t.fillStyle = e.mutedText, t.textAlign = "center", t.textBaseline = "middle";
   for (const o of n)
     t.fillText(o.label, o.x, i);
@@ -3500,21 +3500,25 @@ function pi(t, e, n, i, o, s, r) {
   const c = Math.round(n);
   t.fillStyle = s, t.fillRect(i + 1, c - 18 / 2, o - 1, 18), t.font = Yt, t.fillStyle = r, t.textAlign = "left", t.textBaseline = "middle", t.fillText(e, i + 7, c + 0.5);
 }
-function uc(t, e, n, i, o, s, r) {
+function pc(t, e, n, i, o, s) {
+  const l = Math.round(n);
+  t.fillStyle = s.crosshairTagBg, t.fillRect(i + 1, l - 15 / 2, o - 1, 15), t.font = Ya, t.fillStyle = s.crosshairTagText, t.textAlign = "center", t.textBaseline = "middle", t.fillText(e, i + 1 + (o - 1) / 2, l + 0.5);
+}
+function mc(t, e, n, i, o, s, r) {
   t.font = Yt;
   const l = t.measureText(n).width + 14, c = Math.min(Math.max(i - l / 2, 0), Math.max(0, o - l)), a = 18, f = s + (r - a) / 2 + 1;
   t.fillStyle = e.crosshairTagBg, t.fillRect(c, f, l, a), t.fillStyle = e.crosshairTagText, t.textAlign = "center", t.textBaseline = "middle", t.fillText(n, c + l / 2, f + a / 2 + 0.5);
 }
-function pc(t, e, n, i) {
+function gc(t, e, n, i) {
   t.save(), t.strokeStyle = e, t.lineWidth = 1, t.setLineDash([1.5, 3]), t.beginPath(), t.moveTo(0, n), t.lineTo(i, n), t.stroke(), t.restore();
 }
-function mc(t, e, n, i) {
+function yc(t, e, n, i) {
   t.save(), t.strokeStyle = e.crosshair, t.lineWidth = 1, t.setLineDash([3, 3]), t.beginPath(), t.moveTo(n, 0), t.lineTo(n, i), t.stroke(), t.restore();
 }
-function gc(t, e, n, i) {
+function dc(t, e, n, i) {
   t.save(), t.strokeStyle = e.crosshair, t.lineWidth = 1, t.setLineDash([3, 3]), t.beginPath(), t.moveTo(0, n), t.lineTo(i, n), t.stroke(), t.restore();
 }
-function yc(t, e, n, i) {
+function bc(t, e, n, i) {
   t.save(), t.strokeStyle = i, t.lineWidth = 1.5, t.beginPath(), t.arc(e, n, 5, 0, Math.PI * 2), t.stroke(), t.restore();
 }
 function Wn(t, e, n, i) {
@@ -3524,7 +3528,7 @@ function Wn(t, e, n, i) {
     t.fillStyle = s.color, t.fillText(s.text, o, i), o += t.measureText(s.text).width + 8;
   return o;
 }
-function bc(t, e) {
+function Tc(t, e) {
   const n = /* @__PURE__ */ new Map();
   let i = !1, o = null, s = 0;
   const r = (T, P) => {
@@ -3559,12 +3563,12 @@ function bc(t, e) {
       const { x: P, y: N } = r(T.clientX, T.clientY);
       e.pointerMove(P, N, T);
     } else if (n.size === 2) {
-      const P = Array.from(n.values()), N = P[0].clientX - P[1].clientX, L = P[0].clientY - P[1].clientY, D = Math.hypot(N, L);
-      if (s > 0 && D > 0) {
+      const P = Array.from(n.values()), N = P[0].clientX - P[1].clientX, L = P[0].clientY - P[1].clientY, $ = Math.hypot(N, L);
+      if (s > 0 && $ > 0) {
         const O = (P[0].clientX + P[1].clientX) / 2, G = (P[0].clientY + P[1].clientY) / 2, { x: U } = r(O, G);
-        e.pinch(U, D / s);
+        e.pinch(U, $ / s);
       }
-      s = D;
+      s = $;
     }
   }, a = (T) => {
     if (n.has(T.pointerId)) {
@@ -3587,43 +3591,52 @@ function bc(t, e) {
     T.preventDefault();
     const P = t.getBoundingClientRect(), N = T.clientX - P.left, L = T.clientY - P.top;
     e.wheel(N, L, T);
-  }, p = (T) => {
+  }, m = (T) => {
     const P = t.getBoundingClientRect(), N = T.clientX - P.left, L = T.clientY - P.top;
     e.doubleClick(N, L, T);
   }, g = (T) => {
     T.preventDefault();
     const P = t.getBoundingClientRect(), N = T.clientX - P.left, L = T.clientY - P.top;
     e.contextMenu(N, L, T);
-  }, b = (T) => {
+  }, d = (T) => {
     n.size === 0 && e.pointerLeave();
-  }, A = (T) => {
+  }, k = (T) => {
     e.keyDown(T);
   };
-  return t.addEventListener("pointerdown", l), t.addEventListener("pointermove", c), t.addEventListener("pointerleave", b), t.addEventListener("wheel", u, { passive: !1 }), t.addEventListener("dblclick", p), t.addEventListener("contextmenu", g), window.addEventListener("keydown", A), () => {
-    t.removeEventListener("pointerdown", l), t.removeEventListener("pointermove", c), t.removeEventListener("pointerleave", b), t.removeEventListener("wheel", u), t.removeEventListener("dblclick", p), t.removeEventListener("contextmenu", g), window.removeEventListener("pointermove", f), window.removeEventListener("pointerup", h), window.removeEventListener("pointercancel", h), window.removeEventListener("keydown", A);
+  return t.addEventListener("pointerdown", l), t.addEventListener("pointermove", c), t.addEventListener("pointerleave", d), t.addEventListener("wheel", u, { passive: !1 }), t.addEventListener("dblclick", m), t.addEventListener("contextmenu", g), window.addEventListener("keydown", k), () => {
+    t.removeEventListener("pointerdown", l), t.removeEventListener("pointermove", c), t.removeEventListener("pointerleave", d), t.removeEventListener("wheel", u), t.removeEventListener("dblclick", m), t.removeEventListener("contextmenu", g), window.removeEventListener("pointermove", f), window.removeEventListener("pointerup", h), window.removeEventListener("pointercancel", h), window.removeEventListener("keydown", k);
   };
 }
-const dc = 64, Tc = 26, Mc = 110, Dn = 1, Yn = 3, $n = 160, Ze = 5, wc = 10, Sc = 50, Tt = 18, On = 4, Pc = 180, mi = 3, Ac = 400, gi = 5;
-function ht(t, e, n) {
+const Mc = 64, wc = 26, Sc = 110, Dn = 1, Yn = 3, $n = 160, Ze = 5, Pc = 10, Ac = 50, Tt = 18, On = 4, kc = 180, mi = 3, Lc = 400, gi = 5;
+function ut(t, e, n) {
   return Math.min(Math.max(t, e), n);
 }
-function kc(t) {
+function Ic(t) {
+  let e = Math.floor(t / 1e3);
+  const n = Math.floor(e / 86400);
+  e -= n * 86400;
+  const i = Math.floor(e / 3600);
+  e -= i * 3600;
+  const o = Math.floor(e / 60), s = e - o * 60, r = (l) => String(l).padStart(2, "0");
+  return n > 0 ? `${n}d ${r(i)}:${r(o)}` : i > 0 ? `${i}:${r(o)}:${r(s)}` : `${r(o)}:${r(s)}`;
+}
+function Nc(t) {
   if (!(t instanceof HTMLElement)) return !1;
   const e = t.tagName;
   return e === "INPUT" || e === "TEXTAREA" || e === "SELECT" || t.isContentEditable;
 }
-function df(t, e) {
+function wf(t, e) {
   const n = document.createElement("canvas");
   n.style.display = "block", n.style.touchAction = "none";
   const i = n.getContext("2d");
   if (!i) throw new Error("CandL chart: 2d canvas context unavailable");
   const o = i;
   t.appendChild(n);
-  let s = e.theme, r = e.pricePrecision, l = e.chartType, c = e.timeAxisHeight !== void 0 ? e.timeAxisHeight : Tc, a = [], f = [], h = null, u = 0, p = [], g = null, b = !1, A = [], T = null, P = [], N = [], L = null, D = [], O = null, G = null, U = [], j = !1, K = 6e4, x = "auto", Q = null, Ot = !1, fn = null, We = null, E = null, J = null, hn = !0, De = !1, Qt = 0, zt = 1;
-  const st = { width: 0, height: 0 }, C = new Ya();
+  let s = e.theme, r = e.pricePrecision, l = e.chartType, c = e.timeAxisHeight !== void 0 ? e.timeAxisHeight : wc, a = [], f = [], h = null, u = 0, m = [], g = null, d = !1, k = [], T = null, P = [], N = [], L = null, $ = [], O = null, G = null, U = [], j = !1, K = 6e4, x = "auto", z = null, Ot = !1, fn = null, We = null, E = null, J = null, hn = !0, De = !1, Qt = 0, zt = 1;
+  const rt = { width: 0, height: 0 }, C = new $a();
   function Ye() {
-    const m = t.clientWidth, y = t.clientHeight;
-    zt = Math.max(1, window.devicePixelRatio || 1), st.width = m, st.height = y, n.width = Math.max(1, Math.round(m * zt)), n.height = Math.max(1, Math.round(y * zt)), n.style.width = `${m}px`, n.style.height = `${y}px`, o.setTransform(zt, 0, 0, zt, 0, 0);
+    const p = t.clientWidth, y = t.clientHeight;
+    zt = Math.max(1, window.devicePixelRatio || 1), rt.width = p, rt.height = y, n.width = Math.max(1, Math.round(p * zt)), n.height = Math.max(1, Math.round(y * zt)), n.style.width = `${p}px`, n.style.height = `${y}px`, o.setTransform(zt, 0, 0, zt, 0, 0);
   }
   function B() {
     De || Qt !== 0 || (Qt = requestAnimationFrame(() => {
@@ -3631,151 +3644,151 @@ function df(t, e) {
     }));
   }
   const os = setInterval(B, 1e3);
-  function at() {
-    const m = st.width, y = st.height, d = Math.max(0, m - dc), M = p.filter((X) => X.placement === "pane"), S = M.length, k = Math.max(0, y - c), F = Math.max(0, k - S * Dn);
-    let R = S > 0 ? Mc : 0, W = F - S * R;
-    S > 0 && W < 120 && (R = Math.max(40, Math.floor((F - 120) / S)), W = Math.max(0, F - S * R));
-    const Y = [{ kind: "main", top: 0, height: W }];
-    let $ = W;
+  function ct() {
+    const p = rt.width, y = rt.height, b = Math.max(0, p - Mc), M = m.filter((X) => X.placement === "pane"), S = M.length, A = Math.max(0, y - c), F = Math.max(0, A - S * Dn);
+    let R = S > 0 ? Sc : 0, v = F - S * R;
+    S > 0 && v < 120 && (R = Math.max(40, Math.floor((F - 120) / S)), v = Math.max(0, F - S * R));
+    const D = [{ kind: "main", top: 0, height: v }];
+    let Y = v;
     for (const X of M)
-      $ += Dn, Y.push({ kind: "indicator", top: $, height: R, indicator: X }), $ += R;
-    return C.plotWidth = d, { width: m, height: y, plotWidth: d, timeAxisTop: k, panes: Y };
+      Y += Dn, D.push({ kind: "indicator", top: Y, height: R, indicator: X }), Y += R;
+    return C.plotWidth = b, { width: p, height: y, plotWidth: b, timeAxisTop: A, panes: D };
   }
-  function is(m, y) {
-    for (let d = 0; d < y.panes.length; d++) {
-      const M = y.panes[d];
-      if (m >= M.top && m < M.top + M.height) return d;
+  function is(p, y) {
+    for (let b = 0; b < y.panes.length; b++) {
+      const M = y.panes[b];
+      if (p >= M.top && p < M.top + M.height) return b;
     }
     return -1;
   }
-  function ct(m) {
-    if (x === "manual" && Q !== null)
+  function ft(p) {
+    if (x === "manual" && z !== null)
       return new we(
-        m.top,
-        m.height,
-        Q.min,
-        Q.max,
-        Ot && Q.min > 0
+        p.top,
+        p.height,
+        z.min,
+        z.max,
+        Ot && z.min > 0
       );
-    const y = C.visibleRange(), d = y.from, M = Math.min(y.to, mt() - 1);
-    let S = 1 / 0, k = -1 / 0;
-    if (f.length > 0 && d <= M) {
+    const y = C.visibleRange(), b = y.from, M = Math.min(y.to, dt() - 1);
+    let S = 1 / 0, A = -1 / 0;
+    if (f.length > 0 && b <= M) {
       const R = l === "line" || l === "area" || l === "linemarkers" || l === "step" || l === "baseline" || l === "columns" || l === "kagi";
-      for (let W = d; W <= M; W++) {
-        const Y = f[W];
-        R ? (Y.close < S && (S = Y.close), Y.close > k && (k = Y.close)) : (Y.low < S && (S = Y.low), Y.high > k && (k = Y.high));
+      for (let v = b; v <= M; v++) {
+        const D = f[v];
+        R ? (D.close < S && (S = D.close), D.close > A && (A = D.close)) : (D.low < S && (S = D.low), D.high > A && (A = D.high));
       }
-      if (!Me(l)) {
-        for (const W of p)
-          if (W.placement === "overlay")
-            for (const Y of W.outputs) {
-              const $ = Math.min(M, Y.values.length - 1);
-              for (let X = d; X <= $; X++) {
-                const z = Y.values[X];
-                z == null || !isFinite(z) || (z < S && (S = z), z > k && (k = z));
+      if (!se(l)) {
+        for (const v of m)
+          if (v.placement === "overlay")
+            for (const D of v.outputs) {
+              const Y = Math.min(M, D.values.length - 1);
+              for (let X = b; X <= Y; X++) {
+                const Z = D.values[X];
+                Z == null || !isFinite(Z) || (Z < S && (S = Z), Z > A && (A = Z));
               }
             }
       }
     }
-    if (f.length > 0 && (A.length > 0 || T !== null)) {
-      const R = f.length - 1, W = (Y) => {
-        for (const $ of Y) {
-          const X = R + $.barOffset + 0.5;
-          X < C.view.start - 1 || X > C.view.end + 1 || isFinite($.price) && ($.price < S && (S = $.price), $.price > k && (k = $.price));
+    if (f.length > 0 && (k.length > 0 || T !== null)) {
+      const R = f.length - 1, v = (D) => {
+        for (const Y of D) {
+          const X = R + Y.barOffset + 0.5;
+          X < C.view.start - 1 || X > C.view.end + 1 || isFinite(Y.price) && (Y.price < S && (S = Y.price), Y.price > A && (A = Y.price));
         }
       };
-      for (const Y of A) W(Y.points);
-      T && (W(T.upper), W(T.lower));
+      for (const D of k) v(D.points);
+      T && (v(T.upper), v(T.lower));
     }
-    if ((!isFinite(S) || !isFinite(k)) && (S = 0, k = 1), S === k) {
+    if ((!isFinite(S) || !isFinite(A)) && (S = 0, A = 1), S === A) {
       const R = Math.abs(S) * 0.01 || 1;
-      S -= R, k += R;
+      S -= R, A += R;
     }
     if (Ot && S > 0) {
-      const R = Math.log(S), W = Math.log(k), Y = (W - R) * 0.08;
-      return new we(m.top, m.height, Math.exp(R - Y), Math.exp(W + Y), !0);
+      const R = Math.log(S), v = Math.log(A), D = (v - R) * 0.08;
+      return new we(p.top, p.height, Math.exp(R - D), Math.exp(v + D), !0);
     }
-    const F = (k - S) * 0.08;
-    return new we(m.top, m.height, S - F, k + F);
+    const F = (A - S) * 0.08;
+    return new we(p.top, p.height, S - F, A + F);
   }
-  function ss(m) {
-    const y = m.indicator;
+  function ss(p) {
+    const y = p.indicator;
     if (y.range)
-      return new we(m.top, m.height, y.range[0], y.range[1]);
-    const d = C.visibleRange(), M = d.from, S = Math.min(d.to, mt() - 1);
-    let k = 1 / 0, F = -1 / 0, R = !1;
-    for (const Y of y.outputs) {
-      (Y.style ?? "line") === "histogram" && (R = !0);
-      const $ = Math.min(S, Y.values.length - 1);
-      for (let X = Math.max(0, M); X <= $; X++) {
-        const z = Y.values[X];
-        z == null || !isFinite(z) || (z < k && (k = z), z > F && (F = z));
+      return new we(p.top, p.height, y.range[0], y.range[1]);
+    const b = C.visibleRange(), M = b.from, S = Math.min(b.to, dt() - 1);
+    let A = 1 / 0, F = -1 / 0, R = !1;
+    for (const D of y.outputs) {
+      (D.style ?? "line") === "histogram" && (R = !0);
+      const Y = Math.min(S, D.values.length - 1);
+      for (let X = Math.max(0, M); X <= Y; X++) {
+        const Z = D.values[X];
+        Z == null || !isFinite(Z) || (Z < A && (A = Z), Z > F && (F = Z));
       }
     }
-    if (R && (k > 0 && (k = 0), F < 0 && (F = 0)), (!isFinite(k) || !isFinite(F)) && (k = 0, F = 1), k === F) {
-      const Y = Math.abs(k) * 0.01 || 1;
-      k -= Y, F += Y;
+    if (R && (A > 0 && (A = 0), F < 0 && (F = 0)), (!isFinite(A) || !isFinite(F)) && (A = 0, F = 1), A === F) {
+      const D = Math.abs(A) * 0.01 || 1;
+      A -= D, F += D;
     }
-    const W = (F - k) * 0.08;
-    return new we(m.top, m.height, k - W, F + W);
+    const v = (F - A) * 0.08;
+    return new we(p.top, p.height, A - v, F + v);
   }
-  function xt(m) {
+  function xt(p) {
     return {
       timeToX: (y) => C.timeToX(y),
       xToTime: (y) => C.xToTime(y),
-      priceToY: (y) => m.priceToY(y),
-      yToPrice: (y) => m.yToPrice(y)
+      priceToY: (y) => p.priceToY(y),
+      yToPrice: (y) => p.yToPrice(y)
     };
   }
   let go = null;
   function yo() {
-    const m = f.length, y = m > 0 ? f[m - 1] : null, d = go;
-    if (d !== null && d.mode === x && d.log === Ot && d.manualMin === (Q !== null ? Q.min : NaN) && d.manualMax === (Q !== null ? Q.max : NaN) && d.viewStart === C.view.start && d.viewEnd === C.view.end && d.width === st.width && d.height === st.height && d.seriesRef === f && d.seriesCount === m && d.indicatorsRef === p && d.projLinesRef === A && d.projBandRef === T && d.type === l && (y === null || d.lastHigh === y.high && d.lastLow === y.low && d.lastClose === y.close))
-      return d.scale;
-    const M = ct(at().panes[0]);
+    const p = f.length, y = p > 0 ? f[p - 1] : null, b = go;
+    if (b !== null && b.mode === x && b.log === Ot && b.manualMin === (z !== null ? z.min : NaN) && b.manualMax === (z !== null ? z.max : NaN) && b.viewStart === C.view.start && b.viewEnd === C.view.end && b.width === rt.width && b.height === rt.height && b.seriesRef === f && b.seriesCount === p && b.indicatorsRef === m && b.projLinesRef === k && b.projBandRef === T && b.type === l && (y === null || b.lastHigh === y.high && b.lastLow === y.low && b.lastClose === y.close))
+      return b.scale;
+    const M = ft(ct().panes[0]);
     return go = {
       scale: M,
       viewStart: C.view.start,
       viewEnd: C.view.end,
-      width: st.width,
-      height: st.height,
+      width: rt.width,
+      height: rt.height,
       seriesRef: f,
-      seriesCount: m,
+      seriesCount: p,
       lastHigh: y !== null ? y.high : NaN,
       lastLow: y !== null ? y.low : NaN,
       lastClose: y !== null ? y.close : NaN,
-      indicatorsRef: p,
-      projLinesRef: A,
+      indicatorsRef: m,
+      projLinesRef: k,
       projBandRef: T,
       type: l,
       mode: x,
       log: Ot,
-      manualMin: Q !== null ? Q.min : NaN,
-      manualMax: Q !== null ? Q.max : NaN
+      manualMin: z !== null ? z.min : NaN,
+      manualMax: z !== null ? z.max : NaN
     }, M;
   }
   const rs = {
-    timeToX: (m) => C.timeToX(m),
-    xToTime: (m) => C.xToTime(m),
-    priceToY: (m) => yo().priceToY(m),
-    yToPrice: (m) => yo().yToPrice(m)
+    timeToX: (p) => C.timeToX(p),
+    xToTime: (p) => C.xToTime(p),
+    priceToY: (p) => yo().priceToY(p),
+    yToPrice: (p) => yo().yToPrice(p)
   };
   function ls() {
-    const m = a.length;
-    if (m < 2) {
+    const p = a.length;
+    if (p < 2) {
       K = C.intervalMs || 6e4;
       return;
     }
     const y = [];
-    for (let d = 1; d < m; d++) {
-      const M = a[d].time - a[d - 1].time;
+    for (let b = 1; b < p; b++) {
+      const M = a[b].time - a[b - 1].time;
       M > 0 && y.push(M);
     }
     if (y.length === 0) {
       K = C.intervalMs || 6e4;
       return;
     }
-    y.sort((d, M) => d - M), K = y[y.length >> 1];
+    y.sort((b, M) => b - M), K = y[y.length >> 1];
   }
   function $e() {
     switch (u = 0, l) {
@@ -3789,16 +3802,16 @@ function df(t, e) {
         f = Ra(a, 3), h = null;
         break;
       case "pnf": {
-        const m = Fa(a);
-        u = m, f = _a(a, m, 3), h = null;
+        const p = Fa(a);
+        u = p, f = _a(a, p, 3), h = null;
         break;
       }
       case "range":
         f = va(a, Ea(a)), h = null;
         break;
       case "kagi": {
-        const m = Wa(a, 0.04);
-        h = m, f = m.map((y) => ({
+        const p = Wa(a, 0.04);
+        h = p, f = p.map((y) => ({
           time: y.time,
           open: y.price,
           high: y.price,
@@ -3812,32 +3825,32 @@ function df(t, e) {
         f = a, h = null;
         break;
     }
-    C.setTimes(f.map((m) => m.time));
+    C.setTimes(f.map((p) => p.time));
   }
-  function mt() {
-    const m = f.length;
-    return g === null ? m : Math.min(g + 1, m);
+  function dt() {
+    const p = f.length;
+    return g === null ? p : Math.min(g + 1, p);
   }
   function bo() {
     if (g === null) return;
-    const m = f.length;
-    if (m === 0) {
+    const p = f.length;
+    if (p === 0) {
       g = null;
       return;
     }
-    g = ht(g, 0, m - 1);
+    g = ut(g, 0, p - 1);
   }
-  function ge() {
+  function ye() {
     return { candles: a, pricePrecision: r, barMs: K };
   }
-  function Oe(m) {
-    return L ? L.upColor : m.up;
+  function Oe(p) {
+    return L ? L.upColor : p.up;
   }
-  function Be(m) {
-    return L ? L.downColor : m.down;
+  function Be(p) {
+    return L ? L.downColor : p.down;
   }
-  function as(m) {
-    return L ? { ...m, up: L.upColor, down: L.downColor, accent: L.upColor } : m;
+  function as(p) {
+    return L ? { ...p, up: L.upColor, down: L.downColor, accent: L.upColor } : p;
   }
   function cs() {
     return L ? L.gridVisible : !0;
@@ -3845,173 +3858,173 @@ function df(t, e) {
   function fs() {
     return L ? L.crosshairVisible : !0;
   }
-  function Xe(m, y, d) {
-    const M = d.xToTime(m), S = d.yToPrice(y);
+  function Xe(p, y, b) {
+    const M = b.xToTime(p), S = b.yToPrice(y);
     if (!j || a.length === 0) return { time: M, price: S, snapped: !1 };
-    const k = Math.floor(C.xToIndex(m));
-    if (k < 0 || k >= a.length) return { time: M, price: S, snapped: !1 };
-    const F = a[k];
-    let R = S, W = 1 / 0;
-    for (const Y of [F.open, F.high, F.low, F.close]) {
-      const $ = Math.abs(d.priceToY(Y) - y);
-      $ < W && (W = $, R = Y);
+    const A = Math.floor(C.xToIndex(p));
+    if (A < 0 || A >= a.length) return { time: M, price: S, snapped: !1 };
+    const F = a[A];
+    let R = S, v = 1 / 0;
+    for (const D of [F.open, F.high, F.low, F.close]) {
+      const Y = Math.abs(b.priceToY(D) - y);
+      Y < v && (v = Y, R = D);
     }
-    return W <= Sc ? { time: M, price: R, snapped: !0 } : { time: M, price: S, snapped: !1 };
+    return v <= Ac ? { time: M, price: R, snapped: !0 } : { time: M, price: S, snapped: !1 };
   }
   function To() {
-    return Math.max(60, Math.round(mt() * 1.2) + Ze * 2);
+    return Math.max(60, Math.round(dt() * 1.2) + Ze * 2);
   }
   function Ct() {
-    const m = mt();
-    if (m === 0) return;
-    let { start: y, end: d } = C.view;
-    const M = d - y, S = Math.min(m, 2);
-    d < S && (d = S, y = d - M);
-    const k = m - 2;
-    y > k && (y = k, d = y + M), C.view = { start: y, end: d };
+    const p = dt();
+    if (p === 0) return;
+    let { start: y, end: b } = C.view;
+    const M = b - y, S = Math.min(p, 2);
+    b < S && (b = S, y = b - M);
+    const A = p - 2;
+    y > A && (y = A, b = y + M), C.view = { start: y, end: b };
   }
-  function un(m) {
-    return Math.min(Ze, Math.max(0, Math.floor(m / 3)));
+  function un(p) {
+    return Math.min(Ze, Math.max(0, Math.floor(p / 3)));
   }
-  function Mo(m) {
-    if (g === null || !b || !(g >= m.start && g <= m.end - un(m.end - m.start))) return;
-    let { start: d, end: M } = C.view;
-    const S = M - d, k = un(S);
-    g >= d && g <= M - k || (g < d ? (d = g, M = d + S) : (M = g + 1 + k, d = M - S), C.view = { start: d, end: M });
+  function Mo(p) {
+    if (g === null || !d || !(g >= p.start && g <= p.end - un(p.end - p.start))) return;
+    let { start: b, end: M } = C.view;
+    const S = M - b, A = un(S);
+    g >= b && g <= M - A || (g < b ? (b = g, M = b + S) : (M = g + 1 + A, b = M - S), C.view = { start: b, end: M });
   }
   function te() {
-    var m;
-    hn && C.count > 0 && C.view.start <= wc && (hn = !1, (m = e.onRequestHistory) == null || m.call(e));
+    var p;
+    hn && C.count > 0 && C.view.start <= Pc && (hn = !1, (p = e.onRequestHistory) == null || p.call(e));
   }
-  function hs(m) {
-    C.view = { start: C.view.start + m, end: C.view.end + m }, Ct(), te(), B();
+  function hs(p) {
+    C.view = { start: C.view.start + p, end: C.view.end + p }, Ct(), te(), B();
   }
   function ee() {
     pn();
-    const m = mt();
-    if (m === 0) {
+    const p = dt();
+    if (p === 0) {
       C.view = { start: -$n / 2, end: $n / 2 };
       return;
     }
-    const y = m + Ze, d = Math.min($n, Math.max(Yn, m) + Ze);
-    C.view = { start: y - d, end: y };
+    const y = p + Ze, b = Math.min($n, Math.max(Yn, p) + Ze);
+    C.view = { start: y - b, end: y };
   }
   function us() {
-    return ct(at().panes[0]);
+    return ft(ct().panes[0]);
   }
   function ps() {
-    const m = us();
-    Q = { min: m.min, max: m.max }, x = "manual";
+    const p = us();
+    z = { min: p.min, max: p.max }, x = "manual";
   }
   function pn() {
-    x = "auto", Q = null;
+    x = "auto", z = null;
   }
-  function ye() {
-    var m;
-    (m = e.onDrawingsChange) == null || m.call(e, P.slice());
+  function de() {
+    var p;
+    (p = e.onDrawingsChange) == null || p.call(e, P.slice());
   }
-  function wo(m, y) {
-    const d = P.findIndex((M) => M.id === m);
-    d >= 0 && (P[d] = y);
+  function wo(p, y) {
+    const b = P.findIndex((M) => M.id === p);
+    b >= 0 && (P[b] = y);
   }
-  function Bt(m) {
-    var d;
-    if (O === m) return;
-    O = m;
-    const y = m !== null ? P.find((M) => M.id === m) ?? null : null;
-    (d = e.onSelectionChange) == null || d.call(e, y);
+  function Bt(p) {
+    var b;
+    if (O === p) return;
+    O = p;
+    const y = p !== null ? P.find((M) => M.id === p) ?? null : null;
+    (b = e.onSelectionChange) == null || b.call(e, y);
   }
   function ms() {
     var y;
-    const m = O !== null ? P.find((d) => d.id === O) ?? null : null;
-    (y = e.onSelectionChange) == null || y.call(e, m);
+    const p = O !== null ? P.find((b) => b.id === O) ?? null : null;
+    (y = e.onSelectionChange) == null || y.call(e, p);
   }
   function So() {
-    var m;
-    U = [], G !== null && (G = null, (m = e.onActiveToolChange) == null || m.call(e, null)), B();
+    var p;
+    U = [], G !== null && (G = null, (p = e.onActiveToolChange) == null || p.call(e, null)), B();
   }
-  function Po(m) {
-    var y, d;
-    P.push(m), O = m.id, U = [], G = null, ye(), (y = e.onActiveToolChange) == null || y.call(e, null), (d = e.onSelectionChange) == null || d.call(e, m);
+  function Po(p) {
+    var y, b;
+    P.push(p), O = p.id, U = [], G = null, de(), (y = e.onActiveToolChange) == null || y.call(e, null), (b = e.onSelectionChange) == null || b.call(e, p);
   }
-  function gs(m, y, d) {
+  function gs(p, y, b) {
     const M = G;
     if (!M) return;
     const S = Ke(M);
     if (S < 1) return;
-    const k = ct(d.panes[0]), F = xt(k), R = Xe(m, y, F);
+    const A = ft(b.panes[0]), F = xt(A), R = Xe(p, y, F);
     if (U.push({ time: R.time, price: R.price }), U.length >= S) {
-      const W = ge();
-      let Y = _n(M, U[0]);
-      Y.points = U.slice(0, S);
-      const $ = po(M);
-      $.expandOnCommit && (Y = $.expandOnCommit(Y, W)), Po(Y);
+      const v = ye();
+      let D = _n(M, U[0]);
+      D.points = U.slice(0, S);
+      const Y = po(M);
+      Y.expandOnCommit && (D = Y.expandOnCommit(D, v)), Po(D);
     }
     B();
   }
-  function ys(m, y, d) {
+  function ys(p, y, b) {
     const M = G;
     if (!M) return;
-    const S = xt(ct(d.panes[0]));
-    E = { mode: "freehand", drawing: _n(M, { time: S.xToTime(m), price: S.yToPrice(y) }), lastPx: m, lastPy: y }, B();
+    const S = xt(ft(b.panes[0]));
+    E = { mode: "freehand", drawing: _n(M, { time: S.xToTime(p), price: S.yToPrice(y) }), lastPx: p, lastPy: y }, B();
   }
-  function bs(m, y) {
-    const d = G;
-    if (!d) return null;
-    const M = Ke(d);
+  function ds(p, y) {
+    const b = G;
+    if (!b) return null;
+    const M = Ke(b);
     if (M < 1) return null;
-    const S = J !== null && J.x >= 0 && J.x <= C.plotWidth && J.y >= y.top && J.y < y.top + y.height, k = U.slice();
-    if (S && J && k.length < M) {
-      const R = Xe(J.x, J.y, m);
-      k.push({ time: R.time, price: R.price });
+    const S = J !== null && J.x >= 0 && J.x <= C.plotWidth && J.y >= y.top && J.y < y.top + y.height, A = U.slice();
+    if (S && J && A.length < M) {
+      const R = Xe(J.x, J.y, p);
+      A.push({ time: R.time, price: R.price });
     }
-    if (k.length === 0) return null;
-    const F = _n(d, k[0]);
-    return F.id = "__preview__", F.points = k, F;
+    if (A.length === 0) return null;
+    const F = _n(b, A[0]);
+    return F.id = "__preview__", F.points = A, F;
   }
-  function He(m, y) {
-    for (const d of D)
-      if (m >= d.x && m <= d.x + d.width && y >= d.y && y <= d.y + d.height)
-        return N.find((M) => M.id === d.id) ?? null;
+  function He(p, y) {
+    for (const b of $)
+      if (p >= b.x && p <= b.x + b.width && y >= b.y && y <= b.y + b.height)
+        return N.find((M) => M.id === b.id) ?? null;
     return null;
   }
-  function Ao(m, y, d, M) {
-    if (m < 0 || m > d.plotWidth) return null;
-    let S = null, k = gi + 1;
+  function Ao(p, y, b, M) {
+    if (p < 0 || p > b.plotWidth) return null;
+    let S = null, A = gi + 1;
     for (const F of N) {
       const R = M.priceToY(F.price);
       if (R < M.top || R > M.bottom) continue;
-      const W = Math.abs(R - y);
-      W <= gi && W < k && (S = F, k = W);
+      const v = Math.abs(R - y);
+      v <= gi && v < A && (S = F, A = v);
     }
     return S;
   }
-  function mn(m, y, d) {
-    const M = d.panes[0];
-    return m > d.plotWidth && m <= d.width && y >= M.top && y < M.top + M.height;
+  function mn(p, y, b) {
+    const M = b.panes[0];
+    return p > b.plotWidth && p <= b.width && y >= M.top && y < M.top + M.height;
   }
-  function gn(m, y) {
-    const d = fn;
-    return d !== null && m >= d.x && m <= d.x + d.width && y >= d.y && y <= d.y + d.height;
+  function gn(p, y) {
+    const b = fn;
+    return b !== null && p >= b.x && p <= b.x + b.width && y >= b.y && y <= b.y + b.height;
   }
-  function ko(m, y) {
-    const d = We;
-    return d !== null && m >= d.x && m <= d.x + d.width && y >= d.y && y <= d.y + d.height;
+  function ko(p, y) {
+    const b = We;
+    return b !== null && p >= b.x && p <= b.x + b.width && y >= b.y && y <= b.y + b.height;
   }
-  function Lo(m, y) {
+  function Lo(p, y) {
     if (E) return;
-    const d = at();
+    const b = ct();
     if (!G) {
-      if (gn(m, y) || ko(m, y)) {
+      if (gn(p, y) || ko(p, y)) {
         n.style.cursor = "pointer";
         return;
       }
-      if (mn(m, y, d) && He(m, y) === null) {
+      if (mn(p, y, b) && He(p, y) === null) {
         n.style.cursor = "ns-resize";
         return;
       }
     }
-    if (!(m >= 0 && m <= d.plotWidth && y >= 0 && y < d.timeAxisTop)) {
+    if (!(p >= 0 && p <= b.plotWidth && y >= 0 && y < b.timeAxisTop)) {
       n.style.cursor = "default";
       return;
     }
@@ -4019,77 +4032,77 @@ function df(t, e) {
       n.style.cursor = "crosshair";
       return;
     }
-    const S = d.panes[0];
+    const S = b.panes[0];
     if (P.length > 0 && y >= S.top && y < S.top + S.height) {
-      const k = xt(ct(S)), F = ge(), R = O ? P.find((W) => W.id === O) : void 0;
-      if (R && li(R, m, y, k, F) >= 0) {
+      const A = xt(ft(S)), F = ye(), R = O ? P.find((v) => v.id === O) : void 0;
+      if (R && li(R, p, y, A, F) >= 0) {
         n.style.cursor = "pointer";
         return;
       }
-      for (let W = P.length - 1; W >= 0; W--)
-        if (ri(P[W], m, y, k, F)) {
+      for (let v = P.length - 1; v >= 0; v--)
+        if (ri(P[v], p, y, A, F)) {
           n.style.cursor = "pointer";
           return;
         }
     }
     if (N.length > 0) {
-      if (He(m, y) !== null) {
+      if (He(p, y) !== null) {
         n.style.cursor = "pointer";
         return;
       }
-      const k = ct(S);
-      if (Ao(m, y, d, k) !== null) {
+      const A = ft(S);
+      if (Ao(p, y, b, A) !== null) {
         n.style.cursor = "grab";
         return;
       }
     }
     n.style.cursor = "crosshair";
   }
-  function ds(m, y, d) {
+  function bs(p, y, b) {
     var F;
-    if (d.button !== 0) return;
-    const M = at(), S = M.panes[0], k = m >= 0 && m <= M.plotWidth && y >= S.top && y < S.top + S.height;
+    if (b.button !== 0) return;
+    const M = ct(), S = M.panes[0], A = p >= 0 && p <= M.plotWidth && y >= S.top && y < S.top + S.height;
     if (G) {
-      k && (Ke(G) === -1 ? ys(m, y, M) : gs(m, y, M));
+      A && (Ke(G) === -1 ? ys(p, y, M) : gs(p, y, M));
       return;
     }
-    if (gn(m, y)) {
+    if (gn(p, y)) {
       x === "manual" ? pn() : ps(), B();
       return;
     }
-    if (ko(m, y)) {
+    if (ko(p, y)) {
       Ot = !Ot, B();
       return;
     }
-    if (mn(m, y, M) && He(m, y) === null) {
-      const R = ct(S), W = R.yToPrice(ht(y, R.top, R.bottom));
-      E = { mode: "scale-axis", startMin: R.min, startMax: R.max, anchorPrice: W, startY: y }, Q = { min: R.min, max: R.max }, x = "manual", n.style.cursor = "ns-resize", B();
+    if (mn(p, y, M) && He(p, y) === null) {
+      const R = ft(S), v = R.yToPrice(ut(y, R.top, R.bottom));
+      E = { mode: "scale-axis", startMin: R.min, startMax: R.max, anchorPrice: v, startY: y }, z = { min: R.min, max: R.max }, x = "manual", n.style.cursor = "ns-resize", B();
       return;
     }
     if (N.length > 0) {
-      const R = He(m, y);
+      const R = He(p, y);
       if (R) {
         (F = e.onAlertRemove) == null || F.call(e, R.id);
         return;
       }
     }
-    if (k && P.length > 0) {
-      const R = xt(ct(S)), W = ge(), Y = O ? P.find(($) => $.id === O) : void 0;
-      if (Y) {
-        const $ = li(Y, m, y, R, W);
-        if ($ >= 0) {
-          E = { mode: "move-handle", id: Y.id, original: Y, handleIndex: $, moved: !1 }, B();
+    if (A && P.length > 0) {
+      const R = xt(ft(S)), v = ye(), D = O ? P.find((Y) => Y.id === O) : void 0;
+      if (D) {
+        const Y = li(D, p, y, R, v);
+        if (Y >= 0) {
+          E = { mode: "move-handle", id: D.id, original: D, handleIndex: Y, moved: !1 }, B();
           return;
         }
       }
-      for (let $ = P.length - 1; $ >= 0; $--) {
-        const X = P[$];
-        if (ri(X, m, y, R, W)) {
+      for (let Y = P.length - 1; Y >= 0; Y--) {
+        const X = P[Y];
+        if (ri(X, p, y, R, v)) {
           Bt(X.id), E = {
             mode: "move-drawing",
             id: X.id,
             original: X,
-            startTime: R.xToTime(m),
+            startTime: R.xToTime(p),
             startPrice: R.yToPrice(y),
             moved: !1
           }, B();
@@ -4097,103 +4110,103 @@ function df(t, e) {
         }
       }
     }
-    if (k && N.length > 0) {
-      const R = ct(S), W = Ao(m, y, M, R);
-      if (W) {
-        E = { mode: "move-alert", id: W.id, price: W.price, moved: !1 }, n.style.cursor = "grabbing", B();
+    if (A && N.length > 0) {
+      const R = ft(S), v = Ao(p, y, M, R);
+      if (v) {
+        E = { mode: "move-alert", id: v.id, price: v.price, moved: !1 }, n.style.cursor = "grabbing", B();
         return;
       }
     }
-    k && P.length > 0 && O && (Bt(null), B()), E = { mode: "pan", lastX: m, lastY: y }, n.style.cursor = "grabbing";
+    A && P.length > 0 && O && (Bt(null), B()), E = { mode: "pan", lastX: p, lastY: y }, n.style.cursor = "grabbing";
   }
-  function Ts(m, y, d) {
-    if (J = { x: m, y }, E)
+  function Ts(p, y, b) {
+    if (J = { x: p, y }, E)
       if (E.mode === "pan") {
         const M = C.barSpacing();
         if (M > 0) {
-          const S = (m - E.lastX) / M;
-          E.lastX = m, S !== 0 && hs(-S);
+          const S = (p - E.lastX) / M;
+          E.lastX = p, S !== 0 && hs(-S);
         }
-        if (x === "manual" && Q !== null) {
+        if (x === "manual" && z !== null) {
           const S = y - E.lastY;
           if (S !== 0) {
-            const k = at().panes[0], F = Q.max - Q.min, R = S / Math.max(1, k.height) * F;
-            Q = { min: Q.min + R, max: Q.max + R };
+            const A = ct().panes[0], F = z.max - z.min, R = S / Math.max(1, A.height) * F;
+            z = { min: z.min + R, max: z.max + R };
           }
         }
         E.lastY = y;
       } else if (E.mode === "scale-axis") {
-        const M = y - E.startY, S = Math.exp(M / Pc), k = E.anchorPrice - (E.anchorPrice - E.startMin) * S, F = E.anchorPrice + (E.startMax - E.anchorPrice) * S;
-        F - k > 1e-12 && isFinite(k) && isFinite(F) && (Q = { min: k, max: F });
+        const M = y - E.startY, S = Math.exp(M / kc), A = E.anchorPrice - (E.anchorPrice - E.startMin) * S, F = E.anchorPrice + (E.startMax - E.anchorPrice) * S;
+        F - A > 1e-12 && isFinite(A) && isFinite(F) && (z = { min: A, max: F });
       } else {
-        const M = at(), S = ct(M.panes[0]), k = xt(S);
+        const M = ct(), S = ft(M.panes[0]), A = xt(S);
         if (E.mode === "freehand") {
-          const F = m - E.lastPx, R = y - E.lastPy;
-          E.drawing.points.length < Ac && F * F + R * R >= mi * mi && (E.drawing.points.push({ time: k.xToTime(m), price: k.yToPrice(y) }), E.lastPx = m, E.lastPy = y);
+          const F = p - E.lastPx, R = y - E.lastPy;
+          E.drawing.points.length < Lc && F * F + R * R >= mi * mi && (E.drawing.points.push({ time: A.xToTime(p), price: A.yToPrice(y) }), E.lastPx = p, E.lastPy = y);
         } else if (E.mode === "move-drawing") {
-          const F = k.xToTime(m), R = k.yToPrice(y);
+          const F = A.xToTime(p), R = A.yToPrice(y);
           wo(E.id, Aa(E.original, F - E.startTime, R - E.startPrice)), E.moved = !0;
         } else if (E.mode === "move-alert") {
-          const F = ht(y, S.top, S.bottom);
+          const F = ut(y, S.top, S.bottom);
           E.price = S.yToPrice(F), E.moved = !0, n.style.cursor = "grabbing";
         } else {
-          const F = Xe(m, y, k);
+          const F = Xe(p, y, A);
           wo(
             E.id,
-            ka(E.original, E.handleIndex, { time: F.time, price: F.price }, ge())
+            ka(E.original, E.handleIndex, { time: F.time, price: F.price }, ye())
           ), E.moved = !0;
         }
       }
     else
-      Lo(m, y);
+      Lo(p, y);
     B();
   }
-  function Ms(m, y, d) {
+  function Ms(p, y, b) {
     var M;
-    E && (E.mode === "freehand" ? E.drawing.points.length >= 2 && Po(E.drawing) : E.mode === "move-alert" ? E.moved && ((M = e.onAlertMove) == null || M.call(e, E.id, E.price)) : (E.mode === "move-drawing" || E.mode === "move-handle") && E.moved && (ye(), ms())), E = null, J && Lo(J.x, J.y), B();
+    E && (E.mode === "freehand" ? E.drawing.points.length >= 2 && Po(E.drawing) : E.mode === "move-alert" ? E.moved && ((M = e.onAlertMove) == null || M.call(e, E.id, E.price)) : (E.mode === "move-drawing" || E.mode === "move-handle") && E.moved && (de(), ms())), E = null, J && Lo(J.x, J.y), B();
   }
   function ws() {
     J = null, B();
   }
-  function Ss(m, y, d) {
-    const M = at();
+  function Ss(p, y, b) {
+    const M = ct();
     if (M.plotWidth <= 0) return;
-    if (Math.abs(d.deltaX) > Math.abs(d.deltaY) && !d.ctrlKey) {
-      const z = C.range / M.plotWidth, gt = d.deltaX * z;
-      C.view = { start: C.view.start + gt, end: C.view.end + gt }, Ct(), te(), B();
+    if (Math.abs(b.deltaX) > Math.abs(b.deltaY) && !b.ctrlKey) {
+      const Z = C.range / M.plotWidth, ot = b.deltaX * Z;
+      C.view = { start: C.view.start + ot, end: C.view.end + ot }, Ct(), te(), B();
       return;
     }
-    const S = C.range, k = Math.exp(-d.deltaY * 12e-4), F = ht(S / k, Yn, To());
+    const S = C.range, A = Math.exp(-b.deltaY * 12e-4), F = ut(S / A, Yn, To());
     if (F === S) return;
-    const R = ht(m, 0, M.plotWidth), W = C.xToIndex(R), Y = R / M.plotWidth, $ = W - Y * F, X = C.view;
-    C.view = { start: $, end: $ + F }, Mo(X), Ct(), te(), B();
+    const R = ut(p, 0, M.plotWidth), v = C.xToIndex(R), D = R / M.plotWidth, Y = v - D * F, X = C.view;
+    C.view = { start: Y, end: Y + F }, Mo(X), Ct(), te(), B();
   }
-  function Ps(m, y) {
-    const d = at();
-    if (d.plotWidth <= 0 || !(y > 0)) return;
-    const M = C.range, S = ht(M / y, Yn, To());
+  function Ps(p, y) {
+    const b = ct();
+    if (b.plotWidth <= 0 || !(y > 0)) return;
+    const M = C.range, S = ut(M / y, Yn, To());
     if (S === M) return;
-    const k = ht(m, 0, d.plotWidth), F = C.xToIndex(k), R = k / d.plotWidth, W = F - R * S, Y = C.view;
-    C.view = { start: W, end: W + S }, Mo(Y), Ct(), te(), B();
+    const A = ut(p, 0, b.plotWidth), F = C.xToIndex(A), R = A / b.plotWidth, v = F - R * S, D = C.view;
+    C.view = { start: v, end: v + S }, Mo(D), Ct(), te(), B();
   }
-  function As(m, y, d) {
-    const M = at();
-    if (!G && (gn(m, y) || mn(m, y, M))) {
+  function As(p, y, b) {
+    const M = ct();
+    if (!G && (gn(p, y) || mn(p, y, M))) {
       pn(), B();
       return;
     }
     ee(), B();
   }
-  function ks(m, y, d) {
-    if (d.preventDefault(), !e.onContextMenu) return;
-    const M = at(), k = ct(M.panes[0]).yToPrice(y), F = C.xToTime(m);
-    e.onContextMenu({ x: m, y, price: k, time: F });
+  function ks(p, y, b) {
+    if (b.preventDefault(), !e.onContextMenu) return;
+    const M = ct(), A = ft(M.panes[0]).yToPrice(y), F = C.xToTime(p);
+    e.onContextMenu({ x: p, y, price: A, time: F });
   }
-  function Ls(m) {
-    kc(m.target) || (m.key === "Escape" ? E !== null && E.mode === "freehand" ? (E = null, So()) : G !== null || U.length > 0 ? So() : O && (Bt(null), B()) : (m.key === "Delete" || m.key === "Backspace") && O && (P = P.filter((y) => y.id !== O), Bt(null), ye(), B(), m.preventDefault()));
+  function Ls(p) {
+    Nc(p.target) || (p.key === "Escape" ? E !== null && E.mode === "freehand" ? (E = null, So()) : G !== null || U.length > 0 ? So() : O && (Bt(null), B()) : (p.key === "Delete" || p.key === "Backspace") && O && (P = P.filter((y) => y.id !== O), Bt(null), de(), B(), p.preventDefault()));
   }
-  const Is = bc(n, {
-    pointerDown: ds,
+  const Is = Tc(n, {
+    pointerDown: bs,
     pointerMove: Ts,
     pointerUp: Ms,
     pointerLeave: ws,
@@ -4206,158 +4219,180 @@ function df(t, e) {
     Ye(), B();
   });
   Io.observe(t);
-  function Ns(m) {
-    const y = Math.abs(m) >= 1 ? 2 : 4;
-    return m.toLocaleString("en-US", { minimumFractionDigits: y, maximumFractionDigits: y });
+  function Ns(p) {
+    const y = Math.abs(p) >= 1 ? 2 : 4;
+    return p.toLocaleString("en-US", { minimumFractionDigits: y, maximumFractionDigits: y });
   }
-  function Cs(m, y) {
-    const d = y.length >= 2 ? y[1] - y[0] : Jn((m.max - m.min) / 8 || 1), M = ai(d);
+  function Cs(p, y) {
+    const b = y.length >= 2 ? y[1] - y[0] : Jn((p.max - p.min) / 8 || 1), M = ai(b);
     return y.map((S) => ({
-      y: Math.round(m.priceToY(S)),
+      y: Math.round(p.priceToY(S)),
       label: S.toLocaleString("en-US", { minimumFractionDigits: M, maximumFractionDigits: M })
     }));
   }
-  function Rs(m, y) {
-    const d = ai(Jn((y.max - y.min) / 8 || 1));
-    return m.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+  function Rs(p, y) {
+    const b = ai(Jn((y.max - y.min) / 8 || 1));
+    return p.toLocaleString("en-US", { minimumFractionDigits: b, maximumFractionDigits: b });
   }
-  function yn(m, y) {
-    o.beginPath(), o.rect(0, m.top, y.plotWidth, m.height), o.clip();
+  function yn(p, y) {
+    o.beginPath(), o.rect(0, p.top, y.plotWidth, p.height), o.clip();
   }
-  function Fs(m, y, d, M) {
+  function Fs(p, y, b, M) {
     const S = f;
     switch (l) {
       case "candles":
-        vn(o, S, d, M, C, m, y);
+        vn(o, S, b, M, C, p, y);
         break;
       case "volcandles":
-        Ua(o, S, d, M, C, m, y);
+        ja(o, S, b, M, C, p, y);
         break;
       case "hlcarea":
-        Za(o, S, d, M, C, m, y);
+        Qa(o, S, b, M, C, p, y);
         break;
       case "hollow":
-        Qa(o, S, d, M, C, m, y);
+        za(o, S, b, M, C, p, y);
         break;
       case "heikin":
-        vn(o, S, d, M, C, m, y);
+        vn(o, S, b, M, C, p, y);
         break;
       case "bars":
-        ja(o, S, d, M, C, m, y);
+        Ja(o, S, b, M, C, p, y);
         break;
       case "hlcbars":
-        za(o, S, d, M, C, m, y);
+        xa(o, S, b, M, C, p, y);
         break;
       case "line":
-        Ja(o, S, d, M, C, m, y);
+        Ka(o, S, b, M, C, p, y);
         break;
       case "linemarkers":
-        xa(o, S, d, M, C, m, y);
+        tc(o, S, b, M, C, p, y);
         break;
       case "step":
-        tc(o, S, d, M, C, m, y);
+        ec(o, S, b, M, C, p, y);
         break;
       case "area":
-        Ka(o, S, d, M, C, m, y);
+        Za(o, S, b, M, C, p, y);
         break;
       case "baseline": {
-        const k = S[d].close;
-        ec(o, S, d, M, C, m, y, k);
+        const A = S[b].close;
+        nc(o, S, b, M, C, p, y, A);
         break;
       }
       case "columns":
-        nc(o, S, d, M, C, m, y);
+        oc(o, S, b, M, C, p, y);
         break;
       case "highlow":
-        oc(o, S, d, M, C, m, y);
+        ic(o, S, b, M, C, p, y);
         break;
       case "renko":
       case "linebreak":
-        ic(o, S, d, M, C, m, y);
+        sc(o, S, b, M, C, p, y);
         break;
       case "range":
-        vn(o, S, d, M, C, m, y);
+        vn(o, S, b, M, C, p, y);
         break;
       case "pnf":
-        sc(o, S, d, M, C, m, y, u);
+        rc(o, S, b, M, C, p, y, u);
         break;
       case "kagi":
         if (h) {
-          const k = M >= h.length - 1 ? h : h.slice(0, M + 1);
-          rc(o, k, C, m, y);
+          const A = M >= h.length - 1 ? h : h.slice(0, M + 1);
+          lc(o, A, C, p, y);
         }
         break;
     }
   }
-  function _s(m, y, d) {
-    const M = mt();
+  function _s(p, y, b) {
+    const M = f.length;
     if (M === 0) return;
-    const S = f[M - 1], k = M > 1 ? f[M - 2].close : S.open, F = S.close >= k ? Oe(d) : Be(d), R = y.priceToY(S.close);
-    R >= y.top && R <= y.bottom && pc(o, F, Math.round(R) + 0.5, m.plotWidth);
-    const W = ht(R, y.top + 9, y.bottom - 9);
-    pi(
+    let S = M - 1;
+    for (; S >= 0 && f[S].isPrediction; )
+      S--;
+    if (S < 0) return;
+    const A = f[S], F = S > 0 ? f[S - 1].close : A.open, R = A.close >= F ? Oe(b) : Be(b), v = y.priceToY(A.close);
+    v >= y.top && v <= y.bottom && gc(o, R, Math.round(v) + 0.5, p.plotWidth);
+    const D = ut(v, y.top + 9, y.bottom - 9);
+    if (pi(
       o,
-      Se(S.close, r),
-      W,
-      m.plotWidth,
-      m.width - m.plotWidth,
-      F,
+      Se(A.close, r),
+      D,
+      p.plotWidth,
+      p.width - p.plotWidth,
+      R,
       "#ffffff"
-    );
-  }
-  function Es(m, y, d) {
-    if (D = [], N.length === 0) return;
-    const M = m.width - m.plotWidth, S = E !== null && E.mode === "move-alert" ? E : null;
-    for (const k of N) {
-      const F = S !== null && S.id === k.id ? S.price : k.price, R = y.priceToY(F), W = ht(R, y.top + 9, y.bottom - 9), Y = k.condition === "above" ? Oe(d) : Be(d), $ = R >= y.top && R <= y.bottom, X = ac(
-        o,
-        Y,
-        k.triggered,
-        Se(F, r),
-        R,
-        W,
-        $,
-        m.plotWidth,
-        M
-      );
-      D.push({ id: k.id, x: X.x, y: X.y, width: X.width, height: X.height });
+    ), g === null && !se(l) && a.length > 0 && C.intervalMs > 0) {
+      let Y = a.length - 1;
+      for (; Y >= 0 && a[Y].isPrediction; )
+        Y--;
+      if (Y >= 0) {
+        const Z = a[Y].time + C.intervalMs - Date.now();
+        if (Z > 0 && Z <= C.intervalMs + 6e4) {
+          let ot = D + 9 + 8;
+          ot + 8 > y.bottom && (ot = D - 9 - 8), pc(
+            o,
+            Ic(Z),
+            ot,
+            p.plotWidth,
+            p.width - p.plotWidth,
+            b
+          );
+        }
+      }
     }
   }
-  function vs(m, y, d) {
-    const M = mt();
+  function Es(p, y, b) {
+    if ($ = [], N.length === 0) return;
+    const M = p.width - p.plotWidth, S = E !== null && E.mode === "move-alert" ? E : null;
+    for (const A of N) {
+      const F = S !== null && S.id === A.id ? S.price : A.price, R = y.priceToY(F), v = ut(R, y.top + 9, y.bottom - 9), D = A.condition === "above" ? Oe(b) : Be(b), Y = R >= y.top && R <= y.bottom, X = cc(
+        o,
+        D,
+        A.triggered,
+        Se(F, r),
+        R,
+        v,
+        Y,
+        p.plotWidth,
+        M
+      );
+      $.push({ id: A.id, x: X.x, y: X.y, width: X.width, height: X.height });
+    }
+  }
+  function vs(p, y, b) {
+    const M = dt();
     if (M === 0) return;
-    const S = d ?? M - 1, k = f[S], F = 10, R = 16;
-    let W = m.panes[0].top + 12;
-    const Y = k.close >= k.open ? Oe(y) : Be(y), $ = S > 0 ? f[S - 1].close : k.open, X = $ !== 0 ? (k.close - $) / $ * 100 : 0, z = X >= 0 ? Oe(y) : Be(y), gt = (dt) => Se(dt, r);
+    const S = b ?? M - 1, A = f[S], F = 10, R = 16;
+    let v = p.panes[0].top + 12;
+    const D = A.close >= A.open ? Oe(y) : Be(y), Y = S > 0 ? f[S - 1].close : A.open, X = Y !== 0 ? (A.close - Y) / Y * 100 : 0, Z = X >= 0 ? Oe(y) : Be(y), ot = (bt) => Se(bt, r);
     if (Wn(
       o,
       [
         { text: "O", color: y.mutedText },
-        { text: gt(k.open), color: Y },
+        { text: ot(A.open), color: D },
         { text: "H", color: y.mutedText },
-        { text: gt(k.high), color: Y },
+        { text: ot(A.high), color: D },
         { text: "L", color: y.mutedText },
-        { text: gt(k.low), color: Y },
+        { text: ot(A.low), color: D },
         { text: "C", color: y.mutedText },
-        { text: gt(k.close), color: Y },
-        { text: `${X >= 0 ? "+" : ""}${X.toFixed(2)}%`, color: z },
+        { text: ot(A.close), color: D },
+        { text: `${X >= 0 ? "+" : ""}${X.toFixed(2)}%`, color: Z },
         { text: "Vol", color: y.mutedText },
-        { text: $a(k.volume), color: Y }
+        { text: Oa(A.volume), color: D }
       ],
       F,
-      W
-    ), W += R, !Me(l)) {
-      for (const dt of p) {
-        if (dt.placement !== "overlay") continue;
-        const Rt = [{ text: dt.label, color: y.mutedText }];
-        for (const Ft of dt.outputs) {
+      v
+    ), v += R, !se(l)) {
+      for (const bt of m) {
+        if (bt.placement !== "overlay") continue;
+        const Rt = [{ text: bt.label, color: y.mutedText }];
+        for (const Ft of bt.outputs) {
           const Lt = S < Ft.values.length ? Ft.values[S] : null;
-          Rt.push({ text: Lt == null || !isFinite(Lt) ? "—" : gt(Lt), color: Ft.color });
+          Rt.push({ text: Lt == null || !isFinite(Lt) ? "—" : ot(Lt), color: Ft.color });
         }
-        Wn(o, Rt, F, W), W += R;
+        Wn(o, Rt, F, v), v += R;
       }
-      for (let dt = 1; dt < m.panes.length; dt++) {
-        const Rt = m.panes[dt], Ft = Rt.indicator, Lt = [{ text: Ft.label, color: y.mutedText }];
+      for (let bt = 1; bt < p.panes.length; bt++) {
+        const Rt = p.panes[bt], Ft = Rt.indicator, Lt = [{ text: Ft.label, color: y.mutedText }];
         for (const q of Ft.outputs) {
           const tt = S < q.values.length ? q.values[S] : null;
           Lt.push({ text: tt == null || !isFinite(tt) ? "—" : Ns(tt), color: q.color });
@@ -4366,183 +4401,183 @@ function df(t, e) {
       }
     }
   }
-  function Ws(m, y, d) {
+  function Ws(p, y, b) {
     if (!J) return;
     const { x: M, y: S } = J;
-    if (M < 0 || M > m.plotWidth || S < 0 || S >= m.timeAxisTop) return;
-    const k = Math.floor(C.xToIndex(M)), F = Math.round(C.centerX(k)) + 0.5;
-    mc(o, d, F, m.timeAxisTop), C.count > 0 && uc(
+    if (M < 0 || M > p.plotWidth || S < 0 || S >= p.timeAxisTop) return;
+    const A = Math.floor(C.xToIndex(M)), F = Math.round(C.centerX(A)) + 0.5;
+    yc(o, b, F, p.timeAxisTop), C.count > 0 && mc(
       o,
-      d,
-      Ha(C.indexToTime(k), C.intervalMs),
-      Math.round(C.centerX(k)),
-      m.plotWidth,
-      m.timeAxisTop,
+      b,
+      Va(C.indexToTime(A), C.intervalMs),
+      Math.round(C.centerX(A)),
+      p.plotWidth,
+      p.timeAxisTop,
       c
     );
-    const R = is(S, m);
+    const R = is(S, p);
     if (R >= 0 && R < y.length) {
-      gc(o, d, Math.round(S) + 0.5, m.plotWidth);
-      const W = y[R], Y = W.yToPrice(S), $ = R === 0 ? Se(Y, r) : Rs(Y, W);
+      dc(o, b, Math.round(S) + 0.5, p.plotWidth);
+      const v = y[R], D = v.yToPrice(S), Y = R === 0 ? Se(D, r) : Rs(D, v);
       pi(
         o,
-        $,
+        Y,
         S,
-        m.plotWidth,
-        m.width - m.plotWidth,
-        d.crosshairTagBg,
-        d.crosshairTagText
+        p.plotWidth,
+        p.width - p.plotWidth,
+        b.crosshairTagBg,
+        b.crosshairTagText
       );
     }
   }
   function Ds() {
     var Lt;
-    if (De || ((window.devicePixelRatio || 1) !== zt && Ye(), st.width <= 0 || st.height <= 0)) return;
-    const m = Da[s], y = as(m), d = cs(), M = at();
-    o.save(), o.font = Yt, o.fillStyle = m.bg, o.fillRect(0, 0, M.width, M.height);
-    const S = Ba(C);
-    d && Va(o, m, S, M.timeAxisTop);
-    const { from: k, to: F } = C.visibleRange(), R = Math.min(F, mt() - 1), W = mt() > 0 && k <= R, Y = Me(l), $ = M.panes[0], X = ct($), z = [X], gt = X.ticks(Math.pow(10, -r));
-    if (d && ci(o, m, M.plotWidth, X, gt), W && $.height > 0 && M.plotWidth > 0) {
-      if (o.save(), yn($, M), Fs(X, y, k, R), !Y) {
-        for (const q of p)
+    if (De || ((window.devicePixelRatio || 1) !== zt && Ye(), rt.width <= 0 || rt.height <= 0)) return;
+    const p = Da[s], y = as(p), b = cs(), M = ct();
+    o.save(), o.font = Yt, o.fillStyle = p.bg, o.fillRect(0, 0, M.width, M.height);
+    const S = Xa(C);
+    b && Ga(o, p, S, M.timeAxisTop);
+    const { from: A, to: F } = C.visibleRange(), R = Math.min(F, dt() - 1), v = dt() > 0 && A <= R, D = se(l), Y = M.panes[0], X = ft(Y), Z = [X], ot = X.ticks(Math.pow(10, -r));
+    if (b && ci(o, p, M.plotWidth, X, ot), v && Y.height > 0 && M.plotWidth > 0) {
+      if (o.save(), yn(Y, M), Fs(X, y, A, R), !D) {
+        for (const q of m)
           if (q.placement === "overlay")
             for (const tt of q.outputs)
-              fi(o, tt, k, R, C, X);
+              fi(o, tt, A, R, C, X);
       }
-      (A.length > 0 || T !== null) && lc(o, A, T, mt() - 1, C, X), o.restore();
+      (k.length > 0 || T !== null) && ac(o, k, T, dt() - 1, C, X), o.restore();
     }
     for (let q = 1; q < M.panes.length; q++) {
-      const tt = M.panes[q], ft = ss(tt);
-      z.push(ft);
-      const ne = ft.ticks();
-      d && ci(o, m, M.plotWidth, ft, ne);
+      const tt = M.panes[q], ht = ss(tt);
+      Z.push(ht);
+      const ne = ht.ticks();
+      b && ci(o, p, M.plotWidth, ht, ne);
       const oe = tt.indicator;
-      if (oe.range && oe.range[0] === 0 && oe.range[1] === 100 && fc(o, m, M.plotWidth, ft, [30, 70]), !Y && tt.height > 0 && M.plotWidth > 0) {
+      if (oe.range && oe.range[0] === 0 && oe.range[1] === 100 && hc(o, p, M.plotWidth, ht, [30, 70]), !D && tt.height > 0 && M.plotWidth > 0) {
         o.save(), yn(tt, M);
-        for (const bn of oe.outputs)
-          fi(o, bn, k, R, C, ft);
+        for (const dn of oe.outputs)
+          fi(o, dn, A, R, C, ht);
         o.restore();
       }
-      Ga(o, m, tt.top - Dn, M.width);
+      qa(o, p, tt.top - Dn, M.width);
     }
-    qa(o, m, M.plotWidth, M.timeAxisTop, M.width, M.height), ui(
+    Ua(o, p, M.plotWidth, M.timeAxisTop, M.width, M.height), ui(
       o,
-      m,
+      p,
       M.plotWidth,
-      gt.map((q) => ({ y: Math.round(X.priceToY(q)), label: Se(q, r) }))
+      ot.map((q) => ({ y: Math.round(X.priceToY(q)), label: Se(q, r) }))
     );
     for (let q = 1; q < M.panes.length; q++)
-      ui(o, m, M.plotWidth, Cs(z[q], z[q].ticks()));
-    if (M.width - M.plotWidth > Tt + On && $.height > Tt) {
-      const q = M.plotWidth + On + 1, tt = $.top + On;
-      hi(o, m, q, tt, Tt, x === "auto"), fn = { x: q, y: tt, width: Tt, height: Tt };
-      const ft = tt + Tt + 4;
-      $.top + $.height > ft + Tt ? (hi(o, m, q, ft, Tt, Ot, "L"), We = { x: q, y: ft, width: Tt, height: Tt }) : We = null;
+      ui(o, p, M.plotWidth, Cs(Z[q], Z[q].ticks()));
+    if (M.width - M.plotWidth > Tt + On && Y.height > Tt) {
+      const q = M.plotWidth + On + 1, tt = Y.top + On;
+      hi(o, p, q, tt, Tt, x === "auto"), fn = { x: q, y: tt, width: Tt, height: Tt };
+      const ht = tt + Tt + 4;
+      Y.top + Y.height > ht + Tt ? (hi(o, p, q, ht, Tt, Ot, "L"), We = { x: q, y: ht, width: Tt, height: Tt }) : We = null;
     } else
       fn = null, We = null;
     const Rt = [];
     for (let q = 0; q < S.length; q++)
       Rt.push({
         x: S[q].x,
-        label: Xa(S[q].time, q > 0 ? S[q - 1].time : null, C.intervalMs)
+        label: Ha(S[q].time, q > 0 ? S[q - 1].time : null, C.intervalMs)
       });
-    if (hc(o, m, Rt, M.timeAxisTop + c / 2 + 1), W && _s(M, X, m), Es(M, X, m), $.height > 0 && M.plotWidth > 0) {
-      const q = xt(X), tt = ge();
-      o.save(), yn($, M);
+    if (uc(o, p, Rt, M.timeAxisTop + c / 2 + 1), v && _s(M, X, p), Es(M, X, p), Y.height > 0 && M.plotWidth > 0) {
+      const q = xt(X), tt = ye();
+      o.save(), yn(Y, M);
       for (const ne of P)
         En(o, ne, q, ne.id === O, tt);
-      const ft = bs(q, $);
-      if (ft && En(o, ft, q, !1, tt), E !== null && E.mode === "freehand" && En(o, E.drawing, q, !1, tt), j && J) {
-        const ne = G !== null && Ke(G) >= 1, oe = E !== null && E.mode === "move-handle", bn = J.x >= 0 && J.x <= M.plotWidth && J.y >= $.top && J.y < $.top + $.height;
-        if (ne && bn || oe) {
+      const ht = ds(q, Y);
+      if (ht && En(o, ht, q, !1, tt), E !== null && E.mode === "freehand" && En(o, E.drawing, q, !1, tt), j && J) {
+        const ne = G !== null && Ke(G) >= 1, oe = E !== null && E.mode === "move-handle", dn = J.x >= 0 && J.x <= M.plotWidth && J.y >= Y.top && J.y < Y.top + Y.height;
+        if (ne && dn || oe) {
           const Co = Xe(J.x, J.y, q);
-          Co.snapped && yc(o, J.x, q.priceToY(Co.price), y.accent);
+          Co.snapped && bc(o, J.x, q.priceToY(Co.price), y.accent);
         }
       }
       o.restore();
     }
-    const Ft = J && W && J.x >= 0 && J.x <= M.plotWidth && J.y < M.timeAxisTop ? ht(Math.floor(C.xToIndex(J.x)), 0, mt() - 1) : null;
-    fs() && Ws(M, z, m), vs(M, m, Ft), o.restore(), (Lt = e.onRender) == null || Lt.call(e);
+    const Ft = J && v && J.x >= 0 && J.x <= M.plotWidth && J.y < M.timeAxisTop ? ut(Math.floor(C.xToIndex(J.x)), 0, dt() - 1) : null;
+    fs() && Ws(M, Z, p), vs(M, p, Ft), o.restore(), (Lt = e.onRender) == null || Lt.call(e);
   }
   const No = {
-    setData(m) {
-      const y = f, d = y.length, M = { ...C.view };
-      a = m.slice(), ls(), $e();
+    setData(p) {
+      const y = f, b = y.length, M = { ...C.view };
+      a = p.slice(), ls(), $e();
       const S = f.length;
-      if (d === 0 || S === 0)
+      if (b === 0 || S === 0)
         ee();
       else {
-        const k = f[S - 1].time === y[d - 1].time, F = S - d;
-        k ? C.view = { start: M.start + F, end: M.end + F } : f[0].time === y[0].time ? C.view = M : ee();
+        const A = f[S - 1].time === y[b - 1].time, F = S - b;
+        A ? C.view = { start: M.start + F, end: M.end + F } : f[0].time === y[0].time ? C.view = M : ee();
       }
       hn = !0, bo(), B();
     },
-    updateLast(m) {
+    updateLast(p) {
       const y = a.length;
       if (y === 0) {
-        No.setData([m]);
+        No.setData([p]);
         return;
       }
-      const d = f.length, M = C.view.end >= d - 0.5;
+      const b = f.length, M = C.view.end >= b - 0.5;
       let S = -1;
       for (let F = y - 1; F >= 0; F--)
-        if (a[F].time === m.time) {
+        if (a[F].time === p.time) {
           S = F;
           break;
         }
       if (S !== -1)
-        a[S] = m;
-      else if (m.time > a[y - 1].time)
-        a.push(m);
+        a[S] = p;
+      else if (p.time > a[y - 1].time)
+        a.push(p);
       else
         return;
       $e();
-      const k = f.length - d;
-      M && k > 0 && (C.view = { start: C.view.start + k, end: C.view.end + k }), bo(), B();
+      const A = f.length - b;
+      M && A > 0 && (C.view = { start: C.view.start + A, end: C.view.end + A }), bo(), B();
     },
-    setIndicators(m) {
-      p = m.slice(), B();
+    setIndicators(p) {
+      m = p.slice(), B();
     },
-    setChartType(m) {
-      if (m === l) {
+    setChartType(p) {
+      if (p === l) {
         B();
         return;
       }
-      const y = f.length, d = Me(m) !== Me(l);
-      l = m, $e(), d || f.length !== y ? ee() : Ct(), B();
+      const y = f.length, b = se(p) !== se(l);
+      l = p, $e(), b || f.length !== y ? ee() : Ct(), B();
     },
-    setTheme(m) {
-      s = m, B();
+    setTheme(p) {
+      s = p, B();
     },
-    setPricePrecision(m) {
-      r = m, B();
+    setPricePrecision(p) {
+      r = p, B();
     },
-    setActiveTool(m) {
-      G = m, U = [], E !== null && E.mode === "freehand" && (E = null), m !== null && Bt(null), B();
+    setActiveTool(p) {
+      G = p, U = [], E !== null && E.mode === "freehand" && (E = null), p !== null && Bt(null), B();
     },
-    setDrawings(m) {
-      P = m.slice(), O && !P.some((y) => y.id === O) && Bt(null), B();
+    setDrawings(p) {
+      P = p.slice(), O && !P.some((y) => y.id === O) && Bt(null), B();
     },
-    updateDrawing(m) {
-      const y = P.findIndex((d) => d.id === m.id);
-      y < 0 || (P[y] = m, ye(), B());
+    updateDrawing(p) {
+      const y = P.findIndex((b) => b.id === p.id);
+      y < 0 || (P[y] = p, de(), B());
     },
-    setMagnet(m) {
-      j = m, B();
+    setMagnet(p) {
+      j = p, B();
     },
-    setAlerts(m) {
+    setAlerts(p) {
       if (E !== null && E.mode === "move-alert") {
         const y = E.id;
-        m.some((d) => d.id === y) || (E = null);
+        p.some((b) => b.id === y) || (E = null);
       }
-      N = m.slice(), B();
+      N = p.slice(), B();
     },
-    setSettings(m) {
-      L = { ...m }, B();
+    setSettings(p) {
+      L = { ...p }, B();
     },
     clearDrawings() {
-      P.length !== 0 && (P = [], Bt(null), ye(), B());
+      P.length !== 0 && (P = [], Bt(null), de(), B());
     },
     resetView() {
       ee(), B();
@@ -4553,68 +4588,68 @@ function df(t, e) {
     destroy() {
       De || (De = !0, clearInterval(os), Qt !== 0 && cancelAnimationFrame(Qt), Qt = 0, Is(), Io.disconnect(), n.remove());
     },
-    setProjections(m, y) {
-      A = m.slice(), T = y ?? null;
-      const d = C.count;
-      if (A.length > 0 && d > 0 && C.view.end >= d - 0.5) {
+    setProjections(p, y) {
+      k = p.slice(), T = y ?? null;
+      const b = C.count;
+      if (k.length > 0 && b > 0 && C.view.end >= b - 0.5) {
         let M = 0;
-        for (const k of A)
-          for (const F of k.points) F.barOffset > M && (M = F.barOffset);
+        for (const A of k)
+          for (const F of A.points) F.barOffset > M && (M = F.barOffset);
         if (T) {
-          for (const k of T.upper) k.barOffset > M && (M = k.barOffset);
-          for (const k of T.lower) k.barOffset > M && (M = k.barOffset);
+          for (const A of T.upper) A.barOffset > M && (M = A.barOffset);
+          for (const A of T.lower) A.barOffset > M && (M = A.barOffset);
         }
-        const S = d + M + 3;
+        const S = b + M + 3;
         if (C.view.end < S) {
-          const k = C.range;
-          C.view = { start: S - k, end: S }, Ct();
+          const A = C.range;
+          C.view = { start: S - A, end: S }, Ct();
         }
       }
       B();
     },
-    scrollToTime(m) {
+    scrollToTime(p) {
       const y = f.length;
       if (y === 0) return;
-      const d = ht(Math.round(C.timeToIndex(m)), 0, y - 1), M = C.range, S = d + 0.5;
+      const b = ut(Math.round(C.timeToIndex(p)), 0, y - 1), M = C.range, S = b + 0.5;
       C.view = { start: S - M / 2, end: S + M / 2 }, Ct(), te(), B();
     },
-    setReplayCursor(m) {
-      if (m === null) {
+    setReplayCursor(p) {
+      if (p === null) {
         if (g === null) return;
         g = null, B();
         return;
       }
-      const y = f.length, d = y === 0 ? 0 : ht(Math.round(m), 0, y - 1), M = g === null;
-      if (!(!M && d === g)) {
-        if (g = d, y > 0) {
-          const S = C.view.end - C.view.start, k = un(S), F = d >= C.view.start && d <= C.view.end - k;
+      const y = f.length, b = y === 0 ? 0 : ut(Math.round(p), 0, y - 1), M = g === null;
+      if (!(!M && b === g)) {
+        if (g = b, y > 0) {
+          const S = C.view.end - C.view.start, A = un(S), F = b >= C.view.start && b <= C.view.end - A;
           if (M || !F) {
-            const R = d + 1 + k;
+            const R = b + 1 + A;
             C.view = { start: R - S, end: R }, Ct(), te();
           }
         }
         B();
       }
     },
-    setReplayPlaying(m) {
-      b = m;
+    setReplayPlaying(p) {
+      d = p;
     },
     getMainConverters() {
-      return st.width <= 0 || st.height <= 0 ? null : rs;
+      return rt.width <= 0 || rt.height <= 0 ? null : rs;
     },
     getMainPaneRect() {
-      if (st.width <= 0 || st.height <= 0) return null;
-      const m = at().panes[0];
-      return { x: 0, y: m.top, width: C.plotWidth, height: m.height };
+      if (rt.width <= 0 || rt.height <= 0) return null;
+      const p = ct().panes[0];
+      return { x: 0, y: p.top, width: C.plotWidth, height: p.height };
     }
   };
   return Ye(), $e(), ee(), B(), No;
 }
-function pt(t, e, n, i = 1) {
+function mt(t, e, n, i = 1) {
   const o = t[e], s = typeof o == "number" && Number.isFinite(o) ? Math.floor(o) : n;
   return Math.max(i, s);
 }
-function Lc(t, e, n, i = 0) {
+function Cc(t, e, n, i = 0) {
   const o = t[e], s = typeof o == "number" && Number.isFinite(o) ? o : n;
   return Math.max(i, s);
 }
@@ -4664,14 +4699,14 @@ function Zn(t, e) {
   }
   return n;
 }
-const Ic = {
+const Rc = {
   id: "sma",
   label: "Simple Moving Average",
   shortLabel: "SMA",
   placement: "overlay",
   params: [{ key: "period", label: "Period", default: 20, min: 1, max: 500, step: 1 }],
   compute(t, e) {
-    const n = pt(e, "period", 20);
+    const n = mt(e, "period", 20);
     return [
       {
         name: "sma",
@@ -4680,14 +4715,14 @@ const Ic = {
       }
     ];
   }
-}, Nc = {
+}, Fc = {
   id: "ema",
   label: "Exponential Moving Average",
   shortLabel: "EMA",
   placement: "overlay",
   params: [{ key: "period", label: "Period", default: 20, min: 1, max: 500, step: 1 }],
   compute(t, e) {
-    const n = pt(e, "period", 20);
+    const n = mt(e, "period", 20);
     return [
       {
         name: "ema",
@@ -4696,14 +4731,14 @@ const Ic = {
       }
     ];
   }
-}, Cc = {
+}, _c = {
   id: "wma",
   label: "Weighted Moving Average",
   shortLabel: "WMA",
   placement: "overlay",
   params: [{ key: "period", label: "Period", default: 20, min: 1, max: 500, step: 1 }],
   compute(t, e) {
-    const n = pt(e, "period", 20), i = ve(t), o = new Array(i.length).fill(null), s = n * (n + 1) / 2;
+    const n = mt(e, "period", 20), i = ve(t), o = new Array(i.length).fill(null), s = n * (n + 1) / 2;
     for (let r = n - 1; r < i.length; r++) {
       let l = 0;
       for (let c = 0; c < n; c++)
@@ -4718,7 +4753,7 @@ const Ic = {
       }
     ];
   }
-}, Rc = {
+}, Ec = {
   id: "bollinger",
   label: "Bollinger Bands",
   shortLabel: "BB",
@@ -4728,14 +4763,14 @@ const Ic = {
     { key: "stdDev", label: "StdDev", default: 2, min: 0.1, max: 10, step: 0.1 }
   ],
   compute(t, e) {
-    const n = pt(e, "period", 20), i = Lc(e, "stdDev", 2, 0), o = ve(t), s = ln(o, n), r = new Array(o.length).fill(null), l = new Array(o.length).fill(null);
+    const n = mt(e, "period", 20), i = Cc(e, "stdDev", 2, 0), o = ve(t), s = ln(o, n), r = new Array(o.length).fill(null), l = new Array(o.length).fill(null);
     for (let c = n - 1; c < o.length; c++) {
       const a = s[c];
       if (a === null) continue;
       let f = 0;
       for (let u = c - n + 1; u <= c; u++) {
-        const p = o[u] - a;
-        f += p * p;
+        const m = o[u] - a;
+        f += m * m;
       }
       const h = Math.sqrt(f / n);
       r[c] = a + i * h, l[c] = a - i * h;
@@ -4746,7 +4781,7 @@ const Ic = {
       { name: "lower", values: l, color: "#EF5350" }
     ];
   }
-}, Fc = {
+}, vc = {
   id: "vwap",
   label: "Volume Weighted Average Price",
   shortLabel: "VWAP",
@@ -4761,7 +4796,7 @@ const Ic = {
     }
     return [{ name: "vwap", values: n, color: "#E91E63" }];
   }
-}, _c = {
+}, Wc = {
   id: "rsi",
   label: "Relative Strength Index",
   shortLabel: "RSI",
@@ -4769,7 +4804,7 @@ const Ic = {
   params: [{ key: "period", label: "Period", default: 14, min: 1, max: 500, step: 1 }],
   range: [0, 100],
   compute(t, e) {
-    const n = pt(e, "period", 14), i = t.length, o = new Array(i).fill(null), s = new Array(i).fill(null);
+    const n = mt(e, "period", 14), i = t.length, o = new Array(i).fill(null), s = new Array(i).fill(null);
     for (let a = 1; a < i; a++) {
       const f = t[a].close - t[a - 1].close;
       o[a] = f > 0 ? f : 0, s[a] = f < 0 ? -f : 0;
@@ -4781,7 +4816,7 @@ const Ic = {
     }
     return [{ name: "rsi", values: c, color: "#7E57C2" }];
   }
-}, Ec = {
+}, Dc = {
   id: "macd",
   label: "MACD",
   shortLabel: "MACD",
@@ -4792,15 +4827,15 @@ const Ic = {
     { key: "signal", label: "Signal", default: 9, min: 1, max: 500, step: 1 }
   ],
   compute(t, e) {
-    const n = pt(e, "fast", 12), i = pt(e, "slow", 26), o = pt(e, "signal", 9), s = ve(t), r = s.length, l = ze(s, n), c = ze(s, i), a = new Array(r).fill(null);
+    const n = mt(e, "fast", 12), i = mt(e, "slow", 26), o = mt(e, "signal", 9), s = ve(t), r = s.length, l = ze(s, n), c = ze(s, i), a = new Array(r).fill(null);
     for (let u = 0; u < r; u++) {
-      const p = l[u], g = c[u];
-      p !== null && g !== null && (a[u] = p - g);
+      const m = l[u], g = c[u];
+      m !== null && g !== null && (a[u] = m - g);
     }
     const f = ze(a, o), h = new Array(r).fill(null);
     for (let u = 0; u < r; u++) {
-      const p = a[u], g = f[u];
-      p !== null && g !== null && (h[u] = p - g);
+      const m = a[u], g = f[u];
+      m !== null && g !== null && (h[u] = m - g);
     }
     return [
       { name: "histogram", values: h, color: "#26A69A", style: "histogram" },
@@ -4808,7 +4843,7 @@ const Ic = {
       { name: "signal", values: f, color: "#FF6D00" }
     ];
   }
-}, vc = {
+}, Yc = {
   id: "stochastic",
   label: "Stochastic Oscillator",
   shortLabel: "Stoch",
@@ -4820,11 +4855,11 @@ const Ic = {
   ],
   range: [0, 100],
   compute(t, e) {
-    const n = pt(e, "kPeriod", 14), i = pt(e, "dPeriod", 3), o = pt(e, "smooth", 3), s = t.length, r = new Array(s).fill(null);
+    const n = mt(e, "kPeriod", 14), i = mt(e, "dPeriod", 3), o = mt(e, "smooth", 3), s = t.length, r = new Array(s).fill(null);
     for (let a = n - 1; a < s; a++) {
       let f = -1 / 0, h = 1 / 0;
-      for (let p = a - n + 1; p <= a; p++) {
-        const g = t[p];
+      for (let m = a - n + 1; m <= a; m++) {
+        const g = t[m];
         g.high > f && (f = g.high), g.low < h && (h = g.low);
       }
       const u = f - h;
@@ -4836,14 +4871,14 @@ const Ic = {
       { name: "d", values: c, color: "#FF6D00" }
     ];
   }
-}, Wc = {
+}, $c = {
   id: "atr",
   label: "Average True Range",
   shortLabel: "ATR",
   placement: "pane",
   params: [{ key: "period", label: "Period", default: 14, min: 1, max: 500, step: 1 }],
   compute(t, e) {
-    const n = pt(e, "period", 14), i = t.length, o = new Array(i).fill(null);
+    const n = mt(e, "period", 14), i = t.length, o = new Array(i).fill(null);
     for (let s = 0; s < i; s++) {
       const r = t[s];
       if (s === 0)
@@ -4859,7 +4894,7 @@ const Ic = {
     }
     return [{ name: "atr", values: Zn(o, n), color: "#EF5350" }];
   }
-}, Dc = {
+}, Oc = {
   id: "obv",
   label: "On-Balance Volume",
   shortLabel: "OBV",
@@ -4877,7 +4912,7 @@ const Ic = {
     }
     return [{ name: "obv", values: i, color: "#26A69A" }];
   }
-}, Yc = {
+}, Bc = {
   id: "volume",
   label: "Volume",
   shortLabel: "Vol",
@@ -4894,7 +4929,7 @@ const Ic = {
       { name: "down", values: o, color: "#ef5350", style: "histogram" }
     ];
   }
-}, $c = {
+}, Xc = {
   id: "cvd",
   label: "Cumulative Volume Delta",
   shortLabel: "CVD",
@@ -4904,20 +4939,17 @@ const Ic = {
     const n = t.length, i = new Array(n).fill(null);
     let o = 0;
     for (let s = 0; s < n; s++) {
-      const r = t[s], l = r.high - r.low, c = l > 0 ? Oc(2 * (r.close - r.low) / l - 1, -1, 1) : 0;
+      const r = t[s], l = r.high - r.low, c = l > 0 ? Hc(2 * (r.close - r.low) / l - 1, -1, 1) : 0;
       o += r.volume * c, i[s] = o;
     }
     return [{ name: "cvd", values: i, color: "#2962ff", style: "line" }];
   }
 };
-function Oc(t, e, n) {
+function Hc(t, e, n) {
   return t < e ? e : t > n ? n : t;
 }
-const Bc = [
-  Yc,
-  Ic,
-  Nc,
-  Cc,
+const Vc = [
+  Bc,
   Rc,
   Fc,
   _c,
@@ -4925,10 +4957,13 @@ const Bc = [
   vc,
   Wc,
   Dc,
-  $c
-], Xc = new Map(Bc.map((t) => [t.id, t]));
-function Tf(t) {
-  return Xc.get(t);
+  Yc,
+  $c,
+  Oc,
+  Xc
+], Gc = new Map(Vc.map((t) => [t.id, t]));
+function Sf(t) {
+  return Gc.get(t);
 }
 function zi(t) {
   const e = t.length, n = new Array(e);
@@ -4960,67 +4995,67 @@ function xi(t, e, n) {
     if (!Number.isFinite(f[L])) return [];
   const h = new Float64Array(o), u = new Int32Array(o + 1);
   for (let L = 0; L < o; L++) {
-    const D = t[L];
-    Number.isFinite(D) ? (h[L] = D, u[L + 1] = u[L]) : (h[L] = 0, u[L + 1] = u[L] + 1);
+    const $ = t[L];
+    Number.isFinite($) ? (h[L] = $, u[L + 1] = u[L]) : (h[L] = 0, u[L + 1] = u[L] + 1);
   }
-  const p = new Float64Array(a), g = 1024;
-  let b = 0, A = 0;
+  const m = new Float64Array(a), g = 1024;
+  let d = 0, k = 0;
   for (let L = 0; L < i; L++) {
-    const D = h[L];
-    b += D, A += D * D;
+    const $ = h[L];
+    d += $, k += $ * $;
   }
   for (let L = 0; L < a; L++) {
     if (L > 0)
       if (L % g === 0) {
-        b = 0, A = 0;
+        d = 0, k = 0;
         for (let j = 0; j < i; j++) {
           const K = h[L + j];
-          b += K, A += K * K;
+          d += K, k += K * K;
         }
       } else {
         const j = h[L - 1], K = h[L + i - 1];
-        b += K - j, A += K * K - j * j;
+        d += K - j, k += K * K - j * j;
       }
     if (u[L + i] - u[L] > 0) {
-      p[L] = 1 / 0;
+      m[L] = 1 / 0;
       continue;
     }
-    const D = b / i;
-    let O = A / i - D * D;
+    const $ = d / i;
+    let O = k / i - $ * $;
     O < 0 && (O = 0);
     const G = Math.sqrt(O);
     let U = 0;
     if (G > 0) {
       const j = 1 / G;
       for (let K = 0; K < i; K++) {
-        const x = (h[L + K] - D) * j - f[K];
+        const x = (h[L + K] - $) * j - f[K];
         U += x * x;
       }
     } else
       for (let j = 0; j < i; j++) U += f[j] * f[j];
-    p[L] = Number.isFinite(U) ? Math.sqrt(U) : 1 / 0;
+    m[L] = Number.isFinite(U) ? Math.sqrt(U) : 1 / 0;
   }
   const T = new Array(a);
   for (let L = 0; L < a; L++) T[L] = L;
-  T.sort((L, D) => {
-    const O = p[L], G = p[D];
+  T.sort((L, $) => {
+    const O = m[L], G = m[$];
     return O === G ? 0 : O < G ? -1 : 1;
   });
   const P = [], N = [];
   for (let L = 0; L < a && P.length < s; L++) {
-    const D = T[L], O = p[D];
+    const $ = T[L], O = m[$];
     if (!Number.isFinite(O)) break;
     let G = !0;
     for (let U = 0; U < N.length; U++)
-      if (Math.abs(D - N[U]) < r) {
+      if (Math.abs($ - N[U]) < r) {
         G = !1;
         break;
       }
-    G && (N.push(D), P.push({ startIndex: D, endIndex: D + i - 1, distance: O }));
+    G && (N.push($), P.push({ startIndex: $, endIndex: $ + i - 1, distance: O }));
   }
   return P;
 }
-function Hc(t, e, n, i) {
+function qc(t, e, n, i) {
   if (e < 2 || n < 1 || i < 1) return null;
   const o = t.length;
   if (o < e * 3) return null;
@@ -5033,7 +5068,7 @@ function Hc(t, e, n, i) {
   }), c = [];
   for (let T = 0; T < l.length; T++) {
     const P = l[T], N = P.endIndex, L = s[N];
-    let D = null;
+    let $ = null;
     if (N + n < o && Number.isFinite(L) && L !== 0) {
       const O = new Array(n);
       let G = !0;
@@ -5045,9 +5080,9 @@ function Hc(t, e, n, i) {
         }
         O[U - 1] = j;
       }
-      G && (D = O);
+      G && ($ = O);
     }
-    c.push({ match: P, matchTime: t[N].time, aftermathPct: D });
+    c.push({ match: P, matchTime: t[N].time, aftermathPct: $ });
   }
   const a = [];
   let f = 0;
@@ -5064,29 +5099,29 @@ function Hc(t, e, n, i) {
     const T = h >> 1;
     u = h % 2 === 1 ? a[T] : (a[T - 1] + a[T]) / 2;
   }
-  const p = {
+  const m = {
     count: h,
     upCount: f,
     medianEndPct: u,
     bestEndPct: h > 0 ? a[h - 1] : 0,
     worstEndPct: h > 0 ? a[0] : 0,
     horizon: n
-  }, g = r[0], b = new Array(e), A = Number.isFinite(g) && g !== 0;
+  }, g = r[0], d = new Array(e), k = Number.isFinite(g) && g !== 0;
   for (let T = 0; T < e; T++)
-    if (A) {
+    if (k) {
       const P = (r[T] / g - 1) * 100;
-      b[T] = Number.isFinite(P) ? P : 0;
+      d[T] = Number.isFinite(P) ? P : 0;
     } else
-      b[T] = 0;
-  return { windowLen: e, horizon: n, results: c, stats: p, queryClosePct: b };
+      d[T] = 0;
+  return { windowLen: e, horizon: n, results: c, stats: m, queryClosePct: d };
 }
-function Vc(t, e) {
+function Uc(t, e) {
   if (!Number.isInteger(e) || e < 2)
     throw new Error(`resampleStroke: n must be an integer >= 2 (got ${e})`);
   const n = /* @__PURE__ */ new Map();
   for (let u = 0; u < t.length; u++) {
-    const p = t[u];
-    Number.isFinite(p.x) && Number.isFinite(p.y) && n.set(p.x, p.y);
+    const m = t[u];
+    Number.isFinite(m.x) && Number.isFinite(m.y) && n.set(m.x, m.y);
   }
   if (n.size < 2)
     throw new Error("resampleStroke: need at least 2 points with distinct x");
@@ -5099,51 +5134,51 @@ function Vc(t, e) {
   const l = o[0], a = o[i - 1] - l, f = new Array(e);
   let h = 0;
   for (let u = 0; u < e; u++) {
-    const p = l + a * u / (e - 1);
-    for (; h < i - 2 && o[h + 1] < p; ) h++;
-    const g = o[h], b = o[h + 1];
-    let A = (p - g) / (b - g);
-    A < 0 && (A = 0), A > 1 && (A = 1);
-    const T = r[h] + A * (r[h + 1] - r[h]);
+    const m = l + a * u / (e - 1);
+    for (; h < i - 2 && o[h + 1] < m; ) h++;
+    const g = o[h], d = o[h + 1];
+    let k = (m - g) / (d - g);
+    k < 0 && (k = 0), k > 1 && (k = 1);
+    const T = r[h] + k * (r[h + 1] - r[h]);
     f[u] = -T;
   }
   return f;
 }
-const Gc = 200, yi = 120;
+const jc = 200, yi = 120;
 function Pe(t, e) {
   const n = t.length;
   if (n === 1) return t[0];
   const i = e * (n - 1), o = Math.floor(i), s = o + 1 < n ? o + 1 : o, r = i - o;
   return t[o] + r * (t[s] - t[o]);
 }
-function qc(t, e, n, i = 12) {
-  if (e = Math.floor(e), n = Math.floor(n), i = Math.floor(i), e < 1 || n < 1 || i < 1 || t.length < Gc) return null;
+function Jc(t, e, n, i = 12) {
+  if (e = Math.floor(e), n = Math.floor(n), i = Math.floor(i), e < 1 || n < 1 || i < 1 || t.length < jc) return null;
   const o = new Float64Array(t.length - 1);
   let s = 0, r = NaN;
   for (let g = 0; g < t.length; g++) {
-    const b = t[g].close;
-    if (!(!Number.isFinite(b) || b <= 0)) {
+    const d = t[g].close;
+    if (!(!Number.isFinite(d) || d <= 0)) {
       if (r === r) {
-        const A = Math.log(b / r);
-        Number.isFinite(A) && (o[s++] = A);
+        const k = Math.log(d / r);
+        Number.isFinite(k) && (o[s++] = k);
       }
-      r = b;
+      r = d;
     }
   }
   if (s < i) return null;
   const l = s - i, c = new Float32Array(n * e);
   for (let g = 0; g < n; g++) {
-    const b = g * e;
-    let A = 0, T = 0;
+    const d = g * e;
+    let k = 0, T = 0;
     for (; T < e; ) {
       const P = Math.floor(Math.random() * (l + 1)), N = e - T, L = i < N ? i : N;
-      for (let D = 0; D < L; D++)
-        A += o[P + D], c[b + T] = (Math.exp(A) - 1) * 100, T++;
+      for (let $ = 0; $ < L; $++)
+        k += o[P + $], c[d + T] = (Math.exp(k) - 1) * 100, T++;
     }
   }
   const a = new Float32Array(n), f = new Array(e);
   for (let g = 0; g < e; g++) {
-    for (let b = 0; b < n; b++) a[b] = c[b * e + g];
+    for (let d = 0; d < n; d++) a[d] = c[d * e + g];
     a.sort(), f[g] = {
       p5: Pe(a, 0.05),
       p25: Pe(a, 0.25),
@@ -5152,15 +5187,15 @@ function qc(t, e, n, i = 12) {
       p95: Pe(a, 0.95)
     };
   }
-  const h = f[e - 1].p50, u = n < yi ? n : yi, p = new Array(u);
+  const h = f[e - 1].p50, u = n < yi ? n : yi, m = new Array(u);
   for (let g = 0; g < u; g++) {
-    const A = Math.floor(g * n / u) * e, T = new Array(e);
-    for (let P = 0; P < e; P++) T[P] = c[A + P];
-    p[g] = T;
+    const k = Math.floor(g * n / u) * e, T = new Array(e);
+    for (let P = 0; P < e; P++) T[P] = c[k + P];
+    m[g] = T;
   }
-  return { horizon: e, nPaths: n, pathsPct: c, bandsPct: f, medianEndPct: h, samplePathsPct: p };
+  return { horizon: e, nPaths: n, pathsPct: c, bandsPct: f, medianEndPct: h, samplePathsPct: m };
 }
-function Uc(t, e) {
+function Kc(t, e) {
   const { horizon: n, nPaths: i, pathsPct: o } = t;
   if (i < 1 || n < 1) return { endAbovePct: 0, touchPct: 0 };
   const s = e >= 0;
@@ -5185,7 +5220,7 @@ function Uc(t, e) {
     touchPct: l / i * 100
   };
 }
-function jc(t, e) {
+function Zc(t, e) {
   const { horizon: n, nPaths: i, pathsPct: o } = t;
   if (i < 1 || n < 1 || !Number.isFinite(e)) return 0;
   const s = n - 1;
@@ -5198,55 +5233,55 @@ function jc(t, e) {
       o[l * n + s] <= e && r++;
   return r / i * 100;
 }
-const se = 24, re = 7;
-function Jc(t) {
-  const e = new Float64Array(se), n = new Float64Array(se), i = new Float64Array(se), o = new Int32Array(se), s = new Float64Array(re), r = new Float64Array(re), l = new Float64Array(re), c = new Int32Array(re);
+const re = 24, le = 7;
+function Qc(t) {
+  const e = new Float64Array(re), n = new Float64Array(re), i = new Float64Array(re), o = new Int32Array(re), s = new Float64Array(le), r = new Float64Array(le), l = new Float64Array(le), c = new Int32Array(le);
   let a = 1 / 0, f = -1 / 0;
   for (let g = 0; g < t.length; g++) {
-    const b = t[g];
-    if (!Number.isFinite(b.time) || !Number.isFinite(b.open) || !Number.isFinite(b.close) || !Number.isFinite(b.volume) || b.open === 0)
+    const d = t[g];
+    if (!Number.isFinite(d.time) || !Number.isFinite(d.open) || !Number.isFinite(d.close) || !Number.isFinite(d.volume) || d.open === 0)
       continue;
-    b.time < a && (a = b.time), b.time > f && (f = b.time);
-    const A = new Date(b.time), T = A.getUTCHours(), P = A.getUTCDay(), N = (b.close / b.open - 1) * 100, L = Math.abs(N);
-    e[T] += L, n[T] += N, i[T] += b.volume, o[T]++, s[P] += L, r[P] += N, l[P] += b.volume, c[P]++;
+    d.time < a && (a = d.time), d.time > f && (f = d.time);
+    const k = new Date(d.time), T = k.getUTCHours(), P = k.getUTCDay(), N = (d.close / d.open - 1) * 100, L = Math.abs(N);
+    e[T] += L, n[T] += N, i[T] += d.volume, o[T]++, s[P] += L, r[P] += N, l[P] += d.volume, c[P]++;
   }
-  const h = (g, b, A, T) => T > 0 ? {
+  const h = (g, d, k, T) => T > 0 ? {
     meanAbsReturnPct: g / T,
-    meanReturnPct: b / T,
-    meanVolume: A / T,
+    meanReturnPct: d / T,
+    meanVolume: k / T,
     samples: T
-  } : { meanAbsReturnPct: 0, meanReturnPct: 0, meanVolume: 0, samples: 0 }, u = new Array(se);
-  for (let g = 0; g < se; g++)
-    u[g] = h(e[g], n[g], i[g], o[g]);
-  const p = new Array(re);
+  } : { meanAbsReturnPct: 0, meanReturnPct: 0, meanVolume: 0, samples: 0 }, u = new Array(re);
   for (let g = 0; g < re; g++)
-    p[g] = h(s[g], r[g], l[g], c[g]);
+    u[g] = h(e[g], n[g], i[g], o[g]);
+  const m = new Array(le);
+  for (let g = 0; g < le; g++)
+    m[g] = h(s[g], r[g], l[g], c[g]);
   return {
     byHourUtc: u,
-    byWeekdayUtc: p,
+    byWeekdayUtc: m,
     candleCount: t.length,
     fromTime: Number.isFinite(a) ? a : 0,
     toTime: Number.isFinite(f) ? f : 0
   };
 }
-const Kc = 55, Bn = 256, Zc = 0.12, Xn = 5e-3, Qc = 0.3, zc = 0.5, xc = 0.28, tf = 0.35, ef = 0.25, bi = 0.28, nf = [0, 3, 5, 7, 10], of = 3, sf = 220, xe = [];
-for (let t = 0; t < of; t++)
-  for (const e of nf)
-    xe.push(sf * Math.pow(2, t + e / 12));
+const zc = 55, Bn = 256, xc = 0.12, Xn = 5e-3, tf = 0.3, ef = 0.5, nf = 0.28, of = 0.35, sf = 0.25, di = 0.28, rf = [0, 3, 5, 7, 10], lf = 3, af = 220, xe = [];
+for (let t = 0; t < lf; t++)
+  for (const e of rf)
+    xe.push(af * Math.pow(2, t + e / 12));
 class ts {
   constructor() {
-    ot(this, "ctx", null);
-    ot(this, "masterGain", null);
-    ot(this, "delay", null);
-    ot(this, "_running", !1);
+    it(this, "ctx", null);
+    it(this, "masterGain", null);
+    it(this, "delay", null);
+    it(this, "_running", !1);
     // Rolling window of log(1+qty) values, as a ring buffer.
-    ot(this, "sizes", new Float64Array(Bn));
-    ot(this, "sizeCount", 0);
-    ot(this, "sizeIdx", 0);
+    it(this, "sizes", new Float64Array(Bn));
+    it(this, "sizeCount", 0);
+    it(this, "sizeIdx", 0);
     // Rate limiting: at most one note per TICK_MS, coalescing same-side trades.
-    ot(this, "pending", { buy: null, sell: null });
-    ot(this, "tickTimer", null);
-    ot(this, "suspendTimer", null);
+    it(this, "pending", { buy: null, sell: null });
+    it(this, "tickTimer", null);
+    it(this, "suspendTimer", null);
   }
   get running() {
     return this._running;
@@ -5262,7 +5297,7 @@ class ts {
     if (!e || !n) return;
     this.suspendTimer !== null && (clearTimeout(this.suspendTimer), this.suspendTimer = null), e.state !== "running" && await e.resume();
     const i = e.currentTime, o = n.gain;
-    o.cancelScheduledValues(i), o.setValueAtTime(Math.max(o.value, 1e-4), i), o.exponentialRampToValueAtTime(Zc, i + 0.08), this._running = !0;
+    o.cancelScheduledValues(i), o.setValueAtTime(Math.max(o.value, 1e-4), i), o.exponentialRampToValueAtTime(xc, i + 0.08), this._running = !0;
   }
   /** Fade out, then suspend the context. Restartable via start(). */
   stop() {
@@ -5293,17 +5328,17 @@ class ts {
     const s = i.createDynamicsCompressor();
     s.threshold.value = -22, s.knee.value = 18, s.ratio.value = 5, s.attack.value = 4e-3, s.release.value = 0.22, o.connect(s), s.connect(i.destination);
     const r = i.createDelay(1);
-    r.delayTime.value = xc;
+    r.delayTime.value = nf;
     const l = i.createGain();
-    l.gain.value = tf;
+    l.gain.value = of;
     const c = i.createGain();
-    return c.gain.value = ef, r.connect(l), l.connect(r), r.connect(c), c.connect(o), this.ctx = i, this.masterGain = o, this.delay = r, !0;
+    return c.gain.value = sf, r.connect(l), l.connect(r), r.connect(c), c.connect(o), this.ctx = i, this.masterGain = o, this.delay = r, !0;
   }
   /** One rate-limit tick: keep ticking only while there is something pending. */
   scheduleTick() {
     this.tickTimer = setTimeout(() => {
       this.tickTimer = null, this._running && (this.pending.buy || this.pending.sell) && (this.flushOne(), this.scheduleTick());
-    }, Kc);
+    }, zc);
   }
   /**
    * Play at most ONE pending note (strict ≤ ~18 notes/sec). If both sides are
@@ -5326,17 +5361,17 @@ class ts {
     const r = Math.log1p(Math.max(0, n)), l = this.percentile(r), c = this.velocity(r), a = Math.min(xe.length - 1, Math.max(0, Math.floor(l * xe.length)));
     let f = xe[a];
     e === "sell" && (f /= 2);
-    const h = i.currentTime + 1e-3, u = Qc + zc * c, p = 0.18 + 0.82 * c, g = i.createOscillator();
+    const h = i.currentTime + 1e-3, u = tf + ef * c, m = 0.18 + 0.82 * c, g = i.createOscillator();
     g.type = e === "buy" ? "sine" : "triangle", g.frequency.value = f;
-    const b = i.createGain();
-    b.gain.setValueAtTime(1e-4, h), b.gain.linearRampToValueAtTime(p, h + Xn), b.gain.exponentialRampToValueAtTime(1e-4, h + Xn + u), g.connect(b);
-    let A = b;
+    const d = i.createGain();
+    d.gain.setValueAtTime(1e-4, h), d.gain.linearRampToValueAtTime(m, h + Xn), d.gain.exponentialRampToValueAtTime(1e-4, h + Xn + u), g.connect(d);
+    let k = d;
     if (typeof i.createStereoPanner == "function") {
       const T = i.createStereoPanner();
-      T.pan.value = e === "buy" ? bi : -bi, b.connect(T), A = T;
+      T.pan.value = e === "buy" ? di : -di, d.connect(T), k = T;
     }
-    A.connect(o), A.connect(s), g.start(h), g.stop(h + Xn + u + 0.05), g.onended = () => {
-      g.disconnect(), b.disconnect(), A !== b && A.disconnect();
+    k.connect(o), k.connect(s), g.start(h), g.stop(h + Xn + u + 0.05), g.onended = () => {
+      g.disconnect(), d.disconnect(), k !== d && k.disconnect();
     };
   }
   pushSize(e) {
@@ -5361,19 +5396,19 @@ class ts {
     return i <= 0 ? 0.5 : Math.min(1, Math.max(0.05, e / i));
   }
 }
-const rf = new ts(), Mf = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const cf = new ts(), Pf = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   TradeSonifier: ts,
-  buildEchoScan: Hc,
-  buildOracle: qc,
-  computeMarketClock: Jc,
+  buildEchoScan: qc,
+  buildOracle: Jc,
+  computeMarketClock: Qc,
   findSimilar: xi,
-  probabilityAtLeast: jc,
-  resampleStroke: Vc,
-  sonifier: rf,
-  targetOdds: Uc,
+  probabilityAtLeast: Zc,
+  resampleStroke: Uc,
+  sonifier: cf,
+  targetOdds: Kc,
   zNormalize: zi
-}, Symbol.toStringTag, { value: "Module" })), lf = 10, af = 1, cf = 10, es = {
+}, Symbol.toStringTag, { value: "Module" })), ff = 10, hf = 1, uf = 10, es = {
   upColor: "#26a69a",
   downColor: "#ef5350",
   gridVisible: !1,
@@ -5382,13 +5417,13 @@ const rf = new ts(), Mf = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.d
   alertTune: 0,
   alertDuration: 2
 };
-function wf(t) {
-  return typeof t == "number" && Number.isInteger(t) && t >= 0 && t < lf ? t : es.alertTune;
+function Af(t) {
+  return typeof t == "number" && Number.isInteger(t) && t >= 0 && t < ff ? t : es.alertTune;
 }
-function ff(t) {
-  return typeof t != "number" || !Number.isFinite(t) ? es.alertDuration : Math.min(cf, Math.max(af, Math.round(t)));
+function pf(t) {
+  return typeof t != "number" || !Number.isFinite(t) ? es.alertDuration : Math.min(uf, Math.max(hf, Math.round(t)));
 }
-function it(t, e, n) {
+function st(t, e, n) {
   const { type: i = "sine", freq: o, freqTo: s, start: r, dur: l, peak: c = 0.2 } = n, a = t.createGain();
   a.connect(e);
   const f = Math.min(0.012, l * 0.25);
@@ -5408,18 +5443,18 @@ const Qn = [
   {
     name: "Classic beep",
     render: (t, e, n, i) => It(n, i, 0.5, (o) => {
-      it(t, e, { freq: 880, start: o, dur: 0.15 }), it(t, e, { freq: 1320, start: o + 0.17, dur: 0.15 });
+      st(t, e, { freq: 880, start: o, dur: 0.15 }), st(t, e, { freq: 1320, start: o + 0.17, dur: 0.15 });
     })
   },
   {
     name: "Chime",
     render: (t, e, n, i) => It(n, i, 0.95, (o) => {
-      it(t, e, { type: "triangle", freq: 1318, start: o, dur: 0.85, peak: 0.18 }), it(t, e, { type: "triangle", freq: 1047, start: o + 0.12, dur: 0.8, peak: 0.14 });
+      st(t, e, { type: "triangle", freq: 1318, start: o, dur: 0.85, peak: 0.18 }), st(t, e, { type: "triangle", freq: 1047, start: o + 0.12, dur: 0.8, peak: 0.14 });
     })
   },
   {
     name: "Ping",
-    render: (t, e, n, i) => It(n, i, 0.6, (o) => it(t, e, { freq: 1568, start: o, dur: 0.35, peak: 0.22 }))
+    render: (t, e, n, i) => It(n, i, 0.6, (o) => st(t, e, { freq: 1568, start: o, dur: 0.35, peak: 0.22 }))
   },
   {
     name: "Rising alert",
@@ -5427,7 +5462,7 @@ const Qn = [
       n,
       i,
       0.7,
-      (o) => it(t, e, { type: "sawtooth", freq: 440, freqTo: 1760, start: o, dur: 0.5, peak: 0.14 })
+      (o) => st(t, e, { type: "sawtooth", freq: 440, freqTo: 1760, start: o, dur: 0.5, peak: 0.14 })
     )
   },
   {
@@ -5436,17 +5471,17 @@ const Qn = [
       n,
       i,
       0.7,
-      (o) => it(t, e, { type: "sawtooth", freq: 1760, freqTo: 440, start: o, dur: 0.5, peak: 0.14 })
+      (o) => st(t, e, { type: "sawtooth", freq: 1760, freqTo: 440, start: o, dur: 0.5, peak: 0.14 })
     )
   },
   {
     name: "Pulse",
-    render: (t, e, n, i) => It(n, i, 0.2, (o) => it(t, e, { type: "square", freq: 1100, start: o, dur: 0.09, peak: 0.12 }))
+    render: (t, e, n, i) => It(n, i, 0.2, (o) => st(t, e, { type: "square", freq: 1100, start: o, dur: 0.09, peak: 0.12 }))
   },
   {
     name: "Marimba",
     render: (t, e, n, i) => It(n, i, 0.62, (o) => {
-      it(t, e, { type: "triangle", freq: 523, start: o, dur: 0.2, peak: 0.18 }), it(t, e, { type: "triangle", freq: 659, start: o + 0.12, dur: 0.2, peak: 0.16 }), it(t, e, { type: "triangle", freq: 784, start: o + 0.24, dur: 0.22, peak: 0.16 });
+      st(t, e, { type: "triangle", freq: 523, start: o, dur: 0.2, peak: 0.18 }), st(t, e, { type: "triangle", freq: 659, start: o + 0.12, dur: 0.2, peak: 0.16 }), st(t, e, { type: "triangle", freq: 784, start: o + 0.24, dur: 0.22, peak: 0.16 });
     })
   },
   {
@@ -5470,21 +5505,21 @@ const Qn = [
       i,
       1,
       (o) => [440, 554, 659, 880].forEach(
-        (s, r) => it(t, e, { freq: s, start: o + r * 0.18, dur: 0.24, peak: 0.16 })
+        (s, r) => st(t, e, { freq: s, start: o + r * 0.18, dur: 0.24, peak: 0.16 })
       )
     )
   },
   {
     name: "Digital",
     render: (t, e, n, i) => It(n, i, 0.5, (o) => {
-      it(t, e, { type: "square", freq: 1047, start: o, dur: 0.1, peak: 0.1 }), it(t, e, { type: "square", freq: 1568, start: o + 0.12, dur: 0.1, peak: 0.1 }), it(t, e, { type: "square", freq: 1319, start: o + 0.26, dur: 0.12, peak: 0.1 });
+      st(t, e, { type: "square", freq: 1047, start: o, dur: 0.1, peak: 0.1 }), st(t, e, { type: "square", freq: 1568, start: o + 0.12, dur: 0.1, peak: 0.1 }), st(t, e, { type: "square", freq: 1319, start: o + 0.26, dur: 0.12, peak: 0.1 });
     })
   }
-], Sf = Qn.map((t, e) => ({
+], kf = Qn.map((t, e) => ({
   id: e,
   name: t.name
 }));
-function hf(t, e) {
+function mf(t, e) {
   const n = window, i = n.AudioContext ?? n.webkitAudioContext;
   if (!i) return () => {
   };
@@ -5497,7 +5532,7 @@ function hf(t, e) {
   }
   o.resume().catch(() => {
   });
-  const s = ff(e), r = Qn[t] ?? Qn[0], l = o.createGain();
+  const s = pf(e), r = Qn[t] ?? Qn[0], l = o.createGain();
   l.gain.value = 0.85, l.connect(o.destination);
   const c = o.currentTime + 0.03;
   try {
@@ -5513,7 +5548,7 @@ function hf(t, e) {
     window.clearTimeout(h), f();
   };
 }
-function uf(t) {
+function gf(t) {
   if (!Number.isFinite(t)) return "—";
   const e = Math.abs(t);
   if (e >= 1e3)
@@ -5523,7 +5558,7 @@ function uf(t) {
   const n = t.toPrecision(4);
   return n.includes("e") ? t.toFixed(8) : String(parseFloat(n));
 }
-async function Pf() {
+async function Lf() {
   if (typeof Notification > "u") return !1;
   if (Notification.permission === "granted") return !0;
   if (Notification.permission === "denied") return !1;
@@ -5534,10 +5569,10 @@ async function Pf() {
   }
 }
 function ns(t) {
-  const e = `${t.symbol} crossed ${t.condition} ${uf(t.price)}`;
+  const e = `${t.symbol} crossed ${t.condition} ${gf(t.price)}`;
   return t.message && t.message.trim() !== "" ? `${e} — ${t.message.trim()}` : e;
 }
-function pf(t) {
+function yf(t) {
   if (typeof Notification > "u" || Notification.permission !== "granted") return !1;
   try {
     return new Notification("CandL price alert", { body: ns(t), tag: t.id }), !0;
@@ -5545,7 +5580,7 @@ function pf(t) {
     return !1;
   }
 }
-function mf(t) {
+function df(t) {
   if (typeof document > "u") return;
   const e = document.createElement("div");
   e.className = "alert-toast", e.setAttribute("role", "status"), e.textContent = ns(t), document.body.appendChild(e), requestAnimationFrame(() => e.classList.add("show"));
@@ -5554,16 +5589,16 @@ function mf(t) {
   };
   window.setTimeout(n, 6e3), e.addEventListener("click", n);
 }
-function Af(t) {
+function If(t) {
   const { symbol: e, price: n, prevPrice: i, alerts: o, soundOn: s, tune: r, tuneDurationSec: l, onTriggered: c } = t;
   if (Number.isFinite(n))
     for (const a of o) {
       if (a.symbol !== e || a.triggered) continue;
       let f;
-      a.condition === "above" ? f = (i === null || i < a.price) && n >= a.price : f = (i === null || i > a.price) && n <= a.price, f && (pf(a) || mf(a), s && hf(r, l), c(a.id, Date.now()));
+      a.condition === "above" ? f = (i === null || i < a.price) && n >= a.price : f = (i === null || i > a.price) && n <= a.price, f && (yf(a) || df(a), s && mf(r, l), c(a.id, Date.now()));
     }
 }
-const kf = ["1s", "15s", "30s", "1m", "5m", "15m", "30m", "1h", "4h", "1d", "1w"], Lf = {
+const Nf = ["1s", "15s", "30s", "1m", "5m", "15m", "30m", "1h", "4h", "1d", "1w"], Cf = {
   "1s": 1e3,
   "15s": 15e3,
   "30s": 3e4,
@@ -5575,7 +5610,7 @@ const kf = ["1s", "15s", "30s", "1m", "5m", "15m", "30m", "1h", "4h", "1d", "1w"
   "4h": 144e5,
   "1d": 864e5,
   "1w": 6048e5
-}, If = {
+}, Rf = {
   "1s": "1 second",
   "15s": "15 seconds",
   "30s": "30 seconds",
@@ -5589,40 +5624,40 @@ const kf = ["1s", "15s", "30s", "1m", "5m", "15m", "30m", "1h", "4h", "1d", "1w"
   "1w": "1 week"
 };
 export {
-  cf as ALERT_DURATION_MAX,
-  af as ALERT_DURATION_MIN,
-  Sf as ALERT_TUNES,
-  lf as ALERT_TUNE_COUNT,
+  uf as ALERT_DURATION_MAX,
+  hf as ALERT_DURATION_MIN,
+  kf as ALERT_TUNES,
+  ff as ALERT_TUNE_COUNT,
   Pa as DEFAULT_DRAWING_COLOR,
   es as DEFAULT_SETTINGS,
-  bf as DRAWING_TOOLS,
+  Mf as DRAWING_TOOLS,
   ar as FIBEXT_LEVELS,
   Ai as FIBEXT_LEVEL_COLORS,
   Mn as FIB_LEVELS,
   Pi as FIB_LEVEL_COLORS,
   tn as HANDLE_TOLERANCE,
   Os as HIT_TOLERANCE,
-  Bc as INDICATORS,
-  kf as INTERVALS,
-  If as INTERVAL_LABELS,
-  Lf as INTERVAL_MS,
+  Vc as INDICATORS,
+  Nf as INTERVALS,
+  Rf as INTERVAL_LABELS,
+  Cf as INTERVAL_MS,
   Sa as TOOL_GROUPS,
   Jt as TOOL_IMPLS,
-  Af as checkAndFireAlerts,
-  ff as clampAlertDuration,
-  wf as clampAlertTune,
-  df as createChartEngine,
+  If as checkAndFireAlerts,
+  pf as clampAlertDuration,
+  Af as clampAlertTune,
+  wf as createChartEngine,
   _n as defaultDrawing,
-  Pf as ensureNotificationPermission,
+  Lf as ensureNotificationPermission,
   Eo as fibExtLevelPrice,
   _o as fibLevelPrice,
   Et as formatPrice,
-  Tf as getIndicator,
+  Sf as getIndicator,
   ri as hitTestDrawing,
   li as hitTestHandle,
-  Mf as lab,
+  Pf as lab,
   ka as movePoint,
-  hf as playTune,
+  mf as playTune,
   Ke as pointsNeeded,
   En as renderDrawing,
   po as toolImpl,

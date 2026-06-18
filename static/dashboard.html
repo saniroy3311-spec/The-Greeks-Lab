@@ -495,11 +495,11 @@
     justify-content: space-between;
     align-items: center;
   }
-  .overlay-card-header, .sig-header-row {
+  .overlay-card-header, .sig-header-row, .scalper-logs-head {
     cursor: pointer;
     user-select: none;
   }
-  .overlay-card-header::after, .sig-header-row::after {
+  .overlay-card-header::after, .sig-header-row::after, .scalper-logs-head::after {
     content: '▲';
     font-size: 8px;
     color: var(--muted);
@@ -507,13 +507,15 @@
     margin-left: 8px;
   }
   .overlay-card.card-collapsed .overlay-card-header::after,
-  .overlay-card.card-collapsed .sig-header-row::after {
+  .overlay-card.card-collapsed .sig-header-row::after,
+  .scalper-logs-card.card-collapsed .scalper-logs-head::after {
     content: '▼';
   }
-  .overlay-card.card-collapsed > *:not(.overlay-card-header):not(.sig-header-row) {
+  .overlay-card.card-collapsed > *:not(.overlay-card-header):not(.sig-header-row),
+  .scalper-logs-card.card-collapsed > *:not(.scalper-logs-head) {
     display: none !important;
   }
-  .overlay-card.card-collapsed {
+  .overlay-card.card-collapsed, .scalper-logs-card.card-collapsed {
     padding-bottom: 10px;
   }
   .card-title {
@@ -3373,8 +3375,16 @@ async function load(isFirstLoad = false) {
       isPrediction: true
     })).filter(p => p.time > (liveCandles.length > 0 ? liveCandles[liveCandles.length - 1].time : 0));
 
-    liveChartEngine.setData(liveCandles.concat(cleanPredicted));
-    loadDrawings(liveChartEngine, 'live');
+    const lastServerCandle = d.candles[d.candles.length - 1];
+    const serverCandleTime = lastServerCandle ? lastServerCandle.time * 1000 : 0;
+    const isNewCandle = (window.lastLoadedCandleTime !== serverCandleTime);
+
+    if (isFirstLoad || isNewCandle) {
+      window.lastLoadedCandleTime = serverCandleTime;
+      liveChartEngine.setData(liveCandles.concat(cleanPredicted));
+      loadDrawings(liveChartEngine, 'live');
+    }
+    
     updateChartIndicators(liveChartEngine, liveCandles, liveActiveIndicators);
     renderPredictionsTable(window.lastPredictions);
     
@@ -3383,115 +3393,117 @@ async function load(isFirstLoad = false) {
       lastClosePrice = liveCandles[liveCandles.length - 1].close;
     }
     
-    // -------------------------------------------------------------
-    // Simulating the Oracle Probability Cone & AI Prediction Lines
-    // -------------------------------------------------------------
-    const lastClose = liveCandles[liveCandles.length - 1].close;
-    const horizon = d.pred_len;
-    const oracleResult = lab.buildOracle(liveCandles, horizon, 1000);
-    
-    let projLines = [];
-    let projBand = null;
-    
-    if (oracleResult) {
-      const upperPoints = [{ barOffset: 0, price: lastClose }];
-      const lowerPoints = [{ barOffset: 0, price: lastClose }];
-      const medianPoints = [{ barOffset: 0, price: lastClose }];
+    if (isFirstLoad || isNewCandle) {
+      // -------------------------------------------------------------
+      // Simulating the Oracle Probability Cone & AI Prediction Lines
+      // -------------------------------------------------------------
+      const lastClose = liveCandles[liveCandles.length - 1].close;
+      const horizon = d.pred_len;
+      const oracleResult = lab.buildOracle(liveCandles, horizon, 1000);
       
-      oracleResult.bandsPct.forEach((band, idx) => {
-        const barOffset = idx + 1;
-        upperPoints.push({ barOffset, price: lastClose * (1 + band.p95 / 100) });
-        lowerPoints.push({ barOffset, price: lastClose * (1 + band.p5 / 100) });
-        medianPoints.push({ barOffset, price: lastClose * (1 + band.p50 / 100) });
-      });
+      let projLines = [];
+      let projBand = null;
       
-      projBand = {
-        color: 'rgba(55, 138, 221, 0.12)',
-        opacity: 0.12,
-        upper: upperPoints,
-        lower: lowerPoints
-      };
-      
-      projLines.push({
-        id: 'oracle-median',
-        color: '#378add',
-        opacity: 0.8,
-        width: 1.5,
-        dashed: true,
-        points: medianPoints
-      });
-    }
-
-    // AI Prediction Line
-    const predPoints = [{ barOffset: 0, price: lastClose }];
-    d.predicted.forEach((p, idx) => {
-      predPoints.push({ barOffset: idx + 1, price: p.close });
-    });
-    projLines.push({
-      id: 'kronos-prediction',
-      color: '#ef9f27', // uses CSS palette color
-      opacity: 1,
-      width: 2.5,
-      points: predPoints
-    });
-
-    // -------------------------------------------------------------
-    // Echoes Similarity Search Scan
-    // -------------------------------------------------------------
-    const echoScan = lab.buildEchoScan(liveCandles, 30, horizon, 5);
-    const echoesCard = $('echoes-card');
-    
-    if (echoScan && echoScan.stats.count > 0) {
-      const count = echoScan.stats.count;
-      const up = echoScan.stats.upCount;
-      const rate = Math.round((up / count) * 100);
-      
-      let statusKlass = 'neutral';
-      let statusText = `${up} / ${count} UP (${rate}%)`;
-      if (rate >= 60) {
-        statusKlass = 'bullish';
-      } else if (rate <= 40) {
-        statusKlass = 'bearish';
-      }
-      
-      echoesCard.className = `overlay-card echoes-card ${statusKlass}`;
-      $('echoes-status').textContent = statusText;
-      if ($('mobile-hud-echoes')) $('mobile-hud-echoes').textContent = statusText;
-      $('echoes-median').textContent = `${echoScan.stats.medianEndPct >= 0 ? '+' : ''}${echoScan.stats.medianEndPct.toFixed(2)}%`;
-      $('echoes-best').textContent = `+${echoScan.stats.bestEndPct.toFixed(2)}%`;
-      $('echoes-worst').textContent = `${echoScan.stats.worstEndPct.toFixed(2)}%`;
-      
-      // Draw Echo sparklines
-      drawEchoesSparkline(echoScan);
-      
-      // Plot similar aftermath lines on the main chart as faint paths
-      echoScan.results.forEach((res, i) => {
-        if (!res.aftermathPct) return;
-        const pts = [{ barOffset: 0, price: lastClose }];
-        res.aftermathPct.forEach((pct, offsetIdx) => {
-          pts.push({ barOffset: offsetIdx + 1, price: lastClose * (1 + pct / 100) });
+      if (oracleResult) {
+        const upperPoints = [{ barOffset: 0, price: lastClose }];
+        const lowerPoints = [{ barOffset: 0, price: lastClose }];
+        const medianPoints = [{ barOffset: 0, price: lastClose }];
+        
+        oracleResult.bandsPct.forEach((band, idx) => {
+          const barOffset = idx + 1;
+          upperPoints.push({ barOffset, price: lastClose * (1 + band.p95 / 100) });
+          lowerPoints.push({ barOffset, price: lastClose * (1 + band.p5 / 100) });
+          medianPoints.push({ barOffset, price: lastClose * (1 + band.p50 / 100) });
         });
         
-        const isUp = res.aftermathPct[res.aftermathPct.length - 1] > 0;
+        projBand = {
+          color: 'rgba(55, 138, 221, 0.12)',
+          opacity: 0.12,
+          upper: upperPoints,
+          lower: lowerPoints
+        };
+        
         projLines.push({
-          id: `echo-match-${i}`,
-          color: isUp ? '#1d9e75' : '#d85a30',
-          opacity: 0.15,
-          width: 1,
-          points: pts
+          id: 'oracle-median',
+          color: '#378add',
+          opacity: 0.8,
+          width: 1.5,
+          dashed: true,
+          points: medianPoints
         });
-      });
-    } else {
-      echoesCard.className = `overlay-card echoes-card neutral`;
-      $('echoes-status').textContent = 'No past match';
-      $('echoes-median').textContent = '—';
-      $('echoes-best').textContent = '—';
-      $('echoes-worst').textContent = '—';
-    }
+      }
 
-    liveChartEngine.setProjections(projLines, projBand);
-    if (isFirstLoad) {
-      liveChartEngine.resetView();
+      // AI Prediction Line
+      const predPoints = [{ barOffset: 0, price: lastClose }];
+      d.predicted.forEach((p, idx) => {
+        predPoints.push({ barOffset: idx + 1, price: p.close });
+      });
+      projLines.push({
+        id: 'kronos-prediction',
+        color: '#ef9f27', // uses CSS palette color
+        opacity: 1,
+        width: 2.5,
+        points: predPoints
+      });
+
+      // -------------------------------------------------------------
+      // Echoes Similarity Search Scan
+      // -------------------------------------------------------------
+      const echoScan = lab.buildEchoScan(liveCandles, 30, horizon, 5);
+      const echoesCard = $('echoes-card');
+      
+      if (echoScan && echoScan.stats.count > 0) {
+        const count = echoScan.stats.count;
+        const up = echoScan.stats.upCount;
+        const rate = Math.round((up / count) * 100);
+        
+        let statusKlass = 'neutral';
+        let statusText = `${up} / ${count} UP (${rate}%)`;
+        if (rate >= 60) {
+          statusKlass = 'bullish';
+        } else if (rate <= 40) {
+          statusKlass = 'bearish';
+        }
+        
+        echoesCard.className = `overlay-card echoes-card ${statusKlass}`;
+        $('echoes-status').textContent = statusText;
+        if ($('mobile-hud-echoes')) $('mobile-hud-echoes').textContent = statusText;
+        $('echoes-median').textContent = `${echoScan.stats.medianEndPct >= 0 ? '+' : ''}${echoScan.stats.medianEndPct.toFixed(2)}%`;
+        $('echoes-best').textContent = `+${echoScan.stats.bestEndPct.toFixed(2)}%`;
+        $('echoes-worst').textContent = `${echoScan.stats.worstEndPct.toFixed(2)}%`;
+        
+        // Draw Echo sparklines
+        drawEchoesSparkline(echoScan);
+        
+        // Plot similar aftermath lines on the main chart as faint paths
+        echoScan.results.forEach((res, i) => {
+          if (!res.aftermathPct) return;
+          const pts = [{ barOffset: 0, price: lastClose }];
+          res.aftermathPct.forEach((pct, offsetIdx) => {
+            pts.push({ barOffset: offsetIdx + 1, price: lastClose * (1 + pct / 100) });
+          });
+          
+          const isUp = res.aftermathPct[res.aftermathPct.length - 1] > 0;
+          projLines.push({
+            id: `echo-match-${i}`,
+            color: isUp ? '#1d9e75' : '#d85a30',
+            opacity: 0.15,
+            width: 1,
+            points: pts
+          });
+        });
+      } else {
+        echoesCard.className = `overlay-card echoes-card neutral`;
+        $('echoes-status').textContent = 'No past match';
+        $('echoes-median').textContent = '—';
+        $('echoes-best').textContent = '—';
+        $('echoes-worst').textContent = '—';
+      }
+
+      liveChartEngine.setProjections(projLines, projBand);
+      if (isFirstLoad) {
+        liveChartEngine.resetView();
+      }
     }
 
     // Sync mobile HUD strip
@@ -3676,20 +3688,23 @@ async function loadScalper(isFirstLoad = false) {
       volume: c.volume || 0
     }));
 
-    scalperChartEngine.setData(scalperCandles);
-    loadDrawings(scalperChartEngine, 'scalper');
+    const lastServerCandle = d.candles[d.candles.length - 1];
+    const serverCandleTime = lastServerCandle ? lastServerCandle.time * 1000 : 0;
+    const isNewCandle = (window.lastLoadedScalperCandleTime !== serverCandleTime);
+    
+    if (isFirstLoad || isNewCandle) {
+      window.lastLoadedScalperCandleTime = serverCandleTime;
+      scalperChartEngine.setData(scalperCandles);
+      loadDrawings(scalperChartEngine, 'scalper');
+      if (isFirstLoad) {
+        scalperChartEngine.resetView();
+      }
+    }
+    
     updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
     
     window.currentPrice = d.current || (scalperCandles.length > 0 ? scalperCandles[scalperCandles.length - 1].close : 0);
     renderPredictionsTable(d.predicted || []);
-    
-    if (scalperCandles.length > 0) {
-      activeCandleOpenTime = d.candles[d.candles.length - 1].time;
-    }
-    
-    if (isFirstLoad) {
-      scalperChartEngine.resetView();
-    }
     
     const states = ["Awaiting Setup", "Long Trigger Formed", "Short Trigger Formed", "In Position: Long", "In Position: Short"];
     const idMap = {
@@ -3851,6 +3866,7 @@ function startSimulatedTicks() {
     if (isLive) {
       updateLocalCandles(liveCandles, tickCandle);
       engine.updateLast(tickCandle);
+      updateChartIndicators(engine, liveCandles, liveActiveIndicators);
       updateIdText('s-cur', fmt(boundedPrice));
       renderPredictionsTable(window.lastPredictions);
       if (typeof checkAlerts === 'function') {
@@ -3859,6 +3875,7 @@ function startSimulatedTicks() {
     } else {
       updateLocalCandles(scalperCandles, tickCandle);
       engine.updateLast(tickCandle);
+      updateChartIndicators(engine, scalperCandles, scalperActiveIndicators);
       if (typeof updateShadedBoxes === 'function') {
         updateShadedBoxes();
       }
@@ -4959,9 +4976,9 @@ applySavedTheme();
   applyOverlaysCollapse();
 
   // Toggle collapse state for individual overlay cards
-  document.querySelectorAll('.overlay-card-header, .sig-header-row').forEach(header => {
+  document.querySelectorAll('.overlay-card-header, .sig-header-row, .scalper-logs-head').forEach(header => {
     header.addEventListener('click', () => {
-      const card = header.closest('.overlay-card');
+      const card = header.closest('.overlay-card') || header.closest('.scalper-logs-card');
       if (card) {
         card.classList.toggle('card-collapsed');
       }
