@@ -1120,7 +1120,7 @@
   /* Slide-Down Indicators Panel */
   .indicators-dropdown-panel {
     position: absolute;
-    top: 52px;
+    top: 90px;
     right: 16px;
     width: 320px;
     background: var(--surface);
@@ -1481,10 +1481,9 @@
     display: none;
   }
 
-  /* View Mode Height Calculations */
-  body.view-fullscreen .tab-content {
+  /* View Mode Height Calculation  body.view-fullscreen .tab-content {
     display: none;
-    height: calc(100vh - 52px);
+    height: calc(100vh - 90px);
     overflow: hidden;
   }
   body.view-fullscreen .tab-content.active {
@@ -1509,10 +1508,10 @@
   body.view-fullscreen .scalper-logs-card {
     display: none !important;
   }
-
+ 
   body.view-split .tab-content {
     display: none;
-    height: calc(100vh - 52px);
+    height: calc(100vh - 90px);
     overflow: hidden;
   }
   body.view-split .tab-content.active {
@@ -1534,17 +1533,17 @@
   }
   body.view-split .alerts-card,
   body.view-split .scalper-logs-card {
-    height: calc(40vh - 92px);
+    height: calc(40vh - 130px);
     margin-top: 0;
     border-radius: 0;
     border: none;
     overflow-y: auto;
     background: var(--bg);
   }
-
+ 
   body.view-compact .tab-content {
     display: none;
-    height: calc(100vh - 52px);
+    height: calc(100vh - 90px);
     overflow: hidden;
   }
   body.view-compact .tab-content.active {
@@ -1566,7 +1565,7 @@
   }
   body.view-compact .alerts-card,
   body.view-compact .scalper-logs-card {
-    height: calc(55vh - 92px);
+    height: calc(55vh - 130px);
     margin-top: 0;
     border-radius: 0;
     border: none;
@@ -2046,6 +2045,103 @@
       width: 18px;
       height: 56px;
     }
+  
+  /* Antigravity Radar Styles */
+  .antigravity-radar {
+    height: 38px;
+    background: #0f172a;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    font-size: 12px;
+    z-index: 99;
+    flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    transition: background 0.3s;
+  }
+  .antigravity-radar::-webkit-scrollbar {
+    display: none;
+  }
+  body.dark-theme .antigravity-radar {
+    background: #090d16;
+    border-bottom-color: #1e293b;
+  }
+  .radar-title {
+    font-weight: 800;
+    color: #38bdf8;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .radar-signals-list {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+  .radar-waiting {
+    color: var(--muted);
+    font-style: italic;
+  }
+  .radar-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: radar-badge-entry 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  .radar-badge.long {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+  }
+  .radar-badge.long:hover {
+    background: rgba(16, 185, 129, 0.25);
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
+  }
+  .radar-badge.short {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.1);
+  }
+  .radar-badge.short:hover {
+    background: rgba(239, 68, 68, 0.25);
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.3);
+  }
+  .radar-badge-dir {
+    font-size: 9px;
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-weight: 900;
+    background: currentColor;
+    color: #fff;
+  }
+  .radar-badge.long .radar-badge-dir {
+    background: #10b981;
+    color: #fff;
+  }
+  .radar-badge.short .radar-badge-dir {
+    background: #ef4444;
+    color: #fff;
+  }
+  @keyframes radar-badge-entry {
+    from { opacity: 0; transform: translateY(4px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
 </style>
 </head>
@@ -2360,6 +2456,14 @@
     </button>
     
     <!-- right-section removed to keep topbar extremely clean -->
+  </div>
+
+  <!-- Antigravity Radar Banner -->
+  <div id="antigravity-radar" class="antigravity-radar">
+    <span class="radar-title">📡 ANTIGRAVITY RADAR</span>
+    <div class="radar-signals-list" id="radar-signals-list">
+      <span class="radar-waiting">Scanning all symbols + timeframes. Waiting for setups...</span>
+    </div>
   </div>
 
   <!-- Slide-Down Indicators Panel -->
@@ -5012,11 +5116,195 @@ applySavedTheme();
     scalperActiveIndicators = ['ema9', 'ema15'];
   }
 
+  function checkAntigravityGates(d, candles) {
+    if (!candles || candles.length < 15) return { pass: false, reason: "insufficient_history" };
+    const lastCandle = candles[candles.length - 1];
+    
+    // GATE 1: Kronos Directional Signal
+    const direction = d.direction; // "Long", "Short", or "Flat"
+    if (direction === 'Flat') return { pass: false, reason: "flat" };
+    
+    const movePct = Math.abs(d.move_pct);
+    if (movePct < 0.75) return { pass: false, reason: "move_under_0.75" };
+    
+    // GATE 0: EMA Trend (EMA 9 vs EMA 15)
+    const ema9Def = getIndicator('ema');
+    const ema15Def = getIndicator('ema');
+    if (!ema9Def || !ema15Def) return { pass: false, reason: "no_ema_def" };
+    
+    const ema9Outputs = ema9Def.compute(candles, { period: 9 });
+    const ema15Outputs = ema15Def.compute(candles, { period: 15 });
+    if (!ema9Outputs || ema9Outputs.length === 0 || !ema15Outputs || ema15Outputs.length === 0) {
+      return { pass: false, reason: "ema_compute_failed" };
+    }
+    
+    const ema9Values = ema9Outputs[0].values;
+    const ema15Values = ema15Outputs[0].values;
+    if (ema9Values.length === 0 || ema15Values.length === 0) {
+      return { pass: false, reason: "ema_values_empty" };
+    }
+    
+    const lastEma9 = ema9Values[ema9Values.length - 1];
+    const lastEma15 = ema15Values[ema15Values.length - 1];
+    if (lastEma9 === null || lastEma15 === null) {
+      return { pass: false, reason: "ema_null" };
+    }
+    
+    if (direction === 'Long') {
+      if (lastEma9 <= lastEma15) return { pass: false, reason: "ema_trend_short" };
+    } else if (direction === 'Short') {
+      if (lastEma9 >= lastEma15) return { pass: false, reason: "ema_trend_long" };
+    }
+    
+    // GATE 2: Echoes Directional Agreement
+    const horizon = d.pred_len;
+    const echoScan = lab.buildEchoScan(candles, 30, horizon, 5);
+    if (!echoScan || !echoScan.stats) {
+      return { pass: false, reason: "no_echoes" };
+    }
+    
+    const count = echoScan.stats.count;
+    if (count !== 5) {
+      return { pass: false, reason: "echo_count_not_5" };
+    }
+    
+    const upCount = echoScan.stats.upCount;
+    const upRate = upCount / 5;
+    if (direction === 'Long') {
+      if (upRate < 0.8) return { pass: false, reason: "echo_rate_under_80" };
+    } else if (direction === 'Short') {
+      if (upRate > 0.2) return { pass: false, reason: "echo_rate_over_20" };
+    }
+    
+    // Median outcome sign must match trade direction
+    const medianEndPct = echoScan.stats.medianEndPct;
+    if (direction === 'Long' && medianEndPct <= 0) return { pass: false, reason: "median_pct_negative" };
+    if (direction === 'Short' && medianEndPct >= 0) return { pass: false, reason: "median_pct_positive" };
+    
+    // GATE 3: Asymmetry Check
+    const best = echoScan.stats.bestEndPct;
+    const worst = echoScan.stats.worstEndPct;
+    let asymmetryPass = false;
+    if ((best >= 0 && worst >= 0) || (best <= 0 && worst <= 0)) {
+      asymmetryPass = true; // same sign -> PASS
+    } else {
+      if (direction === 'Long') {
+        if (Math.abs(worst) === 0) {
+          asymmetryPass = true;
+        } else {
+          asymmetryPass = (best / Math.abs(worst)) >= 3.0;
+        }
+      } else if (direction === 'Short') {
+        if (best === 0) {
+          asymmetryPass = true;
+        } else {
+          asymmetryPass = (Math.abs(worst) / best) >= 3.0;
+        }
+      }
+    }
+    if (!asymmetryPass) {
+      return { pass: false, reason: "asymmetry_fail" };
+    }
+    
+    return { pass: true, direction: direction, time: lastCandle.time };
+  }
+
+  window.scanAlertedKeys = window.scanAlertedKeys || {};
+  let scanInflight = false;
+
+  async function runAntigravityScan() {
+    if (scanInflight) return;
+    scanInflight = true;
+    
+    try {
+      const res = await fetch(`${API}/api/scan_all`);
+      const data = await res.json();
+      
+      const activeTrades = [];
+      
+      for (const key in data) {
+        const item = data[key];
+        if (!item || !item.candles || item.candles.length < 15) continue;
+        
+        const tfCandles = item.candles.map(c => ({
+          time: c.time * 1000,
+          open: c.open,
+          high: c.high,
+          low: c.low,
+          close: c.close,
+          volume: c.volume || 0
+        }));
+        
+        const gateResult = checkAntigravityGates(item, tfCandles);
+        if (gateResult.pass) {
+          activeTrades.push({
+            symbol: item.symbol,
+            timeframe: item.timeframe,
+            direction: gateResult.direction,
+            time: gateResult.time
+          });
+          
+          // Timing lock / alert check
+          const alertKey = `${item.symbol}:${item.timeframe}:${gateResult.time}`;
+          if (!window.scanAlertedKeys[alertKey]) {
+            window.scanAlertedKeys[alertKey] = true;
+            // Trigger setup alert popup
+            showSetupAlert(`ANTIGRAVITY ${gateResult.direction === 'Long' ? 'BUY' : 'SELL'} Ready on ${item.symbol} ${item.timeframe}!`);
+            // Play notification sound
+            try {
+              playTune(3, 3); // Tune 3 (Rising Alert) for 3 seconds
+            } catch (e) {
+              console.error("Failed to play notification sound:", e);
+            }
+          }
+        }
+      }
+      
+      // Update radar banner
+      const listContainer = document.getElementById('radar-signals-list');
+      if (listContainer) {
+        if (activeTrades.length === 0) {
+          listContainer.innerHTML = `<span class="radar-waiting">📡 Scanning all symbols + timeframes. Waiting for setups...</span>`;
+        } else {
+          listContainer.innerHTML = activeTrades.map(trade => {
+            const typeClass = trade.direction === 'Long' ? 'long' : 'short';
+            const dirText = trade.direction === 'Long' ? 'BUY' : 'SELL';
+            return `
+              <div class="radar-badge ${typeClass}" onclick="selectRadarSymbolTf('${trade.symbol}', '${trade.timeframe}')" title="Click to view chart">
+                <span>${trade.symbol} ${trade.timeframe}</span>
+                <span class="radar-badge-dir">${dirText}</span>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+      
+    } catch (err) {
+      console.error("Antigravity scan error:", err);
+    } finally {
+      scanInflight = false;
+    }
+  }
+
+  function selectRadarSymbolTf(symbol, tf) {
+    const symEl = document.getElementById('symbol');
+    if (symEl) {
+      symEl.value = symbol;
+      symEl.dispatchEvent(new Event('change'));
+    }
+    setTimeframe(tf);
+  }
+  window.selectRadarSymbolTf = selectRadarSymbolTf;
+
   startShadedBoxesLoop();
   loadAlerts();
   loadToolbarSettings();
   load(true);
   schedule();
+
+  // Start the Antigravity background scanner
+  runAntigravityScan();
+  setInterval(runAntigravityScan, 3000);
 </script>
 
   <!-- Mobile HUD Strip -->

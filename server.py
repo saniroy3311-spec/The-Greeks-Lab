@@ -230,6 +230,31 @@ def index():
     return app.send_static_file("dashboard.html")
 
 
+def get_max_age(tf_key, is_active):
+    """Dynamic max age based on timeframe to save resources and CPU."""
+    if is_active:
+        mapping = {
+            "1m": 25,
+            "3m": 55,
+            "5m": 110,
+            "15m": 290,
+            "30m": 580,
+            "1h": 1160,
+            "1d": 86400,
+        }
+    else:
+        mapping = {
+            "1m": 60,
+            "3m": 120,
+            "5m": 300,
+            "15m": 600,
+            "30m": 1200,
+            "1h": 3600,
+            "1d": 86400,
+        }
+    return mapping.get(tf_key, 30 if is_active else 90)
+
+
 def background_cache_worker():
     """Background worker to continuously compute predictions and keep cache fresh."""
     print("[Kronos] Background cache worker started.")
@@ -239,7 +264,7 @@ def background_cache_worker():
         ("NIFTY", "1m"), ("NIFTY", "3m"), ("NIFTY", "5m"), ("NIFTY", "15m"), ("NIFTY", "30m"),
         ("BANKNIFTY", "1m"), ("BANKNIFTY", "3m"), ("BANKNIFTY", "5m"), ("BANKNIFTY", "15m"), ("BANKNIFTY", "30m"),
         ("BTC", "1m"), ("BTC", "3m"), ("BTC", "5m"), ("BTC", "15m"), ("BTC", "30m"),
-        ("GOLD", "5m"), ("GOLD", "15m"), ("GOLD", "30m"),
+        ("GOLD", "1m"), ("GOLD", "3m"), ("GOLD", "5m"), ("GOLD", "15m"), ("GOLD", "30m"),
     ]
     
     while True:
@@ -274,24 +299,71 @@ def background_cache_worker():
                 with _cache_lock:
                     cached = _cache.get(key)
                 
-                # Active combinations updated if older than 30 seconds.
-                # Passive (default) combinations updated if older than 90 seconds.
-                max_age = 30 if is_active else 90
+                max_age = get_max_age(tf, is_active)
                 
                 if not cached or (time.time() - cached[0]) >= max_age:
                     try:
                         result = run_prediction(sym, tf)
                         with _cache_lock:
                             _cache[key] = (time.time(), result)
+                        # Only sleep after an actual compute/download to save CPU/yfinance rate limit
+                        time.sleep(0.5 if is_active else 2.0)
                     except Exception as e:
                         print(f"[Background Cache] Error updating {key}: {e}")
-                        
-                # Sleep a short duration to save CPU cycles
-                time.sleep(0.5 if is_active else 2.0)
+                        time.sleep(1.0)
+                else:
+                    # Very tiny sleep to yield thread execution but not slow down iterating
+                    time.sleep(0.01)
                 
         except Exception as e:
             print(f"[Background Cache] Worker error: {e}")
             time.sleep(5)
+
+
+@app.route("/api/scan_all")
+def api_scan_all():
+    now = time.time()
+    symbols = ["NIFTY", "BANKNIFTY", "BTC", "GOLD"]
+    timeframes = ["1m", "3m", "5m", "15m", "30m"]
+    
+    # Record active client interest for all combinations to keep them updating fast
+    with active_lock:
+        for symbol in symbols:
+            for tf in timeframes:
+                key = f"{symbol}:{tf}"
+                ACTIVE_COMBINATIONS[key] = now
+
+    results = {}
+    with _cache_lock:
+        for symbol in symbols:
+            for tf in timeframes:
+                key = f"{symbol}:{tf}"
+                cached = _cache.get(key)
+                if cached:
+                    res_dict = cached[1]
+                    light_res = {
+                        "symbol": res_dict.get("symbol"),
+                        "timeframe": res_dict.get("timeframe"),
+                        "direction": res_dict.get("direction"),
+                        "action": res_dict.get("action"),
+                        "bias": res_dict.get("bias"),
+                        "confidence": res_dict.get("confidence"),
+                        "current": res_dict.get("current"),
+                        "pred_5": res_dict.get("pred_5"),
+                        "pred_n": res_dict.get("pred_n"),
+                        "move": res_dict.get("move"),
+                        "move_pct": res_dict.get("move_pct"),
+                        "pred_len": res_dict.get("pred_len"),
+                        "updated": res_dict.get("updated"),
+                    }
+                    if "predicted" in res_dict:
+                        light_res["predicted"] = res_dict["predicted"]
+                    if "candles" in res_dict:
+                        light_res["candles"] = res_dict["candles"][-50:]
+                    results[key] = light_res
+                else:
+                    results[key] = None
+    return jsonify(results)
 
 
 @app.route("/api/signal/<symbol>/<tf>")
