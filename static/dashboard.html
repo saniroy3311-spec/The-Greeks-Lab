@@ -64,7 +64,7 @@
 
   /* Tabular numbers formatting */
   .tnum, td, .stat .v, .sig-dir, .sig-sub span, .echoes-stat .val, 
-  #countdown-overlay-live, #countdown-overlay-scalper, .overlay-stat .v {
+  #countdown-overlay-live, #countdown-overlay-scalper {
     font-family: 'JetBrains Mono', monospace;
     font-feature-settings: "tnum", "kern";
   }
@@ -658,26 +658,6 @@
     line-height: 1.2;
   }
 
-  /* Stats Overlay */
-  .stats-card .overlay-card-body {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-  .overlay-stat {
-    display: flex;
-    flex-direction: column;
-  }
-  .overlay-stat .k {
-    font-size: 9px;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-  .overlay-stat .v {
-    font-size: 13px;
-    font-weight: 600;
-  }
-
   /* Scalper state badges (Horizontal row inside chart head) */
   .scalper-badges-panel-top {
     display: flex;
@@ -961,39 +941,6 @@
   #scalper-info-text {
     font-size: 11px;
     line-height: 1.3;
-  }
-
-  /* Indicator Toggles Inline Row */
-  .indicator-toggles.inline-row {
-    display: flex;
-    gap: 8px;
-    font-size: 11px;
-    align-items: center;
-  }
-  .indicator-toggles.inline-row label {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    cursor: pointer;
-    background: rgba(0, 0, 0, 0.03);
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-    transition: all 0.2s;
-    user-select: none;
-  }
-  body.dark-theme .indicator-toggles.inline-row label {
-    background: rgba(255, 255, 255, 0.03);
-  }
-  .indicator-toggles.inline-row label:hover {
-    background: rgba(0, 0, 0, 0.06);
-  }
-  body.dark-theme .indicator-toggles.inline-row label:hover {
-    background: rgba(255, 255, 255, 0.06);
-  }
-  .indicator-toggles.inline-row input[type="checkbox"] {
-    accent-color: var(--blue);
-    cursor: pointer;
   }
 
   /* Below-Chart Tables styling */
@@ -3307,7 +3254,6 @@ function initLiveChart() {
     }
   });
   
-  setupIndicatorToggles(liveChartEngine, () => liveCandles, 'live-indicator-toggles');
   setupDrawingToolbars(liveChartEngine, 'live-drawing-toolbar', 'live-clear-drawings', 'live');
   setupDrawingsStorage(liveChartEngine, 'live');
   loadChartSettings(liveChartEngine);
@@ -3340,7 +3286,6 @@ function initScalperChart() {
     onRender: updateShadedBoxes
   });
   
-  setupIndicatorToggles(scalperChartEngine, () => scalperCandles, 'scalper-indicator-toggles');
   setupDrawingToolbars(scalperChartEngine, 'scalper-drawing-toolbar', 'scalper-clear-drawings', 'scalper');
   setupDrawingsStorage(scalperChartEngine, 'scalper');
   loadChartSettings(scalperChartEngine);
@@ -3866,7 +3811,8 @@ async function loadScalper(isFirstLoad = false) {
     }
     
     window.currentPrice = d.current || (scalperCandles.length > 0 ? scalperCandles[scalperCandles.length - 1].close : 0);
-    renderPredictionsTable(d.predicted || []);
+    window.lastPredictions = d.predicted || [];
+    renderPredictionsTable(window.lastPredictions);
     
     const states = ["Awaiting Setup", "Long Trigger Formed", "Short Trigger Formed", "In Position: Long", "In Position: Short"];
     const idMap = {
@@ -4040,6 +3986,7 @@ function startSimulatedTicks() {
       updateLocalCandles(scalperCandles, tickCandle);
       engine.updateLast(tickCandle);
       updateChartIndicators(engine, scalperCandles, scalperActiveIndicators);
+      renderPredictionsTable(window.lastPredictions);
       if (typeof updateShadedBoxes === 'function') {
         updateShadedBoxes();
       }
@@ -4048,12 +3995,13 @@ function startSimulatedTicks() {
       if (currentTrade && currentTrade.active) {
         let hit = false;
         let result = "";
+        const tickH = tickCandle.high, tickL = tickCandle.low;
         if (currentTrade.type === 'Long') {
-          if (boundedPrice <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
-          else if (boundedPrice >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+          if (tickL <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
+          else if (tickH >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
         } else if (currentTrade.type === 'Short') {
-          if (boundedPrice >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
-          else if (boundedPrice <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+          if (tickH >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
+          else if (tickL <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
         }
         if (hit) {
           $('scalper-info-text').innerHTML = `<strong>Trade update:</strong> ${currentTrade.type} position has hit ${result} at price ${boundedPrice}. Syncing...`;
@@ -4163,11 +4111,11 @@ function connectBtcWebSocket(tf) {
           let hit = false;
           let result = "";
           if (currentTrade.type === 'Long') {
-            if (c <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
-            else if (c >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+            if (l <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
+            else if (h >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
           } else if (currentTrade.type === 'Short') {
-            if (c >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
-            else if (c <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+            if (h >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
+            else if (l <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
           }
           if (hit) {
             $('scalper-info-text').innerHTML = `<strong>Trade update:</strong> ${currentTrade.type} position has hit ${result} at price ${c}. Syncing...`;
@@ -5111,7 +5059,7 @@ function openMobileSheet() {
     if (activeTab === 'live-signal') {
       const sigHtml = $('sig') ? $('sig').outerHTML : '';
       const echoesHtml = $('echoes-card') ? $('echoes-card').outerHTML : '';
-      const statsHtml = $('stats-card') ? $('stats-card').outerHTML : '';
+      const statsHtml = '';
       const predictionsHtml = $('predictions-card') ? $('predictions-card').outerHTML : '';
       content.innerHTML = `
         <div class="mobile-sheet-content-wrapper">
