@@ -3785,6 +3785,20 @@ function renderHistoricTradeBoxes(engine, trades) {
   }
 }
 
+function _roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
 function renderLiveTrackerLines(engine) {
   if (!engine || !currentTrade || !currentTrade.active) return;
   const conv = engine.getMainConverters();
@@ -3796,48 +3810,107 @@ function renderLiveTrackerLines(engine) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   try {
+    // ── Sine wave pulse generator ──
+    const timeDelta = Date.now();
+    const activePulse = 0.30 + Math.sin(timeDelta / 220) * 0.15;
+    const linePulse = 0.60 + Math.sin(timeDelta / 220) * 0.25;
+
     const xMin = rect.x, xMax = rect.x + rect.width;
+    const xEntry = conv.timeToX(currentTrade.entryTime * 1000);
+    if (xEntry === null) return;
     const yEntry = conv.priceToY(currentTrade.entryPrice);
     const ySL = conv.priceToY(currentTrade.slPrice);
     const yTP = conv.priceToY(currentTrade.tpPrice);
     if (yEntry === null || ySL === null || yTP === null) return;
     const isLong = currentTrade.type === 'Long';
+    const xLeft = Math.max(xMin, xEntry);
 
+    // ── Flashing background zones ──
+    if (xLeft < xMax) {
+      const zoneW = xMax - xLeft;
+      if (isLong) {
+        // Profit zone: entry → (up to) TP
+        const profitTop = Math.min(yEntry, yTP);
+        const profitH = Math.max(1, Math.abs(yEntry - yTP));
+        ctx.fillStyle = `rgba(0, 230, 118, ${activePulse * 0.4})`;
+        ctx.fillRect(xLeft, profitTop, zoneW, profitH);
+        // Loss zone: entry → (down to) SL
+        const lossTop = Math.min(yEntry, ySL);
+        const lossH = Math.max(1, Math.abs(yEntry - ySL));
+        ctx.fillStyle = `rgba(255, 23, 68, ${activePulse * 0.3})`;
+        ctx.fillRect(xLeft, lossTop, zoneW, lossH);
+      } else {
+        // Profit zone: entry → (down to) TP
+        const profitTop = Math.min(yEntry, yTP);
+        const profitH = Math.max(1, Math.abs(yEntry - yTP));
+        ctx.fillStyle = `rgba(0, 230, 118, ${activePulse * 0.4})`;
+        ctx.fillRect(xLeft, profitTop, zoneW, profitH);
+        // Loss zone: entry → (up to) SL
+        const lossTop = Math.min(yEntry, ySL);
+        const lossH = Math.max(1, Math.abs(yEntry - ySL));
+        ctx.fillStyle = `rgba(255, 23, 68, ${activePulse * 0.3})`;
+        ctx.fillRect(xLeft, lossTop, zoneW, lossH);
+      }
+    }
+
+    // ── Luxury horizontal corridor tracker lines ──
     ctx.save();
-    ctx.setLineDash([5, 5]);
-    ctx.lineWidth = 1.2;
 
-    // Entry Price line
-    ctx.strokeStyle = isLong ? 'rgba(8, 153, 129, 0.6)' : 'rgba(242, 54, 69, 0.6)';
-    ctx.beginPath();
-    ctx.moveTo(xMin, yEntry);
-    ctx.lineTo(xMax, yEntry);
-    ctx.stroke();
-    ctx.font = 'bold 9px JetBrains Mono, monospace';
-    ctx.fillStyle = isLong ? 'rgba(8, 153, 129, 0.8)' : 'rgba(242, 54, 69, 0.8)';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillText(`ENTRY ${currentTrade.entryPrice}`, xMin + 4, yEntry + 2);
-
-    // Stop Loss line
-    ctx.strokeStyle = 'rgba(244, 67, 54, 0.6)';
-    ctx.beginPath();
-    ctx.moveTo(xMin, ySL);
-    ctx.lineTo(xMax, ySL);
-    ctx.stroke();
-    ctx.fillStyle = 'rgba(244, 67, 54, 0.8)';
-    ctx.fillText(`SL ${currentTrade.slPrice}`, xMin + 4, ySL + 2);
-
-    // Take Profit line
-    ctx.strokeStyle = 'rgba(76, 175, 80, 0.6)';
+    // TP Target line (dashed, pulsing)
+    ctx.setLineDash([6, 4]);
+    ctx.strokeStyle = `rgba(0, 230, 118, ${linePulse})`;
+    ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(xMin, yTP);
     ctx.lineTo(xMax, yTP);
     ctx.stroke();
-    ctx.fillStyle = 'rgba(76, 175, 80, 0.8)';
-    ctx.fillText(`TP ${currentTrade.tpPrice}`, xMin + 4, yTP + 2);
+
+    // Entry Price line (solid, cyan)
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#00B0FF';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(xMin, yEntry);
+    ctx.lineTo(xMax, yEntry);
+    ctx.stroke();
+
+    // SL Shield line (dashed, pulsing red)
+    ctx.setLineDash([6, 4]);
+    ctx.strokeStyle = `rgba(255, 23, 68, ${linePulse})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(xMin, ySL);
+    ctx.lineTo(xMax, ySL);
+    ctx.stroke();
 
     ctx.restore();
+
+    // ── Badge pills at far right margin ──
+    const pillColor = 'rgba(15, 23, 42, 0.95)';
+    ctx.font = 'bold 11px JetBrains Mono, monospace';
+    ctx.textBaseline = 'middle';
+
+    const drawPill = (label, y, xOffset) => {
+      const textW = ctx.measureText(label).width;
+      const pw = textW + 18, ph = 24, px = xMax - pw + xOffset, py = y - ph / 2;
+      ctx.fillStyle = pillColor;
+      _roundRect(ctx, px, py, pw, ph, 4);
+      ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, px + pw / 2, py + ph / 2);
+    };
+
+    drawPill('🎯 TARGET WIN', yTP, -6);
+    drawPill('▶ LIVE ENTRY', yEntry, -6);
+    drawPill('🛡️ RISK SHIELD', ySL, -6);
+
+    // ── requestAnimationFrame hook for continuous 60fps pulse ──
+    if (window._tradeAnimFrame) cancelAnimationFrame(window._tradeAnimFrame);
+    window._tradeAnimFrame = requestAnimationFrame(() => {
+      window._tradeAnimFrame = null;
+      if (scalperChartEngine) scalperChartEngine.resize();
+    });
   } catch (e) {}
 }
 
