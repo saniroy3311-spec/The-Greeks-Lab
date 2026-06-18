@@ -22,6 +22,7 @@
     --chart-bg: #FFFFFF;
     --surface: #FFFFFF;
     --border: #E0E3EB;
+    --text-primary: #111827;
     --text: #111827;
     --muted: #9CA3AF;
     --up: #26a69a;
@@ -29,6 +30,8 @@
     --flat: #70757a;
     --pred: #ef9f27;
     --blue: #2962FF;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --pill-bg: rgba(255, 255, 255, 0.9);
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
   }
@@ -37,6 +40,7 @@
     --chart-bg: #131a2e;
     --surface: #131a2e;
     --border: #22293f;
+    --text-primary: #ffffff;
     --text: #ffffff;
     --muted: #848e9c;
     --up: #26a69a;
@@ -44,6 +48,8 @@
     --flat: #848e9c;
     --pred: #ef9f27;
     --blue: #2962FF;
+    --card-bg: rgba(19, 26, 46, 0.95);
+    --pill-bg: rgba(15, 23, 42, 0.9);
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   }
@@ -689,13 +695,22 @@
     background: rgba(244, 67, 54, 0.2);
     color: #f44336;
   }
+  body.dark-theme .confluence-status-bar.status-red {
+    color: #ef9a9a;
+  }
   .confluence-status-bar.status-yellow {
     background: rgba(255, 193, 7, 0.2);
     color: #f9a825;
   }
+  body.dark-theme .confluence-status-bar.status-yellow {
+    color: #ffe082;
+  }
   .confluence-status-bar.status-green {
     background: rgba(76, 175, 80, 0.2);
     color: #2e7d32;
+  }
+  body.dark-theme .confluence-status-bar.status-green {
+    color: #a5d6a7;
   }
   .confluence-status-bar.status-waiting {
     background: rgba(158, 158, 158, 0.15);
@@ -1578,6 +1593,11 @@
       overflow: hidden !important;
     }
 
+    /* Stack panels vertically on mobile */
+    .chart-viewport-wrapper {
+      flex-direction: column !important;
+    }
+
     .chart-card, .scalper-chart-card {
       height: 60% !important;
       flex: none !important;
@@ -1599,6 +1619,27 @@
       margin-top: 0 !important;
       overflow-y: auto;
     }
+
+    /* Sticky traffic light banner */
+    #confluence-status-bar {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 999 !important;
+    }
+
+    /* Mobile touch: disable text selection on canvas areas */
+    .chart-stage, #chart, #tv-chart {
+      touch-action: manipulation !important;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+    }
+
+    /* Mobile pill text scaling: reduce font by 20% */
+    .chart-stage canvas ~ * .live-entry-pill,
+    .chart-stage canvas ~ * .live-target-pill {
+      font-size: 9px !important;
+    }
+
     .mobile-hud-strip {
       display: flex;
       position: fixed;
@@ -3685,19 +3726,19 @@ function renderHistoricTradeBoxes(engine, trades) {
       // Profit zone (green): entry to TP
       const greenTop = Math.min(yEntry, yTP);
       const greenH = Math.max(1, Math.abs(yEntry - yTP));
-      ctx.fillStyle = 'rgba(76, 175, 80, 0.08)';
+      ctx.fillStyle = 'rgba(76, 175, 80, 0.15)';
       ctx.fillRect(xLeft, greenTop, w, greenH);
-      ctx.strokeStyle = 'rgba(76, 175, 80, 0.3)';
-      ctx.lineWidth = 0.8;
+      ctx.strokeStyle = '#089981';
+      ctx.lineWidth = 1.5;
       ctx.strokeRect(xLeft, greenTop, w, greenH);
 
       // Loss zone (red): entry to SL
       const redTop = Math.min(yEntry, ySL);
       const redH = Math.max(1, Math.abs(yEntry - ySL));
-      ctx.fillStyle = 'rgba(244, 67, 54, 0.08)';
+      ctx.fillStyle = 'rgba(244, 67, 54, 0.15)';
       ctx.fillRect(xLeft, redTop, w, redH);
-      ctx.strokeStyle = 'rgba(244, 67, 54, 0.3)';
-      ctx.lineWidth = 0.8;
+      ctx.strokeStyle = '#f23645';
+      ctx.lineWidth = 1.5;
       ctx.strokeRect(xLeft, redTop, w, redH);
 
       // ── Pullback Watch marker (yellow dashed vertical line at entry x) ──
@@ -3714,7 +3755,7 @@ function renderHistoricTradeBoxes(engine, trades) {
       ctx.restore();
 
       // Watch label
-      ctx.font = 'bold 9px JetBrains Mono, monospace';
+      ctx.font = 'bold 12px Inter, sans-serif';
       ctx.fillStyle = 'rgba(255, 193, 7, 0.85)';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
@@ -3735,17 +3776,24 @@ function renderHistoricTradeBoxes(engine, trades) {
       ctx.closePath();
       ctx.fill();
 
-      // ── Entry label ──
-      const entryLabel = isLong ? '▶ BUY ENTRY' : '▶ SELL ENTRY';
-      ctx.font = 'bold 10px JetBrains Mono, monospace';
+      // ── Entry pill label ──
+      const entryLabel = '▶ ENTRY ORDER';
+      ctx.font = 'bold 12px Inter, sans-serif';
       const entryLabelW = ctx.measureText(entryLabel).width;
-      const entryLabelY = isLong ? yEntry - 14 : yEntry + 14;
-      ctx.fillStyle = isLong ? 'rgba(8, 153, 129, 0.2)' : 'rgba(242, 54, 69, 0.2)';
-      ctx.fillRect(xLeft - 4, entryLabelY - 7, entryLabelW + 8, 14);
+      const entryLabelY = isLong ? yEntry - 16 : yEntry + 16;
+      const pillPad = 8, pillH = 22;
       ctx.fillStyle = isLong ? '#089981' : '#f23645';
+      _roundRect(ctx, xLeft - 4, entryLabelY - pillH / 2, entryLabelW + pillPad, pillH, 4);
+      ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      if (window._theme) {
+        ctx.strokeStyle = window._theme.border;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText(entryLabel, xLeft, entryLabelY);
+      ctx.fillText(entryLabel, xLeft + 2, entryLabelY);
 
       // ── Horizontal line at entry price ──
       ctx.save();
@@ -3758,26 +3806,33 @@ function renderHistoricTradeBoxes(engine, trades) {
       ctx.stroke();
       ctx.restore();
 
-      // ── Exit label at exit x ──
-      const exitResult = trade.result === 'Profit' ? 'WIN' : 'LOSS';
-      const exitLabel = `🏁 EXIT (${exitResult})`;
+      // ── Exit pill label at exit x ──
+      const exitResult = trade.result === 'Profit' ? 'WIN TARGET HIT' : 'STOP LOSS HIT';
+      const exitLabel = `🏁 ${exitResult}`;
       const exitY = isLong ? yTP : ySL;
-      ctx.font = 'bold 10px JetBrains Mono, monospace';
+      ctx.font = 'bold 12px Inter, sans-serif';
       const exitLabelW = ctx.measureText(exitLabel).width;
-      ctx.fillStyle = trade.result === 'Profit' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)';
-      ctx.fillRect(xRight - exitLabelW - 8, exitY - 2, exitLabelW + 12, 18);
-      ctx.fillStyle = trade.result === 'Profit' ? 'rgba(76, 175, 80, 0.9)' : 'rgba(244, 67, 54, 0.9)';
+      const exitPillPad = 10, exitPillH = 22;
+      ctx.fillStyle = trade.result === 'Profit' ? '#089981' : '#f23645';
+      _roundRect(ctx, xRight - exitLabelW - exitPillPad, exitY - exitPillH / 2, exitLabelW + exitPillPad, exitPillH, 4);
+      ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      if (window._theme) {
+        ctx.strokeStyle = window._theme.border;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
-      ctx.fillText(exitLabel, xRight - 4, exitY + 7);
+      ctx.fillText(exitLabel, xRight - 4, exitY);
 
       // PnL inside exit label
       if (trade.points !== undefined) {
         const pnl = trade.points;
         const pnlStr = (pnl >= 0 ? '+' : '') + pnl.toFixed(1);
-        ctx.font = '9px JetBrains Mono, monospace';
-        ctx.fillStyle = 'rgba(255,255,255,0.7)';
-        ctx.fillText(pnlStr, xRight - 4, exitY + 7);
+        ctx.font = 'bold 10px Inter, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.fillText(pnlStr, xRight - 4, exitY + 14);
       }
     }
   } catch (e) {
@@ -3886,9 +3941,17 @@ function renderLiveTrackerLines(engine) {
     ctx.restore();
 
     // ── Badge pills at far right margin ──
-    const pillColor = 'rgba(15, 23, 42, 0.95)';
-    ctx.font = 'bold 11px JetBrains Mono, monospace';
+    const isMobile = canvas.width < 500;
+    const pillColor = window._theme ? window._theme.pillBg : 'rgba(15, 23, 42, 0.95)';
+    const pillTextColor = '#FFFFFF';
+    const pillFontSize = isMobile ? 9 : 11;
+    ctx.font = `bold ${pillFontSize}px JetBrains Mono, monospace`;
     ctx.textBaseline = 'middle';
+
+    // Shorten labels on mobile
+    const tpLabel = isMobile ? '🎯 TP' : '🎯 TARGET WIN';
+    const entryLabel = isMobile ? '▶ ENTRY' : '▶ LIVE ENTRY';
+    const slLabel = isMobile ? '🛡️ SL' : '🛡️ RISK SHIELD';
 
     const drawPill = (label, y, xOffset) => {
       const textW = ctx.measureText(label).width;
@@ -3896,21 +3959,22 @@ function renderLiveTrackerLines(engine) {
       ctx.fillStyle = pillColor;
       _roundRect(ctx, px, py, pw, ph, 4);
       ctx.fill();
-      ctx.fillStyle = '#FFFFFF';
+      if (window._theme) {
+        ctx.strokeStyle = window._theme.border;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+      ctx.fillStyle = pillTextColor;
       ctx.textAlign = 'center';
       ctx.fillText(label, px + pw / 2, py + ph / 2);
     };
 
-    drawPill('🎯 TARGET WIN', yTP, -6);
-    drawPill('▶ LIVE ENTRY', yEntry, -6);
-    drawPill('🛡️ RISK SHIELD', ySL, -6);
+    drawPill(tpLabel, yTP, -6);
+    drawPill(entryLabel, yEntry, -6);
+    drawPill(slLabel, ySL, -6);
 
-    // ── requestAnimationFrame hook for continuous 60fps pulse ──
-    if (window._tradeAnimFrame) cancelAnimationFrame(window._tradeAnimFrame);
-    window._tradeAnimFrame = requestAnimationFrame(() => {
-      window._tradeAnimFrame = null;
-      if (scalperChartEngine) scalperChartEngine.resize();
-    });
+    // Pulse-driven animation is handled by the chart engine's onRender loop.
+    // No separate rAF needed — that would cause double-render flashing.
   } catch (e) {}
 }
 
@@ -4025,14 +4089,14 @@ async function loadEmaKronos() {
     const statusBar = $('confluence-status-bar');
     if (!d.confluence) {
       statusBar.className = 'confluence-status-bar status-red';
-      statusBar.textContent = '❌ SYSTEMS MISALIGNED — NO CONFLUENCE';
+      statusBar.textContent = '🔴 ROBOT IDLE: AI and EMAs disagree. Standing by to protect your capital.';
     } else if (window.lastScalperState &&
                ["Long Trigger Formed", "Short Trigger Formed", "In Position: Long", "In Position: Short"].includes(window.lastScalperState)) {
       statusBar.className = 'confluence-status-bar status-green';
-      statusBar.textContent = '✅ ENTRY TRIGGERED — ALL CONDITIONS MET';
+      statusBar.textContent = '🟢 ORDER FIRED: Setup confirmed. Live trade triggered on current bar.';
     } else {
       statusBar.className = 'confluence-status-bar status-yellow';
-      statusBar.textContent = '⚠️ TREND ALIGNED — WAITING FOR PULLBACK';
+      statusBar.textContent = '🟡 HOUNDING SETUP: Trend is aligned. Waiting for a candle pullback touch.';
     }
 
     // Store API data for canvas rendering
@@ -4333,7 +4397,24 @@ async function loadScalper(isFirstLoad = false) {
     
     if (d.active_trade && d.active_trade.active) {
       const trade = d.active_trade;
-      $('scalper-info-text').innerHTML = `<strong>Active Trade:</strong> ${trade.type} position entered at ${trade.entryPrice}. SL: ${trade.slPrice} | TP: ${trade.tpPrice} (1:2 Risk:Reward)`;
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        $('scalper-info-text').innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <div style="font-weight:800;font-size:13px;color:${trade.type === 'Long' ? '#089981' : '#f23645'}">
+              🟢 LIVE ${trade.type}
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;font-size:11px;">
+              <span style="color:var(--muted)">Entry:</span><span style="font-weight:700;text-align:right">${fmt(trade.entryPrice)}</span>
+              <span style="color:var(--muted)">Target:</span><span style="font-weight:700;text-align:right">${fmt(trade.tpPrice)}</span>
+              <span style="color:var(--muted)">Stop:</span><span style="font-weight:700;text-align:right">${fmt(trade.slPrice)}</span>
+              <span style="color:var(--muted)">R/R:</span><span style="font-weight:700;text-align:right">1:2</span>
+            </div>
+          </div>
+        `;
+      } else {
+        $('scalper-info-text').innerHTML = `<strong>Active Trade:</strong> ${trade.type} position entered at ${trade.entryPrice}. SL: ${trade.slPrice} | TP: ${trade.tpPrice} (1:2 Risk:Reward)`;
+      }
       infoBar.style.display = 'block';
     } else {
       infoBar.style.display = 'none';
@@ -4706,6 +4787,34 @@ $('chart-type').addEventListener('change', () => {
 window.addEventListener('resize', () => {
   if (liveChartEngine) liveChartEngine.resize();
   if (scalperChartEngine) scalperChartEngine.resize();
+});
+
+// ── ResizeObserver for responsive canvas ──
+if (window.ResizeObserver) {
+  const ro = new ResizeObserver(() => {
+    if (liveChartEngine) liveChartEngine.resize();
+    if (scalperChartEngine) scalperChartEngine.resize();
+  });
+  const chartEl = document.getElementById('chart');
+  const tvChartEl = document.getElementById('tv-chart');
+  if (chartEl) ro.observe(chartEl);
+  if (tvChartEl) ro.observe(tvChartEl);
+}
+
+// ── Touch event support for canvas pan/zoom ──
+['chart', 'tv-chart'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('touchstart', (e) => {
+    // Let the chart engine handle touch via its own listeners
+  }, { passive: true });
+  el.addEventListener('touchmove', (e) => {
+    // Prevent default to stop page scroll during chart interaction
+    if (e.target === el || el.contains(e.target)) e.preventDefault();
+  }, { passive: false });
+  el.addEventListener('touchend', (e) => {
+    // Touch release handled by engine
+  }, { passive: true });
 });
 
 
@@ -5508,16 +5617,8 @@ function evaluateAntigravityAlerts(d, candles) {
 }
 window.evaluateAntigravityAlerts = evaluateAntigravityAlerts;
 
-// Continuous 60fps loop for shaded risk-reward boxes to eliminate lagging
-
-
-function startShadedBoxesLoop() {
-  function tick() {
-    updateShadedBoxes();
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
+// Shaded risk-reward boxes are updated by the chart engine's onRender callback.
+// An independent rAF loop is not needed — it causes DOM layout thrashing → flash.
 
 
 
@@ -5637,6 +5738,20 @@ window.addEventListener('click', (e) => {
 
 window.closeMobileSheet = closeMobileSheet;
 applySavedTheme();
+  // ── Dynamic Theme Sync for Canvas Engine ──
+  const theme = {
+    isDark: document.body.classList.contains('dark-theme'),
+    get text() { return getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || (this.isDark ? '#FFFFFF' : '#111827'); },
+    get pillBg() { return getComputedStyle(document.documentElement).getPropertyValue('--card-bg').trim() || (this.isDark ? 'rgba(15, 23, 42, 0.9)' : 'rgba(255, 255, 255, 0.9)'); },
+    get border() { return getComputedStyle(document.documentElement).getPropertyValue('--border').trim(); }
+  };
+  const themeObserver = new MutationObserver(() => {
+    theme.isDark = document.body.classList.contains('dark-theme');
+    if (liveChartEngine) liveChartEngine.setTheme(theme.isDark ? 'dark' : 'light');
+    if (scalperChartEngine) scalperChartEngine.setTheme(theme.isDark ? 'dark' : 'light');
+  });
+  themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  window._theme = theme;
   applyOverlaysCollapse();
   // Toggle collapse state for individual overlay cards
   document.querySelectorAll('.overlay-card-header, .sig-header-row, .scalper-logs-head').forEach(header => {
@@ -5675,7 +5790,6 @@ applySavedTheme();
     scalperActiveIndicators = ['ema9', 'ema15'];
   }
 
-  startShadedBoxesLoop();
   loadAlerts();
   loadToolbarSettings();
   load(true);
