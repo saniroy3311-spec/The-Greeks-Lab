@@ -665,10 +665,11 @@ def api_ema_kronos(symbol, tf):
     with active_lock:
         ACTIVE_COMBINATIONS[key] = now
 
+    CACHE_TTL = 5
     with _cache_lock:
         cached = _cache.get(key)
 
-    if not cached:
+    if not cached or (now - cached[0]) >= CACHE_TTL:
         try:
             result = run_prediction(symbol, tf)
             with _cache_lock:
@@ -693,6 +694,7 @@ def api_ema_kronos(symbol, tf):
         kronos_dir = cached_result["direction"]
         confidence = cached_result.get("confidence", 0)
         strat = EmaKronosStrategy()
+        df = df.tail(500)
         out = strat.evaluate(df, kronos_direction=kronos_dir, kronos_confidence=confidence)
 
         return jsonify({
