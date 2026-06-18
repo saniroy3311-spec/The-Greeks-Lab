@@ -280,8 +280,7 @@
     flex-shrink: 0;
   }
   .scalper-chart-head {
-    min-height: 40px;
-    display: flex;
+    display: none !important;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
@@ -815,6 +814,38 @@
   /* Desktop hide rule for overlay cards relocated to headers */
   #tab-scalper .state-badges-card {
     display: none;
+  }
+
+  /* Chart Loading Overlays */
+  .chart-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 1000;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    gap: 12px;
+  }
+  .chart-loading-overlay .spinner {
+    width: 28px;
+    height: 28px;
+    border: 3.5px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    border-top-color: var(--blue);
+    animation: spin 0.8s ease-in-out infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 
   /* Custom Flashy Alert Popups */
@@ -2175,13 +2206,31 @@
         <button class="close-btn" onclick="toggleModal('alerts-modal', false)">✕</button>
       </div>
       <div class="modal-body">
-        <div class="alert-type-tabs">
+        <div class="settings-row" style="margin-bottom: 12px;">
+          <label>Alert Type</label>
+          <select id="alert-type-select" class="form-select" onchange="toggleAlertModalType()">
+            <option value="price">Price Crossing Level</option>
+            <option value="strategy">Strategy Buy/Sell Signal</option>
+          </select>
+        </div>
+        
+        <div class="alert-type-tabs" id="alert-condition-tabs-row">
           <button class="alert-tab-btn active" id="alert-tab-above" onclick="setAlertCondition('above')">Above</button>
           <button class="alert-tab-btn" id="alert-tab-below" onclick="setAlertCondition('below')">Below</button>
         </div>
-        <div class="settings-row mt-12">
+        
+        <div class="settings-row mt-12" id="alert-price-row">
           <label>Price</label>
           <input type="number" id="alert-price-input" step="0.01" class="form-input">
+        </div>
+        
+        <div class="settings-row mt-12" id="alert-signal-row" style="display: none;">
+          <label>Signal</label>
+          <select id="alert-signal-select" class="form-select">
+            <option value="buy">Buy Signal (Long Trigger)</option>
+            <option value="sell">Sell Signal (Short Trigger)</option>
+            <option value="any">Any Signal (Buy or Sell)</option>
+          </select>
         </div>
         <div class="settings-row">
           <label>Note (optional)</label>
@@ -2440,19 +2489,17 @@
                 <span class="card-title">FUTURE 5-CANDLE FORECAST</span>
               </div>
               <div class="overlay-card-body" style="padding: 0; overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px; font-weight: 600;">
                   <thead>
-                    <tr style="border-bottom: 1px solid var(--border); color: var(--muted); text-align: left;">
-                      <th style="padding: 4px 4px; font-weight: 500;">Candle</th>
-                      <th style="padding: 4px 4px; font-weight: 500; text-align: right;">Target</th>
-                      <th style="padding: 4px 4px; font-weight: 500; text-align: right;">High / Low</th>
-                      <th style="padding: 4px 4px; font-weight: 500; text-align: right;">Change</th>
-                      <th style="padding: 4px 4px; font-weight: 500; text-align: center;">Trend</th>
+                    <tr style="border-bottom: 1.5px solid var(--border); color: var(--muted); text-align: left;">
+                      <th style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Candle</th>
+                      <th style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-align: right; text-transform: uppercase; letter-spacing: 0.5px;">Target</th>
+                      <th style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-align: right; text-transform: uppercase; letter-spacing: 0.5px;">Change</th>
                     </tr>
                   </thead>
-                  <tbody id="predictions-table-body" class="tnum">
+                  <tbody id="predictions-table-body" class="tnum predictions-table-body">
                     <tr>
-                      <td colspan="5" style="text-align: center; color: var(--muted); padding: 8px 0;">No predictions available</td>
+                      <td colspan="3" style="text-align: center; color: var(--muted); padding: 12px 0;">No predictions available</td>
                     </tr>
                   </tbody>
                 </table>
@@ -2462,7 +2509,12 @@
         </div>
 
         <!-- Live Chart Canvas -->
-        <div id="chart"></div>
+        <div id="chart">
+          <div class="chart-loading-overlay" id="live-chart-loading">
+            <div class="spinner"></div>
+            Updating Forecast...
+          </div>
+        </div>
         </div>
       </div>
     </div>
@@ -2591,11 +2643,39 @@
               </div>
               <div id="scalper-info-text"></div>
             </div>
+
+            <!-- Future Predictions Card (Scalper) -->
+            <div class="overlay-card predictions-card" id="predictions-card-scalper" style="margin-top: 8px;">
+              <div class="overlay-card-header">
+                <span class="card-title">FUTURE 5-CANDLE FORECAST</span>
+              </div>
+              <div class="overlay-card-body" style="padding: 0; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px; font-weight: 600;">
+                  <thead>
+                    <tr style="border-bottom: 1.5px solid var(--border); color: var(--muted); text-align: left;">
+                      <th style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Candle</th>
+                      <th style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-align: right; text-transform: uppercase; letter-spacing: 0.5px;">Target</th>
+                      <th style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-align: right; text-transform: uppercase; letter-spacing: 0.5px;">Change</th>
+                    </tr>
+                  </thead>
+                  <tbody id="predictions-table-body-scalper" class="tnum predictions-table-body">
+                    <tr>
+                      <td colspan="3" style="text-align: center; color: var(--muted); padding: 12px 0;">No predictions available</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Scalper Chart Canvas -->
-        <div id="tv-chart" style="width: 100%; height: 100%;"></div>
+        <div id="tv-chart" style="width: 100%; height: 100%; position: relative;">
+          <div class="chart-loading-overlay" id="scalper-chart-loading">
+            <div class="spinner"></div>
+            Updating Strategy...
+          </div>
+        </div>
         
         <div id="scalper-target-box" style="position: absolute; display: none; background: rgba(38, 166, 154, 0.08); pointer-events: none; border-top: 1px solid rgba(38, 166, 154, 0.4); border-bottom: 1px solid rgba(38, 166, 154, 0.4); z-index: 5;"></div>
         <div id="scalper-stop-box" style="position: absolute; display: none; background: rgba(239, 83, 80, 0.08); pointer-events: none; border-top: 1px solid rgba(239, 83, 80, 0.4); border-bottom: 1px solid rgba(239, 83, 80, 0.4); z-index: 5;"></div>
@@ -2663,6 +2743,8 @@ let liveLoadInflight = 0;
 let scalperLoadSeq = 0;
 let scalperLoadInflight = 0;
 let lastLiveDirectionApplied = null;
+let lastLoadedLiveKey = null;
+let lastLoadedScalperKey = null;
 
 let clientAlerts = [];
 let lastClosePrice = null;
@@ -2731,6 +2813,11 @@ function switchTab(tabId) {
     }
   }
   
+  // Start simulated ticks if appropriate for the active tab and symbol
+  if (typeof startSimulatedTicks === 'function') {
+    startSimulatedTicks();
+  }
+  
   // Resize engines to fit container size after switching tabs
   if (activeTab === 'live-signal') {
     if (liveChartEngine) {
@@ -2739,14 +2826,20 @@ function switchTab(tabId) {
       loadDrawings(liveChartEngine, 'live');
       updateChartAlerts();
     }
-    load(true);
+    const currentKey = $('symbol').value + ":" + $('tf').value;
+    if (lastLoadedLiveKey !== currentKey) {
+      load(true);
+    }
   } else {
     if (scalperChartEngine) {
       scalperChartEngine.resize();
       // Restore drawings
       loadDrawings(scalperChartEngine, 'scalper');
     }
-    loadScalper(true);
+    const currentKey = $('symbol').value + ":" + $('tf').value;
+    if (lastLoadedScalperKey !== currentKey) {
+      loadScalper(true);
+    }
   }
 }
 window.switchTab = switchTab;
@@ -2979,11 +3072,17 @@ function renderAlertsTable() {
       ? `<span class="alert-badge triggered">Triggered</span>`
       : `<span class="alert-badge active">Active</span>`;
       
+    const conditionStr = alert.type === 'strategy'
+      ? `Strategy ${alert.condition === 'buy' ? 'Buy' : alert.condition === 'sell' ? 'Sell' : 'Buy/Sell'}`
+      : alert.condition;
+      
+    const levelStr = alert.type === 'strategy' ? '—' : fmt(alert.price);
+      
     return `
       <tr style="${alert.triggered ? 'opacity: 0.5;' : ''}">
         <td style="font-weight: 600;">${alert.symbol}</td>
-        <td style="text-transform: capitalize;">${alert.condition}</td>
-        <td class="tnum" style="text-align: right;">${fmt(alert.price)}</td>
+        <td style="text-transform: capitalize;">${conditionStr}</td>
+        <td class="tnum" style="text-align: right;">${levelStr}</td>
         <td>${alert.message || '—'}</td>
         <td class="tnum" style="text-align: right;">${createdStr}</td>
         <td>${statusBadge}</td>
@@ -3203,6 +3302,7 @@ async function load(isFirstLoad = false) {
   liveLoadInflight++;
   if ($('status')) $('status').textContent = 'Updating…';
   $('err').style.display = 'none';
+  if ($('live-chart-loading')) $('live-chart-loading').style.display = 'flex';
   try {
     initLiveChart();
     const res = await fetch(`${API}/api/signal/${sym}/${tf}`);
@@ -3218,6 +3318,7 @@ async function load(isFirstLoad = false) {
     // data already on screen.
     if (mySeq !== liveLoadSeq) return;
     if ($('symbol').value !== sym || $('tf').value !== tf) return;
+    lastLoadedLiveKey = sym + ":" + tf;
 
     if (sym === 'BTC' && wsLastClosedTime !== null && d.candles.length > 0) {
       const serverLastCandleTime = d.candles[d.candles.length - 1].time;
@@ -3443,6 +3544,9 @@ async function load(isFirstLoad = false) {
     $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · horizon ${d.pred_len}`;
     if ($('status')) $('status').textContent = 'Live';
     connectBtcWebSocket(tf);
+    if (sym !== 'BTC') {
+      startSimulatedTicks();
+    }
   } catch (e) {
     if (mySeq === liveLoadSeq) {
       $('err').textContent = 'Error: ' + e.message + ' — is the market open and the server reachable?';
@@ -3451,6 +3555,7 @@ async function load(isFirstLoad = false) {
     }
   } finally {
     liveLoadInflight = Math.max(0, liveLoadInflight - 1);
+    if ($('live-chart-loading')) $('live-chart-loading').style.display = 'none';
   }
 }
 
@@ -3517,6 +3622,7 @@ async function loadScalper(isFirstLoad = false) {
   scalperLoadInflight++;
   if ($('status')) $('status').textContent = 'Updating…';
   $('err').style.display = 'none';
+  if ($('scalper-chart-loading')) $('scalper-chart-loading').style.display = 'flex';
   
   try {
     initScalperChart();
@@ -3524,9 +3630,9 @@ async function loadScalper(isFirstLoad = false) {
     const d = await res.json();
     if (d.error) throw new Error(d.error);
 
-    // Discard a stale response the same way load() does for the live tab.
     if (mySeq !== scalperLoadSeq) return;
     if ($('symbol').value !== sym || $('tf').value !== tf) return;
+    lastLoadedScalperKey = sym + ":" + tf;
 
     if (sym === 'BTC' && wsLastClosedTime !== null && d.candles.length > 0) {
       const serverLastCandleTime = d.candles[d.candles.length - 1].time;
@@ -3581,7 +3687,11 @@ async function loadScalper(isFirstLoad = false) {
     // Check for state alert popups
     if (d.state && d.state !== window.lastScalperState) {
       if (window.lastScalperState !== undefined) {
-        if (d.state === "Long Trigger Formed" || d.state === "Short Trigger Formed") {
+        if (typeof checkStrategyAlerts === 'function') {
+          checkStrategyAlerts(d.state, window.lastScalperState);
+        }
+        if (d.state === "Long Trigger Formed" || d.state === "Short Trigger Formed" ||
+            d.state === "In Position: Long" || d.state === "In Position: Short") {
           showSetupAlert(d.state);
         }
       }
@@ -3658,6 +3768,9 @@ async function loadScalper(isFirstLoad = false) {
     $('updated').textContent = 'Last update: ' + d.updated;
     $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · EMA 9/15`;
     if ($('status')) $('status').textContent = 'Live';
+    if (sym !== 'BTC') {
+      startSimulatedTicks();
+    }
   } catch (e) {
     if (mySeq === scalperLoadSeq) {
       $('err').textContent = 'Error: ' + e.message;
@@ -3666,6 +3779,88 @@ async function loadScalper(isFirstLoad = false) {
     }
   } finally {
     scalperLoadInflight = Math.max(0, scalperLoadInflight - 1);
+    if ($('scalper-chart-loading')) $('scalper-chart-loading').style.display = 'none';
+  }
+}
+
+let simulatedTickInterval = null;
+function startSimulatedTicks() {
+  stopSimulatedTicks();
+  const sym = $('symbol').value;
+  if (sym === 'BTC') return; // relies on real Binance WebSocket
+  
+  simulatedTickInterval = setInterval(() => {
+    const isLive = (activeTab === 'live-signal');
+    const candlesArray = isLive ? liveCandles : scalperCandles;
+    const engine = isLive ? liveChartEngine : scalperChartEngine;
+    
+    if (!candlesArray || candlesArray.length === 0 || !engine) return;
+    
+    const lastCandle = candlesArray[candlesArray.length - 1];
+    // Fluctuate the price slightly
+    const volatility = 0.00015; // 0.015% max move per tick
+    const changePct = (Math.random() - 0.5) * 2 * volatility;
+    const currentVal = window.currentPrice || lastCandle.close;
+    const newPrice = currentVal * (1 + changePct);
+    
+    // Bounded check to prevent it from drifting too far away during 30s poll interval
+    const serverClose = lastCandle.close;
+    const maxDrift = 0.001; // 0.1% max drift
+    let boundedPrice = newPrice;
+    if (Math.abs(newPrice - serverClose) / serverClose > maxDrift) {
+      boundedPrice = newPrice + (serverClose - newPrice) * 0.1;
+    }
+    
+    window.currentPrice = boundedPrice;
+    
+    const tickCandle = {
+      time: lastCandle.time,
+      open: lastCandle.open,
+      high: Math.max(lastCandle.high, boundedPrice),
+      low: Math.min(lastCandle.low, boundedPrice),
+      close: boundedPrice,
+      volume: lastCandle.volume + Math.floor(Math.random() * 2)
+    };
+    
+    if (isLive) {
+      updateLocalCandles(liveCandles, tickCandle);
+      engine.updateLast(tickCandle);
+      updateIdText('s-cur', fmt(boundedPrice));
+      renderPredictionsTable(window.lastPredictions);
+      if (typeof checkAlerts === 'function') {
+        checkAlerts(tickCandle);
+      }
+    } else {
+      updateLocalCandles(scalperCandles, tickCandle);
+      engine.updateLast(tickCandle);
+      if (typeof updateShadedBoxes === 'function') {
+        updateShadedBoxes();
+      }
+      
+      // Simulating target/stop check for scalper active trade
+      if (currentTrade && currentTrade.active) {
+        let hit = false;
+        let result = "";
+        if (currentTrade.type === 'Long') {
+          if (boundedPrice <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
+          else if (boundedPrice >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+        } else if (currentTrade.type === 'Short') {
+          if (boundedPrice >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
+          else if (boundedPrice <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+        }
+        if (hit) {
+          $('scalper-info-text').innerHTML = `<strong>Trade update:</strong> ${currentTrade.type} position has hit ${result} at price ${boundedPrice}. Syncing...`;
+          setTimeout(() => loadScalper(), 1000);
+        }
+      }
+    }
+  }, 400); // update every 400ms
+}
+
+function stopSimulatedTicks() {
+  if (simulatedTickInterval) {
+    clearInterval(simulatedTickInterval);
+    simulatedTickInterval = null;
   }
 }
 
@@ -3698,6 +3893,7 @@ function schedule() {
 function connectBtcWebSocket(tf) {
   const symbol = $('symbol').value;
   if (symbol !== 'BTC') {
+    stopSimulatedTicks();
     if (btcSocket) {
       const socketToClose = btcSocket;
       btcSocket = null;
@@ -3709,6 +3905,7 @@ function connectBtcWebSocket(tf) {
     return;
   }
   
+  stopSimulatedTicks();
   const binanceTf = tf.toLowerCase();
   const wsUrl = `wss://fstream.binance.com/ws/btcusdt@kline_${binanceTf}`;
   
@@ -3780,18 +3977,11 @@ function connectBtcWebSocket(tf) {
     } else {
       if (liveChartEngine) {
         updateLocalCandles(liveCandles, candle);
-        const cleanPredicted = (window.lastPredictions || []).map(p => ({
-          time: p.time * 1000,
-          open: p.open,
-          high: p.high,
-          low: p.low,
-          close: p.close,
-          volume: 0,
-          isPrediction: true
-        })).filter(p => p.time > (liveCandles.length > 0 ? liveCandles[liveCandles.length - 1].time : 0));
-        
-        liveChartEngine.setData(liveCandles.concat(cleanPredicted));
+        liveChartEngine.updateLast(candle);
         updateChartIndicators(liveChartEngine, liveCandles, liveActiveIndicators);
+        
+        window.currentPrice = c;
+        renderPredictionsTable(window.lastPredictions);
         checkAlerts(candle);
       }
       if (isClosed) {
@@ -3868,11 +4058,12 @@ function setTimeframe(tfVal) {
 window.setTimeframe = setTimeframe;
 
 function renderPredictionsTable(predicted) {
+  const bodies = document.querySelectorAll('#predictions-table-body, #predictions-table-body-scalper');
   if (!predicted || predicted.length === 0) {
-    document.querySelectorAll('#predictions-table-body').forEach(tbody => {
+    bodies.forEach(tbody => {
       tbody.innerHTML = `
         <tr>
-          <td colspan="5" style="text-align: center; color: var(--muted); padding: 8px 0;">No predictions available</td>
+          <td colspan="3" style="text-align: center; color: var(--muted); padding: 12px 0;">No predictions available</td>
         </tr>
       `;
     });
@@ -3883,23 +4074,21 @@ function renderPredictionsTable(predicted) {
   const next5 = predicted.slice(0, 5);
   const rowsHtml = next5.map((c, idx) => {
     const isUp = c.close >= c.open;
-    const arrow = isUp ? '<span style="color: var(--up);">↗</span>' : '<span style="color: var(--down);">↘</span>';
+    const arrow = isUp ? '↗' : '↘';
     const diffPct = baseline ? ((c.close - baseline) / baseline) * 100 : 0;
     const changeClass = diffPct >= 0 ? 'text-up' : 'text-down';
-    const changeText = (diffPct >= 0 ? '+' : '') + diffPct.toFixed(2) + '%';
+    const changeText = arrow + ' ' + (diffPct >= 0 ? '+' : '') + diffPct.toFixed(2) + '%';
     
     return `
-      <tr style="border-bottom: 1px dotted var(--border);">
-        <td style="padding: 6px 4px; color: var(--muted);">+${idx + 1}</td>
-        <td class="tnum" style="padding: 6px 4px; text-align: right; font-weight: 500;">${fmt(c.close)}</td>
-        <td class="tnum" style="padding: 6px 4px; text-align: right; color: var(--muted); font-size: 10px;">${fmt(c.high)} / ${fmt(c.low)}</td>
-        <td class="tnum ${changeClass}" style="padding: 6px 4px; text-align: right; font-weight: 500;">${changeText}</td>
-        <td style="padding: 6px 4px; text-align: center; font-weight: bold;">${arrow}</td>
+      <tr style="border-bottom: 1px solid var(--border); font-size: 13px;">
+        <td style="padding: 8px 4px; color: var(--muted); font-weight: 600;">+${idx + 1}</td>
+        <td class="tnum" style="padding: 8px 4px; text-align: right; font-weight: 800; color: var(--text);">${fmt(c.close)}</td>
+        <td class="tnum ${changeClass}" style="padding: 8px 4px; text-align: right; font-weight: 700;">${changeText}</td>
       </tr>
     `;
   }).join('');
   
-  document.querySelectorAll('#predictions-table-body').forEach(tbody => {
+  bodies.forEach(tbody => {
     tbody.innerHTML = rowsHtml;
   });
 }
@@ -4145,11 +4334,18 @@ function showSetupAlert(state) {
   const isLong = state.includes('Long');
   const typeClass = isLong ? 'long' : 'short';
   
+  let headerText = "Trade Setup Triggered";
+  let msgText = "A new Scalper Signal has been detected on the chart. Check entry coordinates and risk parameters.";
+  if (state.includes('Position') || state.includes('active') || state.includes('Active')) {
+    headerText = "Trade Position Active";
+    msgText = "A new live position is now active on the exchange. Monitoring targets and stop loss.";
+  }
+  
   popup.innerHTML = `
     <div class="setup-alert-content ${typeClass}">
-      <div class="setup-alert-header">Trade Setup Triggered</div>
+      <div class="setup-alert-header">${headerText}</div>
       <div class="setup-alert-title">${state}</div>
-      <div class="setup-alert-msg">A new Scalper Signal has been detected on the chart. Check entry coordinates and risk parameters.</div>
+      <div class="setup-alert-msg">${msgText}</div>
       <button class="setup-alert-close-btn" onclick="closeSetupAlert()">Dismiss</button>
     </div>
   `;
@@ -4322,6 +4518,11 @@ function openAlertsModal(priceValue) {
   const sym = $('symbol').value;
   $('alerts-modal-title').textContent = `Alerts ${sym}`;
   
+  if ($('alert-type-select')) {
+    $('alert-type-select').value = 'price';
+    toggleAlertModalType();
+  }
+  
   if (priceValue !== undefined && priceValue !== null) {
     $('alert-price-input').value = priceValue.toFixed(2);
     if (lastClosePrice !== null) {
@@ -4340,6 +4541,20 @@ function openAlertsModal(priceValue) {
   toggleModal('alerts-modal', true);
 }
 window.openAlertsModal = openAlertsModal;
+
+function toggleAlertModalType() {
+  const type = $('alert-type-select').value;
+  if (type === 'price') {
+    $('alert-price-row').style.display = 'flex';
+    $('alert-condition-tabs-row').style.display = 'flex';
+    $('alert-signal-row').style.display = 'none';
+  } else {
+    $('alert-price-row').style.display = 'none';
+    $('alert-condition-tabs-row').style.display = 'none';
+    $('alert-signal-row').style.display = 'flex';
+  }
+}
+window.toggleAlertModalType = toggleAlertModalType;
 
 function setAlertCondition(condition) {
   currentAlertCondition = condition;
@@ -4361,23 +4576,41 @@ function previewAlertSound() {
 window.previewAlertSound = previewAlertSound;
 
 function submitAlertModal() {
-  const price = parseFloat($('alert-price-input').value);
-  if (isNaN(price)) {
-    alert('Please enter a valid price.');
-    return;
-  }
   const sym = $('symbol').value;
-  const msg = $('alert-note-input').value.trim() || 'Crossing level';
+  const type = $('alert-type-select').value;
+  let newAlert;
   
-  const newAlert = {
-    id: 'alert_' + Date.now(),
-    symbol: sym,
-    price: price,
-    condition: currentAlertCondition,
-    message: msg,
-    createdAt: Date.now(),
-    triggered: false
-  };
+  if (type === 'price') {
+    const price = parseFloat($('alert-price-input').value);
+    if (isNaN(price)) {
+      alert('Please enter a valid price.');
+      return;
+    }
+    const msg = $('alert-note-input').value.trim() || 'Crossing level';
+    newAlert = {
+      id: 'alert_' + Date.now(),
+      symbol: sym,
+      type: 'price',
+      price: price,
+      condition: currentAlertCondition,
+      message: msg,
+      createdAt: Date.now(),
+      triggered: false
+    };
+  } else {
+    const signalCondition = $('alert-signal-select').value; // 'buy', 'sell', 'any'
+    const note = $('alert-note-input').value.trim() || `Strategy ${signalCondition === 'buy' ? 'Buy' : signalCondition === 'sell' ? 'Sell' : 'Buy/Sell'} signal`;
+    newAlert = {
+      id: 'alert_' + Date.now(),
+      symbol: sym,
+      type: 'strategy',
+      price: 0,
+      condition: signalCondition,
+      message: note,
+      createdAt: Date.now(),
+      triggered: false
+    };
+  }
   
   clientAlerts.push(newAlert);
   saveAlerts();
@@ -4391,6 +4624,44 @@ function submitAlertModal() {
   toggleModal('alerts-modal', false);
 }
 window.submitAlertModal = submitAlertModal;
+
+function checkStrategyAlerts(newState, prevState) {
+  if (!newState || newState === prevState) return;
+  
+  const sym = $('symbol').value;
+  const activeSigAlerts = clientAlerts.filter(a => a.symbol === sym && a.type === 'strategy' && !a.triggered);
+  
+  let isBuy = (newState === "Long Trigger Formed");
+  let isSell = (newState === "Short Trigger Formed");
+  
+  activeSigAlerts.forEach(alert => {
+    let fired = false;
+    if (alert.condition === 'buy' && isBuy) fired = true;
+    else if (alert.condition === 'sell' && isSell) fired = true;
+    else if (alert.condition === 'any' && (isBuy || isSell)) fired = true;
+    
+    if (fired) {
+      alert.triggered = true;
+      alert.triggeredAt = Date.now();
+      
+      // Play sound if enabled
+      const soundOn = localStorage.getItem('greeks_sound') !== 'false';
+      const tuneId = parseInt(localStorage.getItem('greeks_tune') || '3'); // default rising alert
+      const durSec = parseInt(localStorage.getItem('greeks_dur') || '3');
+      if (soundOn) {
+        try {
+          playTune(tuneId, durSec);
+        } catch (e) {
+          console.error("Tune error:", e);
+        }
+      }
+      
+      saveAlerts();
+      renderAlertsTable();
+    }
+  });
+}
+window.checkStrategyAlerts = checkStrategyAlerts;
 
 // Continuous 60fps loop for shaded risk-reward boxes to eliminate lagging
 
@@ -4495,10 +4766,12 @@ function openMobileSheet() {
     } else {
       const stateHtml = document.querySelector('#tab-scalper .state-badges-card') ? document.querySelector('#tab-scalper .state-badges-card').outerHTML : '';
       const tradeHtml = document.querySelector('#tab-scalper .scalper-trade-info-card') ? document.querySelector('#tab-scalper .scalper-trade-info-card').outerHTML : '';
+      const predictionsHtml = $('predictions-card-scalper') ? $('predictions-card-scalper').outerHTML : '';
       content.innerHTML = `
         <div class="mobile-sheet-content-wrapper">
           ${stateHtml}
           ${tradeHtml}
+          ${predictionsHtml}
         </div>
       `;
     }
