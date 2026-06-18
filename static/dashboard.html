@@ -1609,7 +1609,12 @@
       border-bottom: 1px solid var(--border);
     }
     #chart, #tv-chart {
-      height: calc(100% - 40px) !important;
+      min-height: 50vh;
+      height: 400px !important;
+      flex-shrink: 0;
+    }
+    .chart-viewport-wrapper {
+      overflow-y: auto;
     }
     .footer {
       display: none !important;
@@ -5209,6 +5214,7 @@ function setChartViewMode(mode) {
   const chartCard = activeTabEl.querySelector('.chart-card, .scalper-chart-card');
   const logsCard = activeTabEl.querySelector('.alerts-card, .scalper-logs-card');
   if (!chartCard || !logsCard) return;
+  if (window.innerWidth <= 768) return;
   chartCard.style.height = '';
   chartCard.style.flex = '';
   logsCard.style.height = '';
