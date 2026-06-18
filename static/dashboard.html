@@ -4166,7 +4166,7 @@
         }
 
         // Convert from seconds to milliseconds
-        liveCandles = d.candles.map(c => ({
+        const serverLiveCandles = d.candles.map(c => ({
           time: c.time * 1000,
           open: c.open,
           high: c.high,
@@ -4175,7 +4175,6 @@
           volume: c.volume || 0
         }));
 
-        window.currentPrice = d.current;
         window.lastPredictions = d.predicted || [];
         const cleanPredicted = window.lastPredictions.map(p => ({
           time: p.time * 1000,
@@ -4185,7 +4184,7 @@
           close: p.close,
           volume: 0,
           isPrediction: true
-        })).filter(p => p.time > (liveCandles.length > 0 ? liveCandles[liveCandles.length - 1].time : 0));
+        })).filter(p => p.time > (serverLiveCandles.length > 0 ? serverLiveCandles[serverLiveCandles.length - 1].time : 0));
 
         const lastServerCandle = d.candles[d.candles.length - 1];
         const serverCandleTime = lastServerCandle ? lastServerCandle.time * 1000 : 0;
@@ -4197,16 +4196,18 @@
           : 'none';
         const isNewPrediction = (window.lastPredKey !== predKey);
 
-        if (isFirstLoad || isNewCandle || isNewPrediction) {
+        if (isFirstLoad || isNewCandle) {
           window.lastLoadedCandleTime = serverCandleTime;
           window.lastPredKey = predKey;
+          liveCandles = serverLiveCandles;
+          window.currentPrice = d.current;
           liveChartEngine.setData(liveCandles.concat(cleanPredicted));
           loadDrawings(liveChartEngine, 'live');
-        } else {
-          if (liveCandles.length > 0) {
-            liveChartEngine.updateLast(liveCandles[liveCandles.length - 1]);
-          }
+        } else if (isNewPrediction) {
+          window.lastPredKey = predKey;
+          liveChartEngine.setData(liveCandles.concat(cleanPredicted));
         }
+        // else: same candle + same predictions — keep tick-updated candles, don't touch chart data
 
         updateChartIndicators(liveChartEngine, liveCandles, liveActiveIndicators);
         renderPredictionsTable(window.lastPredictions);
@@ -4954,7 +4955,7 @@
         }
 
         // Convert epoch seconds to epoch milliseconds
-        scalperCandles = d.candles.map(c => ({
+        const serverScalperCandles = d.candles.map(c => ({
           time: c.time * 1000,
           open: c.open,
           high: c.high,
@@ -4975,26 +4976,27 @@
           close: p.close,
           volume: 0,
           isPrediction: true
-        })).filter(p => p.time > (scalperCandles.length > 0 ? scalperCandles[scalperCandles.length - 1].time : 0));
+        })).filter(p => p.time > (serverScalperCandles.length > 0 ? serverScalperCandles[serverScalperCandles.length - 1].time : 0));
 
         const predKey = d.predicted && d.predicted.length > 0
           ? d.predicted[0].time + ':' + d.predicted[0].close
           : 'none';
         const isNewPrediction = (window.lastScalperPredKey !== predKey);
 
-        if (isFirstLoad || isNewCandle || isNewPrediction) {
+        if (isFirstLoad || isNewCandle) {
           window.lastLoadedScalperCandleTime = serverCandleTime;
           window.lastScalperPredKey = predKey;
+          scalperCandles = serverScalperCandles;
           scalperChartEngine.setData(scalperCandles.concat(cleanPredicted));
           loadDrawings(scalperChartEngine, 'scalper');
           if (isFirstLoad) {
             scalperChartEngine.resetView();
           }
-        } else {
-          if (scalperCandles.length > 0) {
-            scalperChartEngine.updateLast(scalperCandles[scalperCandles.length - 1]);
-          }
+        } else if (isNewPrediction) {
+          window.lastScalperPredKey = predKey;
+          scalperChartEngine.setData(scalperCandles.concat(cleanPredicted));
         }
+        // else: same candle + same predictions — keep tick-updated candles, don't touch chart data
 
         updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
 
@@ -5118,7 +5120,9 @@
           scalperChartEngine.setProjections(projLines, projBand);
         }
 
-        window.currentPrice = d.current || (scalperCandles.length > 0 ? scalperCandles[scalperCandles.length - 1].close : 0);
+        if (isFirstLoad || isNewCandle) {
+          window.currentPrice = d.current || (scalperCandles.length > 0 ? scalperCandles[scalperCandles.length - 1].close : 0);
+        }
         window.lastPredictions = d.predicted || [];
         renderPredictionsTable(window.lastPredictions);
 
