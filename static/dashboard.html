@@ -479,9 +479,9 @@
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
     box-shadow: var(--card-shadow);
   }
   body.dark-theme .overlay-card {
@@ -489,8 +489,8 @@
   }
   .overlay-card-header {
     border-bottom: 1px solid var(--border);
-    padding-bottom: 6px;
-    margin-bottom: 8px;
+    padding-bottom: 5px;
+    margin-bottom: 6px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -530,8 +530,8 @@
   .signal {
     display: flex;
     flex-direction: column;
-    border: 2px solid var(--border);
-    border-radius: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
   .signal.up {
@@ -964,16 +964,16 @@
     flex-direction: column;
   }
   .alerts-head, .scalper-logs-head {
-    height: 36px;
+    height: 32px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 16px;
+    padding: 0 14px;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
   }
   .alerts-head .t, .scalper-logs-head .t {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
   }
   .alerts-table-wrapper, .scalper-table-wrapper {
@@ -2952,9 +2952,9 @@ function updateChartIndicators(engine, candles, togglesContainerId) {
         const outputs = def.compute(candles, params);
         if (outputs && outputs.length > 0) {
           if (id === 'ema9') {
-            outputs[0].color = '#2962FF'; // Blue
+            outputs[0].color = '#FF00FF'; // Fuchsia
           } else if (id === 'ema15') {
-            outputs[0].color = '#FF6D00'; // Orange
+            outputs[0].color = '#222222'; // Dark Charcoal
           }
         }
         renderDataList.push({
@@ -3627,7 +3627,7 @@ function renderHistoricTradeBoxes(engine, trades) {
       if (xEntry === null || xExit === null) continue;
       const xLeft = Math.max(xMin, Math.min(xEntry, xExit));
       const xRight = Math.min(xMax, Math.max(xEntry, xExit));
-      const w = Math.max(2, xRight - xLeft);
+      const w = Math.max(3, xRight - xLeft);
       if (xRight <= xMin || xLeft >= xMax) continue;
 
       const yEntry = conv.priceToY(trade.entryPrice);
@@ -3635,60 +3635,52 @@ function renderHistoricTradeBoxes(engine, trades) {
       const yTP = conv.priceToY(trade.tpPrice);
       if (yEntry === null || ySL === null || yTP === null) continue;
 
-      if (trade.type === 'Long') {
-        // Green zone: entry -> TP
-        const greenTop = Math.min(yEntry, yTP);
-        const greenH = Math.abs(yEntry - yTP);
-        ctx.fillStyle = 'rgba(0, 200, 100, 0.12)';
-        ctx.fillRect(xLeft, greenTop, w, greenH);
-        ctx.strokeStyle = 'rgba(0, 200, 100, 0.4)';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(xLeft, greenTop, w, greenH);
+      const isLong = trade.type === 'Long';
 
-        // Red zone: SL -> entry
-        const redTop = Math.min(yEntry, ySL);
-        const redH = Math.abs(yEntry - ySL);
-        ctx.fillStyle = 'rgba(255, 50, 50, 0.12)';
-        ctx.fillRect(xLeft, redTop, w, redH);
-        ctx.strokeStyle = 'rgba(255, 50, 50, 0.4)';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(xLeft, redTop, w, redH);
+      // Profit zone (green): entry to TP
+      const greenTop = Math.min(yEntry, yTP);
+      const greenH = Math.max(1, Math.abs(yEntry - yTP));
+      ctx.fillStyle = 'rgba(76, 175, 80, 0.08)';
+      ctx.fillRect(xLeft, greenTop, w, greenH);
+      ctx.strokeStyle = 'rgba(76, 175, 80, 0.3)';
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(xLeft, greenTop, w, greenH);
 
-        // Entry marker: green up arrow
-        ctx.fillStyle = '#089981';
-        ctx.beginPath();
-        ctx.moveTo(xLeft, yEntry - 6);
-        ctx.lineTo(xLeft - 4, yEntry);
+      // Loss zone (red): entry to SL
+      const redTop = Math.min(yEntry, ySL);
+      const redH = Math.max(1, Math.abs(yEntry - ySL));
+      ctx.fillStyle = 'rgba(244, 67, 54, 0.08)';
+      ctx.fillRect(xLeft, redTop, w, redH);
+      ctx.strokeStyle = 'rgba(244, 67, 54, 0.3)';
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(xLeft, redTop, w, redH);
+
+      // Entry marker
+      ctx.fillStyle = isLong ? '#089981' : '#f23645';
+      ctx.beginPath();
+      if (isLong) {
+        ctx.moveTo(xLeft - 4, yEntry);
+        ctx.lineTo(xLeft, yEntry - 7);
         ctx.lineTo(xLeft + 4, yEntry);
-        ctx.closePath();
-        ctx.fill();
-      } else if (trade.type === 'Short') {
-        // Green zone: SL -> entry (for short, profit is below entry)
-        const greenTop = Math.min(yEntry, yTP);
-        const greenH = Math.abs(yEntry - yTP);
-        ctx.fillStyle = 'rgba(0, 200, 100, 0.12)';
-        ctx.fillRect(xLeft, greenTop, w, greenH);
-        ctx.strokeStyle = 'rgba(0, 200, 100, 0.4)';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(xLeft, greenTop, w, greenH);
-
-        // Red zone: entry -> SL
-        const redTop = Math.min(yEntry, ySL);
-        const redH = Math.abs(yEntry - ySL);
-        ctx.fillStyle = 'rgba(255, 50, 50, 0.12)';
-        ctx.fillRect(xLeft, redTop, w, redH);
-        ctx.strokeStyle = 'rgba(255, 50, 50, 0.4)';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(xLeft, redTop, w, redH);
-
-        // Entry marker: red down arrow
-        ctx.fillStyle = '#f23645';
-        ctx.beginPath();
-        ctx.moveTo(xLeft, yEntry + 6);
-        ctx.lineTo(xLeft - 4, yEntry);
+      } else {
+        ctx.moveTo(xLeft - 4, yEntry);
+        ctx.lineTo(xLeft, yEntry + 7);
         ctx.lineTo(xLeft + 4, yEntry);
-        ctx.closePath();
-        ctx.fill();
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // PnL label at exit boundary
+      if (trade.points !== undefined && xRight < xMax) {
+        const pnl = trade.points;
+        const pnlStr = (pnl >= 0 ? '+' : '') + pnl.toFixed(1);
+        const labelX = Math.min(xRight + 4, xMax - 4);
+        const labelY = (yEntry + (isLong ? yTP : ySL)) / 2;
+        ctx.font = '10px JetBrains Mono, monospace';
+        ctx.fillStyle = pnl >= 0 ? 'rgba(76, 175, 80, 0.7)' : 'rgba(244, 67, 54, 0.7)';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(pnlStr, labelX, labelY);
       }
     }
   } catch (e) {
