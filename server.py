@@ -517,6 +517,11 @@ def api_scalper(symbol, tf):
             "active_trade": active_trade,
             "trades_history": trades_history[::-1],
             "kronos_prediction": kronos_dir,
+            "direction": kronos_dir,
+            "move_pct": cached_result.get("move_pct"),
+            "pred_len": cached_result.get("pred_len"),
+            "predicted": cached_result.get("predicted", []),
+            "current": cached_result.get("current"),
             "updated": time.strftime("%H:%M:%S")
         })
 

@@ -495,6 +495,27 @@
     justify-content: space-between;
     align-items: center;
   }
+  .overlay-card-header, .sig-header-row {
+    cursor: pointer;
+    user-select: none;
+  }
+  .overlay-card-header::after, .sig-header-row::after {
+    content: '▲';
+    font-size: 8px;
+    color: var(--muted);
+    transition: transform 0.2s;
+    margin-left: 8px;
+  }
+  .overlay-card.card-collapsed .overlay-card-header::after,
+  .overlay-card.card-collapsed .sig-header-row::after {
+    content: '▼';
+  }
+  .overlay-card.card-collapsed > *:not(.overlay-card-header):not(.sig-header-row) {
+    display: none !important;
+  }
+  .overlay-card.card-collapsed {
+    padding-bottom: 10px;
+  }
   .card-title {
     font-size: 10px;
     font-weight: 700;
@@ -3302,7 +3323,7 @@ async function load(isFirstLoad = false) {
   liveLoadInflight++;
   if ($('status')) $('status').textContent = 'Updating…';
   $('err').style.display = 'none';
-  if ($('live-chart-loading')) $('live-chart-loading').style.display = 'flex';
+  if (isFirstLoad && $('live-chart-loading')) $('live-chart-loading').style.display = 'flex';
   try {
     initLiveChart();
     const res = await fetch(`${API}/api/signal/${sym}/${tf}`);
@@ -3543,6 +3564,7 @@ async function load(isFirstLoad = false) {
     $('updated').textContent = 'Last update: ' + d.updated;
     $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · horizon ${d.pred_len}`;
     if ($('status')) $('status').textContent = 'Live';
+    evaluateAntigravityAlerts(d, liveCandles);
     connectBtcWebSocket(tf);
     if (sym !== 'BTC') {
       startSimulatedTicks();
@@ -3622,7 +3644,7 @@ async function loadScalper(isFirstLoad = false) {
   scalperLoadInflight++;
   if ($('status')) $('status').textContent = 'Updating…';
   $('err').style.display = 'none';
-  if ($('scalper-chart-loading')) $('scalper-chart-loading').style.display = 'flex';
+  if (isFirstLoad && $('scalper-chart-loading')) $('scalper-chart-loading').style.display = 'flex';
   
   try {
     initScalperChart();
@@ -3657,6 +3679,9 @@ async function loadScalper(isFirstLoad = false) {
     scalperChartEngine.setData(scalperCandles);
     loadDrawings(scalperChartEngine, 'scalper');
     updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
+    
+    window.currentPrice = d.current || (scalperCandles.length > 0 ? scalperCandles[scalperCandles.length - 1].close : 0);
+    renderPredictionsTable(d.predicted || []);
     
     if (scalperCandles.length > 0) {
       activeCandleOpenTime = d.candles[d.candles.length - 1].time;
@@ -3768,6 +3793,7 @@ async function loadScalper(isFirstLoad = false) {
     $('updated').textContent = 'Last update: ' + d.updated;
     $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · EMA 9/15`;
     if ($('status')) $('status').textContent = 'Live';
+    evaluateAntigravityAlerts(d, scalperCandles);
     if (sym !== 'BTC') {
       startSimulatedTicks();
     }
@@ -4331,7 +4357,7 @@ function showSetupAlert(state) {
     document.body.appendChild(popup);
   }
   
-  const isLong = state.includes('Long');
+  const isLong = state.includes('Long') || state.includes('BUY') || state.includes('Buy');
   const typeClass = isLong ? 'long' : 'short';
   
   let headerText = "Trade Setup Triggered";
@@ -4339,6 +4365,9 @@ function showSetupAlert(state) {
   if (state.includes('Position') || state.includes('active') || state.includes('Active')) {
     headerText = "Trade Position Active";
     msgText = "A new live position is now active on the exchange. Monitoring targets and stop loss.";
+  } else if (state.includes('ANTIGRAVITY')) {
+    headerText = "ANTIGRAVITY SIGNAL ALERT";
+    msgText = `All 4 gates successfully passed on the closed candle. ${isLong ? 'BUY (Long)' : 'SELL (Short)'} trade setup is now active.`;
   }
   
   popup.innerHTML = `
@@ -4663,6 +4692,118 @@ function checkStrategyAlerts(newState, prevState) {
 }
 window.checkStrategyAlerts = checkStrategyAlerts;
 
+function evaluateAntigravityAlerts(d, candles) {
+  if (!candles || candles.length < 15) {
+    return; // Not enough candles to compute indicators
+  }
+  const lastCandle = candles[candles.length - 1];
+  const sym = d.symbol || $('symbol').value;
+  const tf = d.timeframe || $('tf').value;
+  const alertKey = `${sym}:${tf}:${lastCandle.time}`;
+  
+  // GATE 1: Kronos Directional Signal
+  const direction = d.direction; // "Long", "Short", or "Flat"
+  if (direction === 'Flat') {
+    return;
+  }
+  const movePct = Math.abs(d.move_pct);
+  if (movePct < 0.75) {
+    return;
+  }
+  
+  // GATE 0: EMA Trend (EMA 9 vs EMA 15)
+  const ema9Def = getIndicator('ema');
+  const ema15Def = getIndicator('ema');
+  if (!ema9Def || !ema15Def) {
+    return;
+  }
+  
+  const ema9Outputs = ema9Def.compute(candles, { period: 9 });
+  const ema15Outputs = ema15Def.compute(candles, { period: 15 });
+  if (!ema9Outputs || ema9Outputs.length === 0 || !ema15Outputs || ema15Outputs.length === 0) {
+    return;
+  }
+  
+  const ema9Values = ema9Outputs[0].values;
+  const ema15Values = ema15Outputs[0].values;
+  if (ema9Values.length === 0 || ema15Values.length === 0) {
+    return;
+  }
+  
+  const lastEma9 = ema9Values[ema9Values.length - 1];
+  const lastEma15 = ema15Values[ema15Values.length - 1];
+  if (lastEma9 === null || lastEma15 === null) {
+    return;
+  }
+  
+  if (direction === 'Long') {
+    if (lastEma9 <= lastEma15) return;
+  } else if (direction === 'Short') {
+    if (lastEma9 >= lastEma15) return;
+  }
+  
+  // GATE 2: Echoes Directional Agreement
+  const horizon = d.pred_len;
+  const echoScan = lab.buildEchoScan(candles, 30, horizon, 5);
+  if (!echoScan || !echoScan.stats) {
+    return;
+  }
+  
+  const count = echoScan.stats.count;
+  if (count !== 5) {
+    return; // reject if count != 5
+  }
+  
+  const upCount = echoScan.stats.upCount;
+  const upRate = upCount / 5;
+  if (direction === 'Long') {
+    if (upRate < 0.8) return; // LONG requires upCount/5 >= 80% (4/5 or 5/5 UP)
+  } else if (direction === 'Short') {
+    if (upRate > 0.2) return; // SHORT requires upCount/5 <= 20% (0/5 or 1/5 UP)
+  }
+  
+  // Median outcome sign must match trade direction
+  const medianEndPct = echoScan.stats.medianEndPct;
+  if (direction === 'Long' && medianEndPct <= 0) return;
+  if (direction === 'Short' && medianEndPct >= 0) return;
+  
+  // GATE 3: Asymmetry Check
+  const best = echoScan.stats.bestEndPct;
+  const worst = echoScan.stats.worstEndPct;
+  let asymmetryPass = false;
+  if ((best >= 0 && worst >= 0) || (best <= 0 && worst <= 0)) {
+    asymmetryPass = true; // same sign -> PASS
+  } else {
+    if (direction === 'Long') {
+      if (Math.abs(worst) === 0) {
+        asymmetryPass = true;
+      } else {
+        asymmetryPass = (best / Math.abs(worst)) >= 3.0;
+      }
+    } else if (direction === 'Short') {
+      if (best === 0) {
+        asymmetryPass = true;
+      } else {
+        asymmetryPass = (Math.abs(worst) / best) >= 3.0;
+      }
+    }
+  }
+  if (!asymmetryPass) {
+    return;
+  }
+  
+  // GATE 4 check for duplicate sound/alert
+  if (window.lastAntigravityAlertKey === alertKey) {
+    return;
+  }
+  
+  // All gates passed! Trigger Alert
+  window.lastAntigravityAlertKey = alertKey;
+  const signalMsg = direction === 'Long' ? 'BUY' : 'SELL';
+  showSetupAlert(`ANTIGRAVITY ${signalMsg} Signal Ready!`);
+}
+window.evaluateAntigravityAlerts = evaluateAntigravityAlerts;
+
 // Continuous 60fps loop for shaded risk-reward boxes to eliminate lagging
 
 
@@ -4816,6 +4957,16 @@ window.closeMobileSheet = closeMobileSheet;
 applySavedTheme();
   applySavedViewMode();
   applyOverlaysCollapse();
+
+  // Toggle collapse state for individual overlay cards
+  document.querySelectorAll('.overlay-card-header, .sig-header-row').forEach(header => {
+    header.addEventListener('click', () => {
+      const card = header.closest('.overlay-card');
+      if (card) {
+        card.classList.toggle('card-collapsed');
+      }
+    });
+  });
 
   
   // Load active indicators from localStorage
