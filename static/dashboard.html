@@ -1481,45 +1481,18 @@
     display: none;
   }
 
-  /* View Mode Height Calculation  body.view-fullscreen .tab-content {
+  /* Layout Sizing Calculation */
+  .tab-content {
     display: none;
     height: calc(100vh - 90px);
     overflow: hidden;
   }
-  body.view-fullscreen .tab-content.active {
+  .tab-content.active {
     display: flex;
     flex-direction: column;
   }
-  body.view-fullscreen .chart-card,
-  body.view-fullscreen .scalper-chart-card {
-    flex: 1;
-    height: 100%;
-    border-radius: 0;
-    border: none;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-  }
-  body.view-fullscreen .chart-viewport-wrapper {
-    flex: 1;
-    height: 100% !important;
-  }
-  body.view-fullscreen .alerts-card,
-  body.view-fullscreen .scalper-logs-card {
-    display: none !important;
-  }
- 
-  body.view-split .tab-content {
-    display: none;
-    height: calc(100vh - 90px);
-    overflow: hidden;
-  }
-  body.view-split .tab-content.active {
-    display: flex;
-    flex-direction: column;
-  }
-  body.view-split .chart-card,
-  body.view-split .scalper-chart-card {
+  .chart-card,
+  .scalper-chart-card {
     height: 60vh;
     border-radius: 0;
     border: none;
@@ -1528,84 +1501,17 @@
     display: flex;
     flex-direction: column;
   }
-  body.view-split .chart-viewport-wrapper {
+  .chart-viewport-wrapper {
     flex: 1;
   }
-  body.view-split .alerts-card,
-  body.view-split .scalper-logs-card {
+  .alerts-card,
+  .scalper-logs-card {
     height: calc(40vh - 130px);
     margin-top: 0;
     border-radius: 0;
     border: none;
     overflow-y: auto;
     background: var(--bg);
-  }
- 
-  body.view-compact .tab-content {
-    display: none;
-    height: calc(100vh - 90px);
-    overflow: hidden;
-  }
-  body.view-compact .tab-content.active {
-    display: flex;
-    flex-direction: column;
-  }
-  body.view-compact .chart-card,
-  body.view-compact .scalper-chart-card {
-    height: 45vh;
-    border-radius: 0;
-    border: none;
-    border-bottom: 1px solid var(--border);
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-  }
-  body.view-compact .chart-viewport-wrapper {
-    flex: 1;
-  }
-  body.view-compact .alerts-card,
-  body.view-compact .scalper-logs-card {
-    height: calc(55vh - 130px);
-    margin-top: 0;
-    border-radius: 0;
-    border: none;
-    overflow-y: auto;
-    background: var(--bg);
-  }
-
-  .view-mode-buttons {
-    display: flex;
-    gap: 4px;
-    background: rgba(0, 0, 0, 0.03);
-    padding: 2px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-  }
-  body.dark-theme .view-mode-buttons {
-    background: rgba(255, 255, 255, 0.03);
-  }
-  .view-mode-btn {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    transition: all 0.15s;
-  }
-  .view-mode-btn:hover {
-    color: var(--text);
-  }
-  .view-mode-btn.active {
-    background: var(--surface);
-    color: var(--text);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  }
-  body.dark-theme .view-mode-btn.active {
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   }
 
   /* Mobile HUD strip & bottom sheet drawer */
@@ -1665,11 +1571,7 @@
       height: calc(100vh - 74px) !important;
       overflow: hidden !important;
     }
-    body.view-fullscreen .tab-content,
-    body.view-split .tab-content,
-    body.view-compact .tab-content {
-      height: calc(100vh - 74px) !important;
-    }
+
     .chart-card, .scalper-chart-card {
       height: 60% !important;
       border-bottom: 1px solid var(--border);
@@ -2177,14 +2079,7 @@
         </button>
       </div>
       
-      <div class="sidebar-section-title" style="margin-top: 16px;">Chart View Mode</div>
-      <div class="sidebar-menu-list" style="padding: 4px 12px;">
-        <div class="view-mode-buttons" style="display: flex; gap: 4px; width: 100%;">
-          <button class="view-mode-btn active" id="sidebar-view-split" data-mode="split" onclick="setViewMode('split')" style="flex: 1; text-align: center;">Split</button>
-          <button class="view-mode-btn" id="sidebar-view-fullscreen" data-mode="fullscreen" onclick="setViewMode('fullscreen')" style="flex: 1; text-align: center;">Full</button>
-          <button class="view-mode-btn" id="sidebar-view-compact" data-mode="compact" onclick="setViewMode('compact')" style="flex: 1; text-align: center;">Compact</button>
-        </div>
-      </div>
+
 
       <div class="sidebar-section-title" style="margin-top: 16px;">Chart Controls</div>
       <div class="sidebar-menu-list" style="padding: 4px 12px; display: flex; flex-direction: column; gap: 6px;">
@@ -4403,6 +4298,27 @@ function setTimeframe(tfVal) {
 }
 window.setTimeframe = setTimeframe;
 
+function formatCandleTime(timeSecs, tf) {
+  if (!timeSecs) return '';
+  const date = new Date(timeSecs * 1000);
+  if (tf === '1d') {
+    return date.toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      day: 'numeric',
+      month: 'short'
+    });
+  } else {
+    return date.toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  }
+}
+
 function renderPredictionsTable(predicted) {
   const bodies = document.querySelectorAll('#predictions-table-body, #predictions-table-body-scalper');
   if (!predicted || predicted.length === 0) {
@@ -4418,6 +4334,7 @@ function renderPredictionsTable(predicted) {
   
   const baseline = window.currentPrice || (predicted.length > 0 ? predicted[0].open : 0);
   const next5 = predicted.slice(0, 5);
+  const tf = $('tf') ? $('tf').value : '5m';
   const rowsHtml = next5.map((c, idx) => {
     const isUp = c.close >= c.open;
     const arrow = isUp ? '↗' : '↘';
@@ -4425,9 +4342,14 @@ function renderPredictionsTable(predicted) {
     const changeClass = diffPct >= 0 ? 'text-up' : 'text-down';
     const changeText = arrow + ' ' + (diffPct >= 0 ? '+' : '') + diffPct.toFixed(2) + '%';
     
+    const timeStr = formatCandleTime(c.time, tf);
+    
     return `
       <tr style="border-bottom: 1px solid var(--border); font-size: 13px;">
-        <td style="padding: 8px 4px; color: var(--muted); font-weight: 600;">+${idx + 1}</td>
+        <td style="padding: 6px 4px; color: var(--muted); font-weight: 600; line-height: 1.2;">
+          +${idx + 1}
+          <div style="font-size: 9px; font-weight: 500; color: var(--muted); margin-top: 1px;">${timeStr}</div>
+        </td>
         <td class="tnum" style="padding: 8px 4px; text-align: right; font-weight: 800; color: var(--text);">${fmt(c.close)}</td>
         <td class="tnum ${changeClass}" style="padding: 8px 4px; text-align: right; font-weight: 700;">${changeText}</td>
       </tr>
@@ -5138,28 +5060,7 @@ function startShadedBoxesLoop() {
 
 
   
-// View Mode Toggling
-function setViewMode(mode) {
-  document.body.classList.remove('view-fullscreen', 'view-split', 'view-compact');
-  document.body.classList.add('view-' + mode);
-  localStorage.setItem('greeks_view_mode', mode);
-  
-  document.querySelectorAll('.view-mode-btn').forEach(btn => {
-    if (btn.getAttribute('data-mode') === mode) btn.classList.add('active');
-    else btn.classList.remove('active');
-  });
-  
-  setTimeout(() => {
-    window.dispatchEvent(new Event('resize'));
-    updateShadedBoxes();
-  }, 100);
-}
-window.setViewMode = setViewMode;
 
-function applySavedViewMode() {
-  const mode = localStorage.getItem('greeks_view_mode') || 'split';
-  setViewMode(mode);
-}
 
 // Overlays Collapse Toggling
 function toggleOverlaysCollapse() {
@@ -5273,11 +5174,8 @@ window.addEventListener('click', (e) => {
 });
 
 window.closeMobileSheet = closeMobileSheet;
-
 applySavedTheme();
-  applySavedViewMode();
   applyOverlaysCollapse();
-
   // Toggle collapse state for individual overlay cards
   document.querySelectorAll('.overlay-card-header, .sig-header-row, .scalper-logs-head').forEach(header => {
     header.addEventListener('click', () => {
