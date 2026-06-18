@@ -23,6 +23,7 @@ from flask_cors import CORS
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from model import Kronos, KronosTokenizer, KronosPredictor
+from ema_kronos_strategy import EmaKronosStrategy
 
 # ----------------------------------------------------------------------------
 # Config (override with environment variables if you want)
@@ -607,6 +608,73 @@ def api_scalper(symbol, tf):
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
+
+
+@app.route("/api/ema_kronos/<symbol>/<tf>")
+def api_ema_kronos(symbol, tf):
+    """EMA/Kronos confluence strategy endpoint - Pine Script v5 logic."""
+    symbol = symbol.upper()
+    tf = tf.lower()
+    key = f"{symbol}:{tf}"
+    now = time.time()
+
+    with active_lock:
+        ACTIVE_COMBINATIONS[key] = now
+
+    with _cache_lock:
+        cached = _cache.get(key)
+
+    if not cached:
+        try:
+            result = run_prediction(symbol, tf)
+            with _cache_lock:
+                _cache[key] = (now, result)
+            cached_result = result
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+    else:
+        cached_result = cached[1]
+
+    try:
+        candles = cached_result["candles"]
+        if len(candles) < 30:
+            return jsonify({"error": "Insufficient history"}), 400
+
+        df = pd.DataFrame(candles)
+        df.set_index('time', inplace=True)
+        df.index = pd.to_datetime(df.index, unit='s')
+
+        kronos_dir = cached_result["direction"]
+        strat = EmaKronosStrategy(fast=9, slow=15)
+        out = strat.evaluate(df, kronos_direction=kronos_dir)
+
+        return jsonify({
+            "symbol": symbol,
+            "timeframe": tf,
+            "state": out["state"],
+            "trend": out["trend"],
+            "bars_since_cross": out["bars_since_cross"],
+            "body_touches_both": out["body_touches_both"],
+            "kronos_direction": kronos_dir,
+            "confluence": out["confluence"],
+            "active_trade": out["active_trade"],
+            "trades_history": out["trades_history"],
+            "ema9": out["ema9"],
+            "ema15": out["ema15"],
+            "markers": out["markers"],
+            "candles": candles,
+            "predicted": cached_result.get("predicted", []),
+            "current": cached_result.get("current"),
+            "confidence": cached_result.get("confidence"),
+            "direction": kronos_dir,
+            "move_pct": cached_result.get("move_pct"),
+            "updated": time.strftime("%H:%M:%S")
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":

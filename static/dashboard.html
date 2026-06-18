@@ -658,6 +658,20 @@
     line-height: 1.2;
   }
 
+  /* Confluence Card */
+  .confluence-card { background: var(--card-bg); }
+  .confluence-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .confluence-label { color: var(--muted); font-size: 11px; }
+  .confluence-value { font-weight: 600; font-size: 12px; }
+  .confluence-value.confluence-yes { color: #089981; }
+  .confluence-value.confluence-no { color: #f23645; }
+  .confluence-value.trend-up { color: #089981; }
+  .confluence-value.trend-down { color: #f23645; }
+
   /* Scalper state badges (Horizontal row inside chart head) */
   .scalper-badges-panel-top {
     display: flex;
@@ -2580,6 +2594,23 @@
               <div id="scalper-info-text"></div>
             </div>
 
+            <!-- EMA/Kronos Confluence Card -->
+            <div class="overlay-card confluence-card" id="scalper-confluence" style="margin-top: 8px;">
+              <div class="overlay-card-header">
+                <span class="card-title">EMA/KRONOS CONFLUENCE</span>
+              </div>
+              <div class="confluence-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 12px; padding: 4px 0;">
+                <div class="confluence-row"><span class="confluence-label">EMA Trend</span> <span class="confluence-value" id="ema-trend">—</span></div>
+                <div class="confluence-row"><span class="confluence-label">Bars Since Cross</span> <span class="confluence-value" id="ema-bars-since">—</span></div>
+                <div class="confluence-row"><span class="confluence-label">Body Touches Both</span> <span class="confluence-value" id="ema-body-touch">—</span></div>
+                <div class="confluence-row"><span class="confluence-label">Kronos AI</span> <span class="confluence-value" id="ema-kronos-dir">—</span></div>
+                <div class="confluence-row" style="grid-column: 1 / -1; border-top: 1px solid var(--border); padding-top: 6px; margin-top: 2px;">
+                  <span class="confluence-label" style="font-weight: 700;">CONFLUENCE</span>
+                  <span class="confluence-value" id="ema-confluence-status" style="font-weight: 700;">—</span>
+                </div>
+              </div>
+            </div>
+
             <!-- Kronos Unified Forecast Card (Scalper) -->
             <div class="overlay-card signal flat" id="scalper-sig" style="margin-top: 8px;">
               <div class="sig-header-row" style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px;">
@@ -3283,7 +3314,10 @@ function initScalperChart() {
       localStorage.setItem(getDrawingsKey('scalper'), JSON.stringify(drawings));
       pushDrawingsState('scalper', drawings);
     },
-    onRender: updateShadedBoxes
+    onRender: () => {
+      updateShadedBoxes();
+      renderHistoricTradeBoxes(scalperChartEngine, emaKronosTradesHistory);
+    }
   });
   
   setupDrawingToolbars(scalperChartEngine, 'scalper-drawing-toolbar', 'scalper-clear-drawings', 'scalper');
@@ -3573,6 +3607,141 @@ async function load(isFirstLoad = false) {
 // -------------------------------------------------------------
 // Scalper Loader (Tab 2)
 // -------------------------------------------------------------
+/* EMA/Kronos strategy data and historical trade box rendering */
+let emaKronosTradesHistory = [];
+
+function renderHistoricTradeBoxes(engine, trades) {
+  if (!engine || !trades || trades.length === 0) return;
+  const conv = engine.getMainConverters();
+  const rect = engine.getMainPaneRect();
+  if (!conv || !rect) return;
+  try {
+    const canvas = engine.getCanvas();
+    const ctx = canvas.getContext('2d');
+    const xMin = rect.x, xMax = rect.x + rect.width;
+
+    for (const trade of trades) {
+      if (!trade.entryTime || !trade.exitTime || !trade.entryPrice) continue;
+      const xEntry = conv.timeToX(trade.entryTime * 1000);
+      const xExit = conv.timeToX(trade.exitTime * 1000);
+      if (xEntry === null || xExit === null) continue;
+      const xLeft = Math.max(xMin, Math.min(xEntry, xExit));
+      const xRight = Math.min(xMax, Math.max(xEntry, xExit));
+      const w = Math.max(2, xRight - xLeft);
+      if (xRight <= xMin || xLeft >= xMax) continue;
+
+      const yEntry = conv.priceToY(trade.entryPrice);
+      const ySL = conv.priceToY(trade.slPrice);
+      const yTP = conv.priceToY(trade.tpPrice);
+      if (yEntry === null || ySL === null || yTP === null) continue;
+
+      if (trade.type === 'Long') {
+        // Green zone: entry -> TP
+        const greenTop = Math.min(yEntry, yTP);
+        const greenH = Math.abs(yEntry - yTP);
+        ctx.fillStyle = 'rgba(0, 200, 100, 0.12)';
+        ctx.fillRect(xLeft, greenTop, w, greenH);
+        ctx.strokeStyle = 'rgba(0, 200, 100, 0.4)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(xLeft, greenTop, w, greenH);
+
+        // Red zone: SL -> entry
+        const redTop = Math.min(yEntry, ySL);
+        const redH = Math.abs(yEntry - ySL);
+        ctx.fillStyle = 'rgba(255, 50, 50, 0.12)';
+        ctx.fillRect(xLeft, redTop, w, redH);
+        ctx.strokeStyle = 'rgba(255, 50, 50, 0.4)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(xLeft, redTop, w, redH);
+
+        // Entry marker: green up arrow
+        ctx.fillStyle = '#089981';
+        ctx.beginPath();
+        ctx.moveTo(xLeft, yEntry - 6);
+        ctx.lineTo(xLeft - 4, yEntry);
+        ctx.lineTo(xLeft + 4, yEntry);
+        ctx.closePath();
+        ctx.fill();
+      } else if (trade.type === 'Short') {
+        // Green zone: SL -> entry (for short, profit is below entry)
+        const greenTop = Math.min(yEntry, yTP);
+        const greenH = Math.abs(yEntry - yTP);
+        ctx.fillStyle = 'rgba(0, 200, 100, 0.12)';
+        ctx.fillRect(xLeft, greenTop, w, greenH);
+        ctx.strokeStyle = 'rgba(0, 200, 100, 0.4)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(xLeft, greenTop, w, greenH);
+
+        // Red zone: entry -> SL
+        const redTop = Math.min(yEntry, ySL);
+        const redH = Math.abs(yEntry - ySL);
+        ctx.fillStyle = 'rgba(255, 50, 50, 0.12)';
+        ctx.fillRect(xLeft, redTop, w, redH);
+        ctx.strokeStyle = 'rgba(255, 50, 50, 0.4)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(xLeft, redTop, w, redH);
+
+        // Entry marker: red down arrow
+        ctx.fillStyle = '#f23645';
+        ctx.beginPath();
+        ctx.moveTo(xLeft, yEntry + 6);
+        ctx.lineTo(xLeft - 4, yEntry);
+        ctx.lineTo(xLeft + 4, yEntry);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+  } catch (e) {
+    // Silently skip render errors
+  }
+}
+
+function renderTradeBoxesOnAnimation(engine) {
+  renderHistoricTradeBoxes(engine, emaKronosTradesHistory);
+}
+
+async function loadEmaKronos() {
+  const sym = $('symbol').value, tf = $('tf').value;
+  try {
+    const res = await fetch(`${API}/api/ema_kronos/${sym}/${tf}`);
+    const d = await res.json();
+    if (d.error) return;
+
+    // Update confluence card
+    const trendEl = $('ema-trend');
+    if (trendEl) {
+      trendEl.textContent = d.trend || '—';
+      trendEl.className = 'confluence-value' + (d.trend === 'Up' ? ' trend-up' : d.trend === 'Down' ? ' trend-down' : '');
+    }
+    $('ema-bars-since').textContent = d.bars_since_cross != null ? d.bars_since_cross : '—';
+    $('ema-body-touch').textContent = d.body_touches_both ? '✓ YES' : '✗ NO';
+    $('ema-body-touch').className = 'confluence-value' + (d.body_touches_both ? ' confluence-yes' : ' confluence-no');
+    $('ema-kronos-dir').textContent = d.kronos_direction || '—';
+    $('ema-kronos-dir').className = 'confluence-value' + (d.kronos_direction === 'Long' ? ' trend-up' : d.kronos_direction === 'Short' ? ' trend-down' : '');
+
+    const confluenceEl = $('ema-confluence-status');
+    if (d.confluence) {
+      confluenceEl.textContent = '✓ ALIGNED';
+      confluenceEl.className = 'confluence-value confluence-yes';
+    } else {
+      confluenceEl.textContent = '✗ MISALIGNED';
+      confluenceEl.className = 'confluence-value confluence-no';
+    }
+
+    // Store trade history for canvas rendering
+    if (d.trades_history && d.trades_history.length > 0) {
+      emaKronosTradesHistory = d.trades_history;
+    }
+
+    // Render historical trade boxes on chart
+    if (activeTab === 'scalper' && scalperChartEngine) {
+      renderHistoricTradeBoxes(scalperChartEngine, emaKronosTradesHistory);
+    }
+  } catch (e) {
+    // Silently ignore fetch errors for ema_kronos
+  }
+}
+
 function updateShadedBoxes() {
   const targetBox = document.getElementById('scalper-target-box');
   const stopBox = document.getElementById('scalper-stop-box');
@@ -3913,6 +4082,7 @@ async function loadScalper(isFirstLoad = false) {
     }
 
     connectBtcWebSocket(tf);
+    loadEmaKronos();
     const timeText = 'Last update: ' + d.updated;
     if ($('updated')) $('updated').textContent = timeText;
     if ($('updated-topbar')) $('updated-topbar').textContent = timeText;
@@ -4123,6 +4293,7 @@ function connectBtcWebSocket(tf) {
           }
         }
         updateShadedBoxes();
+        loadEmaKronos();
       }
       if (isClosed) {
         setTimeout(() => {
