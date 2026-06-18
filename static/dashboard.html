@@ -3318,6 +3318,7 @@ function initScalperChart() {
     onRender: () => {
       updateShadedBoxes();
       renderHistoricTradeBoxes(scalperChartEngine, emaKronosTradesHistory);
+      renderEmaLines(scalperChartEngine);
     }
   });
   
@@ -3610,6 +3611,8 @@ async function load(isFirstLoad = false) {
 // -------------------------------------------------------------
 /* EMA/Kronos strategy data and historical trade box rendering */
 let emaKronosTradesHistory = [];
+let emaKronosApiData = null;
+let emaKronosScalperCandleTimes = null;
 
 function renderHistoricTradeBoxes(engine, trades) {
   if (!engine || !trades || trades.length === 0) return;
@@ -3695,6 +3698,39 @@ function renderTradeBoxesOnAnimation(engine) {
   renderHistoricTradeBoxes(engine, emaKronosTradesHistory);
 }
 
+function renderEmaLines(engine) {
+  if (!engine || !emaKronosApiData || !emaKronosApiData.ema_fast || !emaKronosApiData.ema_slow) return;
+  const conv = engine.getMainConverters();
+  const rect = engine.getMainPaneRect();
+  if (!conv || !rect) return;
+  const container = document.getElementById('tv-chart');
+  const canvas = container ? container.querySelector('canvas') : null;
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  try {
+    const xMin = rect.x, xMax = rect.x + rect.width;
+    const drawEmaLine = (points, color) => {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      let started = false;
+      for (const pt of points) {
+        const x = conv.timeToX(pt.time * 1000);
+        const y = conv.priceToY(pt.value);
+        if (x === null || y === null) continue;
+        if (x < xMin) { started = false; continue; }
+        if (x > xMax) break;
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    };
+    drawEmaLine(emaKronosApiData.ema_fast, '#FF00FF');
+    drawEmaLine(emaKronosApiData.ema_slow, '#222222');
+  } catch (e) {}
+}
+
 async function loadEmaKronos() {
   const sym = $('symbol').value, tf = $('tf').value;
   try {
@@ -3726,6 +3762,12 @@ async function loadEmaKronos() {
     } else {
       confluenceEl.textContent = '✗ MISALIGNED';
       confluenceEl.className = 'confluence-value confluence-no';
+    }
+
+    // Store API data for canvas rendering
+    emaKronosApiData = d;
+    if (scalperCandles.length > 0) {
+      emaKronosScalperCandleTimes = scalperCandles.map(c => c.time);
     }
 
     // Store trade history for canvas rendering
