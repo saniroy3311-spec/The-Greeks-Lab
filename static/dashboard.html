@@ -2884,6 +2884,10 @@ function switchTab(tabId) {
       loadScalper(true);
     }
   }
+  // Re-apply view mode to the active tab
+  if (typeof setChartViewMode === 'function') {
+    setChartViewMode(currentViewMode);
+  }
 }
 window.switchTab = switchTab;
 
@@ -4612,11 +4616,16 @@ function setChartViewMode(mode) {
     const btn = $(id);
     if (btn) btn.classList.toggle('active', id === 'btn-' + mode);
   });
-  const chartCard = document.querySelector('.chart-card, .scalper-chart-card');
-  const logsCard = document.querySelector('.alerts-card, .scalper-logs-card');
+  const activeTabEl = document.querySelector('.tab-content.active');
+  if (!activeTabEl) return;
+  const chartCard = activeTabEl.querySelector('.chart-card, .scalper-chart-card');
+  const logsCard = activeTabEl.querySelector('.alerts-card, .scalper-logs-card');
   if (!chartCard || !logsCard) return;
   chartCard.style.height = '';
+  chartCard.style.flex = '';
   logsCard.style.height = '';
+  logsCard.style.flex = '';
+  logsCard.style.display = '';
   if (mode === 'full') {
     chartCard.style.flex = '1 1 100%';
     logsCard.style.display = 'none';
@@ -4626,7 +4635,6 @@ function setChartViewMode(mode) {
   } else {
     chartCard.style.flex = '1 1 65%';
     logsCard.style.flex = '0 0 35%';
-    logsCard.style.display = '';
   }
   if (typeof window.dispatchEvent === 'function') {
     window.dispatchEvent(new Event('resize'));
