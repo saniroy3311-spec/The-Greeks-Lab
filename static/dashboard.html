@@ -269,8 +269,8 @@
     flex-direction: column;
   }
   .chart-head {
+    display: none;
     height: 36px;
-    display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 16px;
@@ -776,32 +776,40 @@
   .pulsing-green {
     color: #fff !important;
     background: #10b981;
-    padding: 2px 8px;
-    border-radius: 4px;
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
-    animation: flash-pulse-green 1.5s infinite alternate;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    display: inline-block;
+    box-shadow: none !important;
+    animation: none !important;
   }
   .pulsing-red {
     color: #fff !important;
     background: #ef4444;
-    padding: 2px 8px;
-    border-radius: 4px;
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
-    animation: flash-pulse-red 1.5s infinite alternate;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    display: inline-block;
+    box-shadow: none !important;
+    animation: none !important;
   }
   .pulse-btn-green {
     color: #fff !important;
     background: #059669;
-    padding: 2px 8px;
-    border-radius: 4px;
-    box-shadow: 0 0 6px rgba(5, 150, 105, 0.4);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    display: inline-block;
+    box-shadow: none !important;
   }
   .pulse-btn-red {
     color: #fff !important;
     background: #dc2626;
-    padding: 2px 8px;
-    border-radius: 4px;
-    box-shadow: 0 0 6px rgba(220, 38, 38, 0.4);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    display: inline-block;
+    box-shadow: none !important;
   }
 
   /* Desktop hide rule for overlay cards relocated to headers */
@@ -1568,6 +1576,9 @@
       align-items: center !important;
       justify-content: space-between;
     }
+    .chart-head {
+      display: flex !important;
+    }
     .logo-section {
       display: none !important;
     }
@@ -2301,32 +2312,6 @@
   <div id="tab-live-signal" class="tab-content active">
     <div class="chart-card">
       <div class="chart-head">
-        <div class="chart-head-metrics">
-          <div class="metric-item">
-            <span class="m-lbl">Current</span>
-            <span class="m-val mono bold" id="s-cur">—</span>
-          </div>
-          <div class="metric-item">
-            <span class="m-lbl">Predicted (5b)</span>
-            <span class="m-val mono bold" id="s-p5">—</span>
-          </div>
-          <div class="metric-item">
-            <span class="m-lbl">Predicted (end)</span>
-            <span class="m-val mono bold" id="s-pn">—</span>
-          </div>
-          <div class="metric-item">
-            <span class="m-lbl">Expected Move</span>
-            <span class="m-val mono bold" id="s-mv">—</span>
-          </div>
-          <div class="metric-item direction-item">
-            <span class="m-lbl">Direction</span>
-            <span class="m-val bold" id="dir">—</span>
-          </div>
-          <div class="metric-item action-item">
-            <span class="m-lbl">Action</span>
-            <span class="m-val bold" id="act">—</span>
-          </div>
-        </div>
         <button class="mobile-forecast-btn" id="mobile-forecast-trigger" onclick="openMobileSheet()">
           📊 FORECAST: <span id="m-dir">—</span> — <span id="m-act">—</span>
         </button>
