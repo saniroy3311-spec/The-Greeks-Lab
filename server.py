@@ -646,8 +646,9 @@ def api_ema_kronos(symbol, tf):
         df.index = pd.to_datetime(df.index, unit='s')
 
         kronos_dir = cached_result["direction"]
-        strat = EmaKronosStrategy(fast=9, slow=15)
-        out = strat.evaluate(df, kronos_direction=kronos_dir)
+        confidence = cached_result.get("confidence", 0)
+        strat = EmaKronosStrategy()
+        out = strat.evaluate(df, kronos_direction=kronos_dir, kronos_confidence=confidence)
 
         return jsonify({
             "symbol": symbol,
@@ -660,13 +661,13 @@ def api_ema_kronos(symbol, tf):
             "confluence": out["confluence"],
             "active_trade": out["active_trade"],
             "trades_history": out["trades_history"],
-            "ema9": out["ema9"],
-            "ema15": out["ema15"],
+            "ema_fast": out["ema_fast"],
+            "ema_slow": out["ema_slow"],
             "markers": out["markers"],
             "candles": candles,
             "predicted": cached_result.get("predicted", []),
             "current": cached_result.get("current"),
-            "confidence": cached_result.get("confidence"),
+            "confidence": confidence,
             "direction": kronos_dir,
             "move_pct": cached_result.get("move_pct"),
             "updated": time.strftime("%H:%M:%S")

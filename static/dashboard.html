@@ -2604,6 +2604,7 @@
                 <div class="confluence-row"><span class="confluence-label">Bars Since Cross</span> <span class="confluence-value" id="ema-bars-since">—</span></div>
                 <div class="confluence-row"><span class="confluence-label">Body Touches Both</span> <span class="confluence-value" id="ema-body-touch">—</span></div>
                 <div class="confluence-row"><span class="confluence-label">Kronos AI</span> <span class="confluence-value" id="ema-kronos-dir">—</span></div>
+                <div class="confluence-row"><span class="confluence-label">Confidence</span> <span class="confluence-value" id="ema-kronos-conf">—</span></div>
                 <div class="confluence-row" style="grid-column: 1 / -1; border-top: 1px solid var(--border); padding-top: 6px; margin-top: 2px;">
                   <span class="confluence-label" style="font-weight: 700;">CONFLUENCE</span>
                   <span class="confluence-value" id="ema-confluence-status" style="font-weight: 700;">—</span>
@@ -2789,8 +2790,8 @@ let currentAlertCondition = 'above';
 
 const ALL_INDICATORS = [
   { id: 'volume', label: 'Volume', placement: 'pane' },
-  { id: 'ema9', label: 'EMA 9', placement: 'overlay' },
-  { id: 'ema15', label: 'EMA 15', placement: 'overlay' },
+  { id: 'ema9', label: 'EMA 5', placement: 'overlay' },
+  { id: 'ema15', label: 'EMA 10', placement: 'overlay' },
   { id: 'vwap', label: 'VWAP', placement: 'overlay' },
   { id: 'stochastic', label: 'Stochastic Oscillator', placement: 'pane' },
   { id: 'obv', label: 'On-Balance Volume', placement: 'pane' },
@@ -2931,12 +2932,12 @@ function updateChartIndicators(engine, candles, togglesContainerId) {
     
     if (id === 'ema9') {
       defId = 'ema';
-      params = { period: 9 };
-      label = 'EMA 9';
+      params = { period: 5 };
+      label = 'EMA 5';
     } else if (id === 'ema15') {
       defId = 'ema';
-      params = { period: 15 };
-      label = 'EMA 15';
+      params = { period: 10 };
+      label = 'EMA 10';
     } else {
       const def = getIndicator(id);
       if (!def) return;
@@ -3710,6 +3711,11 @@ async function loadEmaKronos() {
     $('ema-body-touch').className = 'confluence-value' + (d.body_touches_both ? ' confluence-yes' : ' confluence-no');
     $('ema-kronos-dir').textContent = d.kronos_direction || '—';
     $('ema-kronos-dir').className = 'confluence-value' + (d.kronos_direction === 'Long' ? ' trend-up' : d.kronos_direction === 'Short' ? ' trend-down' : '');
+    const confEl = $('ema-kronos-conf');
+    if (d.confidence != null) {
+      confEl.textContent = d.confidence + '%';
+      confEl.className = 'confluence-value' + (d.confidence >= 75 ? ' trend-up' : '');
+    }
 
     const confluenceEl = $('ema-confluence-status');
     if (d.confluence) {
@@ -4078,7 +4084,7 @@ async function loadScalper(isFirstLoad = false) {
     const timeText = 'Last update: ' + d.updated;
     if ($('updated')) $('updated').textContent = timeText;
     if ($('updated-topbar')) $('updated-topbar').textContent = timeText;
-    $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · EMA 9/15`;
+    $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · EMA 5/10`;
     if ($('status')) $('status').textContent = 'Live';
     evaluateAntigravityAlerts(d, scalperCandles);
     if (sym !== 'BTC') {
@@ -4797,7 +4803,7 @@ function renderIndicatorsModalList() {
     } else {
       onChartContainer.innerHTML = activeList.map(id => {
         const ind = ALL_INDICATORS.find(i => i.id === id);
-        const label = ind ? ind.label : (id === 'ema9' ? 'EMA 9' : (id === 'ema15' ? 'EMA 15' : id));
+        const label = ind ? ind.label : (id === 'ema9' ? 'EMA 5' : (id === 'ema15' ? 'EMA 10' : id));
         return `
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; background: rgba(255, 255, 255, 0.03); border-radius: 4px; border: 1px solid var(--border);">
             <span>${label}</span>
@@ -5064,15 +5070,15 @@ function evaluateAntigravityAlerts(d, candles) {
     return;
   }
   
-  // GATE 0: EMA Trend (EMA 9 vs EMA 15)
+  // GATE 0: EMA Trend (EMA 5 vs EMA 10)
   const ema9Def = getIndicator('ema');
   const ema15Def = getIndicator('ema');
   if (!ema9Def || !ema15Def) {
     return;
   }
   
-  const ema9Outputs = ema9Def.compute(candles, { period: 9 });
-  const ema15Outputs = ema15Def.compute(candles, { period: 15 });
+  const ema9Outputs = ema9Def.compute(candles, { period: 5 });
+  const ema15Outputs = ema15Def.compute(candles, { period: 10 });
   if (!ema9Outputs || ema9Outputs.length === 0 || !ema15Outputs || ema15Outputs.length === 0) {
     return;
   }

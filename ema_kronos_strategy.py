@@ -3,13 +3,14 @@ EMA/Kronos Strategy Module
 ===========================
 Pine Script v5 logic ported to Python:
 
-- Fast EMA (9) / Slow EMA (15)
+- Fast EMA (5) / Slow EMA (10)
 - Trend State, Crossover Filter (barsSinceCross >= 5)
 - Real Body Conditions (body touches both EMAs)
+- High-confidence bypass (>75% confidence skips body-touch requirement)
 - Confluence Guard with Kronos AI
 - SL (1x risk) / TP (2x risk) per Pine Script spec
 
-Call evaluate(df, kronos_direction) once per bar close.
+Call evaluate(df, kronos_direction, kronos_confidence) once per bar close.
 """
 
 import numpy as np
@@ -21,7 +22,7 @@ def ema(series, span):
 
 
 class EmaKronosStrategy:
-    def __init__(self, fast=9, slow=15):
+    def __init__(self, fast=5, slow=10):
         self.fast = fast
         self.slow = slow
         self.state = "Awaiting Setup"
@@ -29,10 +30,11 @@ class EmaKronosStrategy:
         self.trades_history = []
         self.last_cross_bar = -999
 
-    def evaluate(self, df, kronos_direction="Flat"):
+    def evaluate(self, df, kronos_direction="Flat", kronos_confidence=0):
         """
         Evaluate the strategy on a DataFrame of OHLCV candles.
         kronos_direction: "Long", "Short", or "Flat" from the Kronos model.
+        kronos_confidence: 0-100 confidence score from Kronos.
 
         Returns a dict with:
           - state: current FSM state string
@@ -50,16 +52,16 @@ class EmaKronosStrategy:
         low = df["low"].values
         open_p = df["open"].values
 
-        ema9 = ema(df["close"], self.fast).values
-        ema15 = ema(df["close"], self.slow).values
+        ema_fast = ema(df["close"], self.fast).values
+        ema_slow = ema(df["close"], self.slow).values
 
         # Detect last crossover
         bars_since_cross = len(df)
         prev_diff = 0
         for i in range(1, len(df)):
-            diff = ema9[i] - ema15[i]
+            diff = ema_fast[i] - ema_slow[i]
             if i >= 1:
-                prev_diff = ema9[i - 1] - ema15[i - 1]
+                prev_diff = ema_fast[i - 1] - ema_slow[i - 1]
             if (prev_diff <= 0 and diff > 0) or (prev_diff >= 0 and diff < 0):
                 bars_since_cross = 0
             else:
@@ -77,24 +79,27 @@ class EmaKronosStrategy:
             o = open_p[i]
             h = high[i]
             l = low[i]
-            e9 = ema9[i]
-            e15 = ema15[i]
+            e_fast = ema_fast[i]
+            e_slow = ema_slow[i]
 
-            up_trend = e9 > e15
-            down_trend = e9 < e15
+            up_trend = e_fast > e_slow
+            down_trend = e_fast < e_slow
 
             body_high = max(o, c)
             body_low = min(o, c)
-            top_ema = max(e9, e15)
-            bottom_ema = min(e9, e15)
+            top_ema = max(e_fast, e_slow)
+            bottom_ema = min(e_fast, e_slow)
             body_touches_both = (body_high >= top_ema) and (body_low <= bottom_ema)
 
             cross_age = bars_since_cross - (len(df) - 1 - i) if bars_since_cross < len(df) else bars_since_cross
             cross_ok = cross_age >= 5
 
             is_latest = (i == len(df) - 1)
+            high_conf = is_latest and kronos_confidence >= 75
             current_kronos_buy = kronos_buy if is_latest else (up_trend and cross_ok)
             current_kronos_sell = kronos_sell if is_latest else (down_trend and cross_ok)
+
+            body_or_conf = body_touches_both or high_conf
 
             # Exit checks
             if self.state == "In Position: Long" and self.active_trade:
@@ -147,8 +152,8 @@ class EmaKronosStrategy:
 
             # Entry checks
             if self.state == "Awaiting Setup":
-                long_trigger = up_trend and (c > o) and body_touches_both and cross_ok
-                short_trigger = down_trend and (c < o) and body_touches_both and cross_ok
+                long_trigger = up_trend and (c > o) and body_or_conf and cross_ok
+                short_trigger = down_trend and (c < o) and body_or_conf and cross_ok
 
                 if long_trigger:
                     if current_kronos_buy:
@@ -215,27 +220,28 @@ class EmaKronosStrategy:
                         self.state = "Awaiting Setup"
 
         # Build output
-        ema9_out = [{"time": int(df.index[i].timestamp()), "value": round(float(ema9[i]), 2)}
-                     for i in range(len(df)) if not np.isnan(ema9[i])]
-        ema15_out = [{"time": int(df.index[i].timestamp()), "value": round(float(ema15[i]), 2)}
-                      for i in range(len(df)) if not np.isnan(ema15[i])]
+        ema_fast_out = [{"time": int(df.index[i].timestamp()), "value": round(float(ema_fast[i]), 2)}
+                     for i in range(len(df)) if not np.isnan(ema_fast[i])]
+        ema_slow_out = [{"time": int(df.index[i].timestamp()), "value": round(float(ema_slow[i]), 2)}
+                     for i in range(len(df)) if not np.isnan(ema_slow[i])]
 
-        current_trend = "Up" if ema9[-1] > ema15[-1] else ("Down" if ema9[-1] < ema15[-1] else "Flat")
+        current_trend = "Up" if ema_fast[-1] > ema_slow[-1] else ("Down" if ema_fast[-1] < ema_slow[-1] else "Flat")
 
         return {
             "state": self.state,
             "active_trade": self.active_trade,
             "trades_history": self.trades_history[::-1],
-            "ema9": ema9_out,
-            "ema15": ema15_out,
+            "ema_fast": ema_fast_out,
+            "ema_slow": ema_slow_out,
             "markers": markers,
             "trend": current_trend,
             "bars_since_cross": bars_since_cross,
             "body_touches_both": bool(
-                max(close[-1], open_p[-1]) >= max(ema9[-1], ema15[-1]) and
-                min(close[-1], open_p[-1]) <= min(ema9[-1], ema15[-1])
+                max(close[-1], open_p[-1]) >= max(ema_fast[-1], ema_slow[-1]) and
+                min(close[-1], open_p[-1]) <= min(ema_fast[-1], ema_slow[-1])
             ),
             "kronos_direction": kronos_direction,
+            "kronos_confidence": kronos_confidence,
             "confluence": (
                 (kronos_direction == "Long" and current_trend == "Up") or
                 (kronos_direction == "Short" and current_trend == "Down")
