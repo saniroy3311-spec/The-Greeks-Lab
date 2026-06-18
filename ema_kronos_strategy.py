@@ -15,6 +15,10 @@ Call evaluate(df, kronos_direction, kronos_confidence) once per bar close.
 
 import numpy as np
 import pandas as pd
+from datetime import timedelta, timezone
+
+# Asia/Kolkata timezone
+IST = timezone(timedelta(hours=5, minutes=30))
 
 
 def ema(series, span):
@@ -47,6 +51,12 @@ class EmaKronosStrategy:
           - body_touches_both: bool
           - confluence: bool (EMA & Kronos agree)
         """
+        # Force timezone to Asia/Kolkata for timestamp correctness
+        if hasattr(df.index, 'tz') and df.index.tz is None:
+            df.index = df.index.tz_localize('Asia/Kolkata')
+        elif hasattr(df.index, 'tz'):
+            df.index = df.index.tz_convert('Asia/Kolkata')
+
         close = df["close"].values
         high = df["high"].values
         low = df["low"].values
@@ -74,7 +84,10 @@ class EmaKronosStrategy:
         kronos_sell = kronos_direction == "Short"
 
         for i in range(max(self.fast, self.slow) + 1, len(df)):
-            ts = int(df.index[i].timestamp()) if hasattr(df.index, 'dtype') else i
+            try:
+                ts = int(df.index[i].timestamp())
+            except (AttributeError, OSError, ValueError):
+                ts = int(i)
             c = close[i]
             o = open_p[i]
             h = high[i]
@@ -219,10 +232,16 @@ class EmaKronosStrategy:
                     if self.state in ["Long Trigger Formed", "Short Trigger Formed"]:
                         self.state = "Awaiting Setup"
 
-        # Build output
-        ema_fast_out = [{"time": int(df.index[i].timestamp()), "value": round(float(ema_fast[i]), 2)}
+        # Build output (safe timestamp conversion)
+        def _ts(idx):
+            try:
+                return int(idx.timestamp())
+            except (AttributeError, OSError, ValueError):
+                return int(0)
+
+        ema_fast_out = [{"time": _ts(df.index[i]), "value": round(float(ema_fast[i]), 2)}
                      for i in range(len(df)) if not np.isnan(ema_fast[i])]
-        ema_slow_out = [{"time": int(df.index[i].timestamp()), "value": round(float(ema_slow[i]), 2)}
+        ema_slow_out = [{"time": _ts(df.index[i]), "value": round(float(ema_slow[i]), 2)}
                      for i in range(len(df)) if not np.isnan(ema_slow[i])]
 
         current_trend = "Up" if ema_fast[-1] > ema_slow[-1] else ("Down" if ema_fast[-1] < ema_slow[-1] else "Flat")

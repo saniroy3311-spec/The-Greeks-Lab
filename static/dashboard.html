@@ -2490,6 +2490,7 @@
 
         <!-- Live Chart Canvas -->
         <div id="chart">
+          <div id="countdown-overlay-live" style="position: absolute; right: 4px; bottom: 24px; z-index: 10; background: #475569; color: #fff; padding: 1px 4px; border-radius: 2px; font-size: 9px; font-weight: bold; pointer-events: none; box-shadow: 0 1px 3px rgba(0,0,0,0.2); display: none;"></div>
           <div class="chart-loading-overlay" id="live-chart-loading">
             <div class="spinner"></div>
             Updating Forecast...
@@ -2724,6 +2725,7 @@
 
         <!-- Scalper Chart Canvas -->
         <div id="tv-chart" style="width: 100%; height: 100%; position: relative;">
+          <div id="countdown-overlay-scalper" style="position: absolute; right: 4px; bottom: 24px; z-index: 10; background: #475569; color: #fff; padding: 1px 4px; border-radius: 2px; font-size: 9px; font-weight: bold; pointer-events: none; box-shadow: 0 1px 3px rgba(0,0,0,0.2); display: none;"></div>
           <div class="chart-loading-overlay" id="scalper-chart-loading">
             <div class="spinner"></div>
             Updating Strategy...
@@ -2871,6 +2873,9 @@ function switchTab(tabId) {
     startSimulatedTicks();
   }
   
+  // Restart wall-clock candle countdown for active tab
+  startCandleCountdown();
+
   // Resize engines to fit container size after switching tabs
   if (activeTab === 'live-signal') {
     if (liveChartEngine) {
@@ -3347,6 +3352,7 @@ function initScalperChart() {
       pushDrawingsState('scalper', drawings);
     },
     onRender: () => {
+      if (!scalperChartEngine) return;
       updateShadedBoxes();
       renderHistoricTradeBoxes(scalperChartEngine, emaKronosTradesHistory);
       renderEmaLines(scalperChartEngine);
@@ -4429,6 +4435,7 @@ function stopSimulatedTicks() {
 function schedule() {
   if (timer) clearInterval(timer);
   if (countTimer) clearInterval(countTimer);
+  startCandleCountdown();
   const secs = 1;
   countdown = secs;
   countTimer = setInterval(() => {
@@ -4447,6 +4454,35 @@ function schedule() {
       loadScalper();
     }
   }, secs * 1000);
+}
+
+// ── Wall-clock countdown overlay ──
+const TF_TO_MS = {"1m":60000,"3m":180000,"5m":300000,"15m":900000,"30m":1800000,"1h":3600000,"1d":86400000};
+function getIntervalMs() {
+  const tf = (activeTab === 'live-signal' ? $('tf') : $('scalper-tf')).value;
+  return TF_TO_MS[tf] || 60000;
+}
+function startCandleCountdown() {
+  if (window._countdownTimer) clearInterval(window._countdownTimer);
+  window._countdownTimer = setInterval(() => {
+    const intervalMs = getIntervalMs();
+    const remain = intervalMs - (Date.now() % intervalMs);
+    const totalSec = Math.ceil(remain / 1000);
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    const label = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+    const liveEl = document.getElementById('countdown-overlay-live');
+    const scalperEl = document.getElementById('countdown-overlay-scalper');
+    if (activeTab === 'live-signal' && liveEl) {
+      liveEl.textContent = label;
+      liveEl.style.display = 'block';
+      if (scalperEl) scalperEl.style.display = 'none';
+    } else if (activeTab === 'scalper' && scalperEl) {
+      scalperEl.textContent = label;
+      scalperEl.style.display = 'block';
+      if (liveEl) liveEl.style.display = 'none';
+    }
+  }, 500);
 }
 
 function connectBtcWebSocket(tf) {

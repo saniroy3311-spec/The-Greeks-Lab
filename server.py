@@ -14,7 +14,7 @@ import sys
 import time
 import threading
 import traceback
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 
 import numpy as np
 import pandas as pd
@@ -59,6 +59,9 @@ TF_MINUTES = {"1m":1,"3m":3,"5m":5,"15m":15,"30m":30,"1h":60,"1d":1440}
 import mimetypes
 mimetypes.add_type('application/javascript', '.js')
 
+# Asia/Kolkata timezone constant for all datetime operations
+IST = timezone(timedelta(hours=5, minutes=30))
+
 app = Flask(__name__)
 CORS(app)
 
@@ -79,13 +82,31 @@ active_lock = threading.Lock()
 prediction_lock = threading.Lock()
 
 
+def _localize_index(df, symbol_key):
+    """Ensure DataFrame index is timezone-aware in Asia/Kolkata."""
+    if df is None or len(df) == 0:
+        return df
+    if not hasattr(df.index, 'tz'):
+        return df
+    idx = pd.to_datetime(df.index)
+    if idx.tz is None:
+        # Binance returns UTC timestamps; yfinance returns exchange-local
+        if symbol_key == "BTC":
+            idx = idx.tz_localize('UTC')
+        else:
+            idx = idx.tz_localize('Asia/Kolkata')
+    else:
+        idx = idx.tz_convert('Asia/Kolkata')
+    df.index = idx
+    return df
+
+
 def fetch_candles(symbol_key, tf_key):
-    """Pull live OHLCV candles and return a clean DataFrame."""
+    """Pull live OHLCV candles and return a clean DataFrame with Asia/Kolkata timezone index."""
     if symbol_key == "BTC":
         try:
             import requests
-            # Map intervals to Binance formats
-            binance_tf = tf_key  # 1m, 3m, 5m, 15m, 30m, 1h, 1d are identical
+            binance_tf = tf_key
             url = f"https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval={binance_tf}&limit={LOOKBACK}"
             
             headers = {"User-Agent": "Mozilla/5.0"}
@@ -104,14 +125,14 @@ def fetch_candles(symbol_key, tf_key):
             df["close"] = df["close"].astype(float)
             df["volume"] = df["volume"].astype(float)
             
-            df.index = pd.to_datetime(df["open_time"], unit="ms")
+            # Binance open_time is UTC ms → localize to Asia/Kolkata
+            df.index = pd.to_datetime(df["open_time"], unit="ms", utc=True).tz_convert('Asia/Kolkata')
             df = df[["open", "high", "low", "close", "volume"]].copy()
             df = df.dropna()
             df = df.tail(LOOKBACK)
             return df
         except Exception as e:
             print(f"[Binance Fetch Error] {e}. Falling back to yfinance.")
-            # Fallback to yfinance if Binance has any issues
             pass
 
     # Fallback / Default: yfinance
@@ -124,7 +145,6 @@ def fetch_candles(symbol_key, tf_key):
     if df is None or len(df) == 0:
         raise RuntimeError(f"No data returned for {ticker} {interval}")
 
-    # yfinance may return a MultiIndex column set; flatten it
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = [c[0] for c in df.columns]
     df.columns = [str(c).lower() for c in df.columns]
@@ -141,14 +161,29 @@ def fetch_candles(symbol_key, tf_key):
     df = df[["open", "high", "low", "close", "volume"]].copy()
     df = df.dropna()
     df = df.tail(LOOKBACK)
-    df.index = pd.to_datetime(df.index)
+    
+    # Standardise timezone: localise to Asia/Kolkata for all assets
+    df = _localize_index(df, symbol_key)
     return df
+
+
+def _safe_float(val, fallback=0.0):
+    """Return a safe float, guarding against None/NaN/Inf."""
+    if val is None:
+        return fallback
+    try:
+        f = float(val)
+        if not np.isfinite(f):
+            return fallback
+        return f
+    except (ValueError, TypeError):
+        return fallback
 
 
 def _run_prediction_inner(symbol_key, tf_key):
     """Run Kronos on the latest candles and build a signal dict."""
     df = fetch_candles(symbol_key, tf_key)
-    if len(df) < 50:
+    if df is None or len(df) < 50:
         raise RuntimeError(f"Only {len(df)} candles available, need more history.")
 
     x_df = df[["open", "high", "low", "close", "volume"]].copy()
@@ -160,19 +195,25 @@ def _run_prediction_inner(symbol_key, tf_key):
     y_index = pd.date_range(start=last_ts + freq, periods=PRED_LEN, freq=freq)
     y_timestamp = pd.Series(y_index)
 
-    pred_df = predictor.predict(
-        df=x_df.reset_index(drop=True),
-        x_timestamp=x_timestamp,
-        y_timestamp=y_timestamp,
-        pred_len=PRED_LEN,
-        T=1.0, top_p=0.9, sample_count=1, verbose=False,
-    )
+    try:
+        pred_df = predictor.predict(
+            df=x_df.reset_index(drop=True),
+            x_timestamp=x_timestamp,
+            y_timestamp=y_timestamp,
+            pred_len=PRED_LEN,
+            T=1.0, top_p=0.9, sample_count=1, verbose=False,
+        )
+    except Exception as e:
+        print(f"[Kronos Prediction Error] {e}. Using fallback flat prediction.")
+        # Fallback: repeat last candle.
+        last_row = x_df.iloc[-1]
+        pred_df = pd.DataFrame([last_row.to_dict() for _ in range(PRED_LEN)])
 
-    current = float(df["close"].iloc[-1])
-    pred_5  = float(pred_df["close"].iloc[min(4, PRED_LEN - 1)])
-    pred_n  = float(pred_df["close"].iloc[-1])
+    current = _safe_float(df["close"].iloc[-1])
+    pred_5  = _safe_float(pred_df["close"].iloc[min(4, PRED_LEN - 1)], current)
+    pred_n  = _safe_float(pred_df["close"].iloc[-1], current)
     move    = pred_n - current
-    move_pct = move / current if current else 0.0
+    move_pct = move / current if abs(current) > 1e-12 else 0.0
 
     if abs(move_pct) < 0.0015:
         direction, action, bias = "Flat", "Skip", "No clear edge"
@@ -183,24 +224,27 @@ def _run_prediction_inner(symbol_key, tf_key):
 
     confidence = int(max(50, min(95, 50 + abs(move_pct) * 4000)))
 
-    # Build candlestick arrays for lightweight-charts (unix seconds)
+    # Build candlestick arrays for lightweight-charts (unix seconds, IST-localized)
     hist_candles = [{
         "time": int(ts.timestamp()),
-        "open": round(float(r.open), 2),
-        "high": round(float(r.high), 2),
-        "low":  round(float(r.low), 2),
-        "close": round(float(r.close), 2),
+        "open": round(_safe_float(r.open, 0), 2),
+        "high": round(_safe_float(r.high, 0), 2),
+        "low":  round(_safe_float(r.low, 0), 2),
+        "close": round(_safe_float(r.close, 0), 2),
     } for ts, r in zip(df.index, df.itertuples())]
 
     pred_candles = [{
         "time": int(ts.timestamp()),
-        "open": round(float(o), 2),
-        "high": round(float(h), 2),
-        "low":  round(float(l), 2),
-        "close": round(float(c), 2),
+        "open": round(_safe_float(o, 0), 2),
+        "high": round(_safe_float(h, 0), 2),
+        "low":  round(_safe_float(l, 0), 2),
+        "close": round(_safe_float(c, 0), 2),
     } for ts, o, h, l, c in zip(
         y_index,
         pred_df["open"], pred_df["high"], pred_df["low"], pred_df["close"])]
+
+    # IST-formatted "updated" field
+    ist_now = datetime.now(IST).strftime("%H:%M:%S")
 
     return {
         "symbol": symbol_key,
@@ -217,7 +261,7 @@ def _run_prediction_inner(symbol_key, tf_key):
         "pred_len": PRED_LEN,
         "candles": hist_candles,
         "predicted": pred_candles,
-        "updated": time.strftime("%H:%M:%S"),
+        "updated": ist_now,
     }
 
 
@@ -601,7 +645,7 @@ def api_scalper(symbol, tf):
             "pred_5": cached_result.get("pred_5"),
             "pred_n": cached_result.get("pred_n"),
             "move": cached_result.get("move"),
-            "updated": time.strftime("%H:%M:%S")
+            "updated": datetime.now(IST).strftime("%H:%M:%S")
         })
 
     except Exception as e:
@@ -643,7 +687,8 @@ def api_ema_kronos(symbol, tf):
 
         df = pd.DataFrame(candles)
         df.set_index('time', inplace=True)
-        df.index = pd.to_datetime(df.index, unit='s')
+        # Ensure timezone-aware index: candles are Unix seconds (UTC), convert to IST
+        df.index = pd.to_datetime(df.index, unit='s', utc=True).tz_convert('Asia/Kolkata')
 
         kronos_dir = cached_result["direction"]
         confidence = cached_result.get("confidence", 0)
@@ -670,7 +715,7 @@ def api_ema_kronos(symbol, tf):
             "confidence": confidence,
             "direction": kronos_dir,
             "move_pct": cached_result.get("move_pct"),
-            "updated": time.strftime("%H:%M:%S")
+            "updated": datetime.now(IST).strftime("%H:%M:%S")
         })
 
     except Exception as e:
