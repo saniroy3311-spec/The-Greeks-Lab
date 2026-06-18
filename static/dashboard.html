@@ -672,6 +672,36 @@
   .confluence-value.trend-up { color: #089981; }
   .confluence-value.trend-down { color: #f23645; }
 
+  /* Confluence Status Bar */
+  .confluence-status-bar {
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+    transition: background 0.3s ease, color 0.3s ease;
+    line-height: 1.3;
+  }
+  .confluence-status-bar.status-red {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+  }
+  .confluence-status-bar.status-yellow {
+    background: rgba(255, 193, 7, 0.2);
+    color: #f9a825;
+  }
+  .confluence-status-bar.status-green {
+    background: rgba(76, 175, 80, 0.2);
+    color: #2e7d32;
+  }
+  .confluence-status-bar.status-waiting {
+    background: rgba(158, 158, 158, 0.15);
+    color: var(--muted);
+  }
+
   /* Scalper state badges (Horizontal row inside chart head) */
   .scalper-badges-panel-top {
     display: flex;
@@ -2599,6 +2629,7 @@
               <div class="overlay-card-header">
                 <span class="card-title">EMA/KRONOS CONFLUENCE</span>
               </div>
+              <div id="confluence-status-bar" class="confluence-status-bar status-waiting">⏳ LOADING...</div>
               <div class="confluence-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 12px; padding: 4px 0;">
                 <div class="confluence-row"><span class="confluence-label">EMA Trend</span> <span class="confluence-value" id="ema-trend">—</span></div>
                 <div class="confluence-row"><span class="confluence-label">Bars Since Cross</span> <span class="confluence-value" id="ema-bars-since">—</span></div>
@@ -3319,6 +3350,8 @@ function initScalperChart() {
       updateShadedBoxes();
       renderHistoricTradeBoxes(scalperChartEngine, emaKronosTradesHistory);
       renderEmaLines(scalperChartEngine);
+      renderLiveTrackerLines(scalperChartEngine);
+      renderLivePullbackWatch(scalperChartEngine);
     }
   });
   
@@ -3661,7 +3694,27 @@ function renderHistoricTradeBoxes(engine, trades) {
       ctx.lineWidth = 0.8;
       ctx.strokeRect(xLeft, redTop, w, redH);
 
-      // Entry marker
+      // ── Pullback Watch marker (yellow dashed vertical line at entry x) ──
+      ctx.save();
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = 'rgba(255, 193, 7, 0.7)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      const watchTop = isLong ? yEntry - 14 : yEntry + 14;
+      const watchBot = isLong ? yTP : ySL;
+      ctx.moveTo(xLeft, watchTop);
+      ctx.lineTo(xLeft, watchBot);
+      ctx.stroke();
+      ctx.restore();
+
+      // Watch label
+      ctx.font = 'bold 9px JetBrains Mono, monospace';
+      ctx.fillStyle = 'rgba(255, 193, 7, 0.85)';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('⚠️ PULLBACK WATCH', xLeft, watchTop);
+
+      // ── Entry marker (triangle) ──
       ctx.fillStyle = isLong ? '#089981' : '#f23645';
       ctx.beginPath();
       if (isLong) {
@@ -3676,22 +3729,110 @@ function renderHistoricTradeBoxes(engine, trades) {
       ctx.closePath();
       ctx.fill();
 
-      // PnL label at exit boundary
-      if (trade.points !== undefined && xRight < xMax) {
+      // ── Entry label ──
+      const entryLabel = isLong ? '▶ BUY ENTRY' : '▶ SELL ENTRY';
+      ctx.font = 'bold 10px JetBrains Mono, monospace';
+      const entryLabelW = ctx.measureText(entryLabel).width;
+      const entryLabelY = isLong ? yEntry - 14 : yEntry + 14;
+      ctx.fillStyle = isLong ? 'rgba(8, 153, 129, 0.2)' : 'rgba(242, 54, 69, 0.2)';
+      ctx.fillRect(xLeft - 4, entryLabelY - 7, entryLabelW + 8, 14);
+      ctx.fillStyle = isLong ? '#089981' : '#f23645';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(entryLabel, xLeft, entryLabelY);
+
+      // ── Horizontal line at entry price ──
+      ctx.save();
+      ctx.setLineDash([3, 4]);
+      ctx.strokeStyle = isLong ? 'rgba(8, 153, 129, 0.35)' : 'rgba(242, 54, 69, 0.35)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(xLeft, yEntry);
+      ctx.lineTo(xRight, yEntry);
+      ctx.stroke();
+      ctx.restore();
+
+      // ── Exit label at exit x ──
+      const exitResult = trade.result === 'Profit' ? 'WIN' : 'LOSS';
+      const exitLabel = `🏁 EXIT (${exitResult})`;
+      const exitY = isLong ? yTP : ySL;
+      ctx.font = 'bold 10px JetBrains Mono, monospace';
+      const exitLabelW = ctx.measureText(exitLabel).width;
+      ctx.fillStyle = trade.result === 'Profit' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)';
+      ctx.fillRect(xRight - exitLabelW - 8, exitY - 2, exitLabelW + 12, 18);
+      ctx.fillStyle = trade.result === 'Profit' ? 'rgba(76, 175, 80, 0.9)' : 'rgba(244, 67, 54, 0.9)';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(exitLabel, xRight - 4, exitY + 7);
+
+      // PnL inside exit label
+      if (trade.points !== undefined) {
         const pnl = trade.points;
         const pnlStr = (pnl >= 0 ? '+' : '') + pnl.toFixed(1);
-        const labelX = Math.min(xRight + 4, xMax - 4);
-        const labelY = (yEntry + (isLong ? yTP : ySL)) / 2;
-        ctx.font = '10px JetBrains Mono, monospace';
-        ctx.fillStyle = pnl >= 0 ? 'rgba(76, 175, 80, 0.7)' : 'rgba(244, 67, 54, 0.7)';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(pnlStr, labelX, labelY);
+        ctx.font = '9px JetBrains Mono, monospace';
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.fillText(pnlStr, xRight - 4, exitY + 7);
       }
     }
   } catch (e) {
     // Silently skip render errors
   }
+}
+
+function renderLiveTrackerLines(engine) {
+  if (!engine || !currentTrade || !currentTrade.active) return;
+  const conv = engine.getMainConverters();
+  const rect = engine.getMainPaneRect();
+  if (!conv || !rect) return;
+  const container = document.getElementById('tv-chart');
+  const canvas = container ? container.querySelector('canvas') : null;
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  try {
+    const xMin = rect.x, xMax = rect.x + rect.width;
+    const yEntry = conv.priceToY(currentTrade.entryPrice);
+    const ySL = conv.priceToY(currentTrade.slPrice);
+    const yTP = conv.priceToY(currentTrade.tpPrice);
+    if (yEntry === null || ySL === null || yTP === null) return;
+    const isLong = currentTrade.type === 'Long';
+
+    ctx.save();
+    ctx.setLineDash([5, 5]);
+    ctx.lineWidth = 1.2;
+
+    // Entry Price line
+    ctx.strokeStyle = isLong ? 'rgba(8, 153, 129, 0.6)' : 'rgba(242, 54, 69, 0.6)';
+    ctx.beginPath();
+    ctx.moveTo(xMin, yEntry);
+    ctx.lineTo(xMax, yEntry);
+    ctx.stroke();
+    ctx.font = 'bold 9px JetBrains Mono, monospace';
+    ctx.fillStyle = isLong ? 'rgba(8, 153, 129, 0.8)' : 'rgba(242, 54, 69, 0.8)';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText(`ENTRY ${currentTrade.entryPrice}`, xMin + 4, yEntry + 2);
+
+    // Stop Loss line
+    ctx.strokeStyle = 'rgba(244, 67, 54, 0.6)';
+    ctx.beginPath();
+    ctx.moveTo(xMin, ySL);
+    ctx.lineTo(xMax, ySL);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(244, 67, 54, 0.8)';
+    ctx.fillText(`SL ${currentTrade.slPrice}`, xMin + 4, ySL + 2);
+
+    // Take Profit line
+    ctx.strokeStyle = 'rgba(76, 175, 80, 0.6)';
+    ctx.beginPath();
+    ctx.moveTo(xMin, yTP);
+    ctx.lineTo(xMax, yTP);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(76, 175, 80, 0.8)';
+    ctx.fillText(`TP ${currentTrade.tpPrice}`, xMin + 4, yTP + 2);
+
+    ctx.restore();
+  } catch (e) {}
 }
 
 function renderTradeBoxesOnAnimation(engine) {
@@ -3731,6 +3872,43 @@ function renderEmaLines(engine) {
   } catch (e) {}
 }
 
+function renderLivePullbackWatch(engine) {
+  if (!engine) return;
+  const statusBar = $('confluence-status-bar');
+  if (!statusBar || !statusBar.classList.contains('status-yellow')) return;
+  const conv = engine.getMainConverters();
+  const rect = engine.getMainPaneRect();
+  if (!conv || !rect) return;
+  const container = document.getElementById('tv-chart');
+  const canvas = container ? container.querySelector('canvas') : null;
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  try {
+    const xMin = rect.x, xMax = rect.x + rect.width;
+    const lastCandle = scalperCandles && scalperCandles.length > 0 ? scalperCandles[scalperCandles.length - 1] : null;
+    if (!lastCandle) return;
+    const xNow = conv.timeToX(lastCandle.time);
+    if (xNow === null || xNow < xMin || xNow > xMax) return;
+
+    ctx.save();
+    ctx.setLineDash([6, 6]);
+    ctx.strokeStyle = 'rgba(255, 193, 7, 0.7)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(xNow, rect.y);
+    ctx.lineTo(xNow, rect.y + rect.height);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.font = 'bold 10px JetBrains Mono, monospace';
+    ctx.fillStyle = 'rgba(255, 193, 7, 0.9)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('⚠️ PULLBACK WATCH', xNow, rect.y - 2);
+  } catch (e) {}
+}
+
 async function loadEmaKronos() {
   const sym = $('symbol').value, tf = $('tf').value;
   try {
@@ -3762,6 +3940,20 @@ async function loadEmaKronos() {
     } else {
       confluenceEl.textContent = '✗ MISALIGNED';
       confluenceEl.className = 'confluence-value confluence-no';
+    }
+
+    // Update confluence status bar
+    const statusBar = $('confluence-status-bar');
+    if (!d.confluence) {
+      statusBar.className = 'confluence-status-bar status-red';
+      statusBar.textContent = '❌ SYSTEMS MISALIGNED — NO CONFLUENCE';
+    } else if (window.lastScalperState &&
+               ["Long Trigger Formed", "Short Trigger Formed", "In Position: Long", "In Position: Short"].includes(window.lastScalperState)) {
+      statusBar.className = 'confluence-status-bar status-green';
+      statusBar.textContent = '✅ ENTRY TRIGGERED — ALL CONDITIONS MET';
+    } else {
+      statusBar.className = 'confluence-status-bar status-yellow';
+      statusBar.textContent = '⚠️ TREND ALIGNED — WAITING FOR PULLBACK';
     }
 
     // Store API data for canvas rendering
