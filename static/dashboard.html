@@ -2738,7 +2738,7 @@
   </div>
 
 <script type="module">
-import { createChartEngine, lab, playTune, ALERT_TUNES, getIndicator } from './static/candl-charts.js';
+import { createChartEngine, lab, playTune, ALERT_TUNES, checkAndFireAlerts, getIndicator } from './static/candl-charts.js';
 
 const API = window.location.pathname.endsWith('/') ? window.location.pathname.slice(0, -1) : window.location.pathname;
 const $ = id => document.getElementById(id);
@@ -3140,7 +3140,7 @@ function checkAlerts(candle) {
     const tuneId = parseInt(localStorage.getItem('greeks_tune') || '0');
     const durSec = parseInt(localStorage.getItem('greeks_dur') || '2');
     
-    lab.checkAndFireAlerts({
+    checkAndFireAlerts({
       symbol: $('symbol').value,
       price: currentPrice,
       prevPrice: prevPrice,
