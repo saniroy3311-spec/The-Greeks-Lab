@@ -4203,6 +4203,9 @@
           window.currentPrice = d.current;
           liveChartEngine.setData(liveCandles.concat(cleanPredicted));
           loadDrawings(liveChartEngine, 'live');
+          if (!isFirstLoad && liveCandles.length > 0) {
+            liveChartEngine.scrollToTime(liveCandles[liveCandles.length - 1].time);
+          }
         } else if (isNewPrediction) {
           window.lastPredKey = predKey;
           liveChartEngine.setData(liveCandles.concat(cleanPredicted));
@@ -4991,6 +4994,9 @@
           loadDrawings(scalperChartEngine, 'scalper');
           if (isFirstLoad) {
             scalperChartEngine.resetView();
+          }
+          if (!isFirstLoad && scalperCandles.length > 0) {
+            scalperChartEngine.scrollToTime(scalperCandles[scalperCandles.length - 1].time);
           }
         } else if (isNewPrediction) {
           window.lastScalperPredKey = predKey;
