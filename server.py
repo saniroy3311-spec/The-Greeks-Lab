@@ -665,11 +665,12 @@ def api_ema_kronos(symbol, tf):
     with active_lock:
         ACTIVE_COMBINATIONS[key] = now
 
-    CACHE_TTL = 5
     with _cache_lock:
         cached = _cache.get(key)
 
-    if not cached or (now - cached[0]) >= CACHE_TTL:
+    if cached:
+        cached_result = cached[1]
+    else:
         try:
             result = run_prediction(symbol, tf)
             with _cache_lock:
@@ -678,8 +679,6 @@ def api_ema_kronos(symbol, tf):
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
-    else:
-        cached_result = cached[1]
 
     try:
         candles = cached_result["candles"]
