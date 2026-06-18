@@ -3616,8 +3616,10 @@ function renderHistoricTradeBoxes(engine, trades) {
   const conv = engine.getMainConverters();
   const rect = engine.getMainPaneRect();
   if (!conv || !rect) return;
+  const container = document.getElementById('tv-chart');
+  const canvas = container ? container.querySelector('canvas') : null;
+  if (!canvas) return;
   try {
-    const canvas = engine.getCanvas();
     const ctx = canvas.getContext('2d');
     const xMin = rect.x, xMax = rect.x + rect.width;
 
