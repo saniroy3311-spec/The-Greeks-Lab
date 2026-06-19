@@ -5595,6 +5595,9 @@
         socketToClose.close();
       }
 
+      if (!window.lastScheduledClosedTime) window.lastScheduledClosedTime = 0;
+      if (!window.lastScheduledClosedTimeScalper) window.lastScheduledClosedTimeScalper = 0;
+
       const deltaSocketInstance = new WebSocket(wsUrl);
       deltaSocket = deltaSocketInstance;
       window.currentDeltaSub = { symbol, tf };
@@ -5605,28 +5608,32 @@
           "payload": {
             "channels": [
               {
-                "name": `candlestick_${tf}`,
-                "symbols": [deltaSymbol]
+                "name": "candlesticks",
+                "symbols": [deltaSymbol],
+                "granularity": tf
               }
             ]
           }
         };
         deltaSocketInstance.send(JSON.stringify(subscribeMsg));
-        console.log(`Subscribed to Delta Exchange candlestick_${tf} for ${deltaSymbol}`);
+        console.log(`Subscribed to Delta Exchange candlesticks for ${deltaSymbol} at granularity ${tf}`);
       };
 
       deltaSocketInstance.onmessage = (event) => {
         const msg = JSON.parse(event.data);
-        if (msg.type !== `candlestick_${tf}` || msg.symbol !== deltaSymbol) {
+        if (msg.channel !== "candlesticks" || msg.symbol !== deltaSymbol || msg.granularity !== tf) {
           return;
         }
 
-        const t = Math.floor(msg.candle_start_time / 1000000000);
-        const o = parseFloat(msg.open);
-        const h = parseFloat(msg.high);
-        const l = parseFloat(msg.low);
-        const c = parseFloat(msg.close);
-        const v = parseFloat(msg.volume);
+        const candleData = msg.data;
+        if (!candleData) return;
+
+        const t = candleData.time; // time is in seconds
+        const o = parseFloat(candleData.open);
+        const h = parseFloat(candleData.high);
+        const l = parseFloat(candleData.low);
+        const c = parseFloat(candleData.close);
+        const v = parseFloat(candleData.volume || 0);
 
         const candle = { time: t * 1000, open: o, high: h, low: l, close: c, volume: v };
         activeCandleOpenTime = t;
@@ -5635,14 +5642,22 @@
         if (activeTab === 'scalper') {
           const lastCandle = scalperCandles[scalperCandles.length - 1];
           if (lastCandle && t > Math.floor(lastCandle.time / 1000)) {
-            isClosed = true;
-            wsLastClosedTime = lastCandle.time / 1000;
+            const closeTime = Math.floor(lastCandle.time / 1000);
+            if (window.lastScheduledClosedTimeScalper !== closeTime) {
+              window.lastScheduledClosedTimeScalper = closeTime;
+              isClosed = true;
+              wsLastClosedTime = closeTime;
+            }
           }
         } else {
           const lastCandle = liveCandles[liveCandles.length - 1];
           if (lastCandle && t > Math.floor(lastCandle.time / 1000)) {
-            isClosed = true;
-            wsLastClosedTime = lastCandle.time / 1000;
+            const closeTime = Math.floor(lastCandle.time / 1000);
+            if (window.lastScheduledClosedTime !== closeTime) {
+              window.lastScheduledClosedTime = closeTime;
+              isClosed = true;
+              wsLastClosedTime = closeTime;
+            }
           }
         }
 
@@ -5676,7 +5691,7 @@
             setTimeout(() => {
               const currentSym = $('symbol').value;
               if (currentSym === 'BTC' || currentSym === 'GOLD') loadScalper();
-            }, 1000);
+            }, 2000);
           }
         } else {
           if (liveChartEngine) {
@@ -5692,7 +5707,7 @@
             setTimeout(() => {
               const currentSym = $('symbol').value;
               if (currentSym === 'BTC' || currentSym === 'GOLD') load();
-            }, 1000);
+            }, 2000);
           }
         }
       };
