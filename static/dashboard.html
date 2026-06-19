@@ -5577,7 +5577,7 @@
 
       stopSimulatedTicks();
       const deltaSymbol = symbol === 'BTC' ? 'BTCUSD' : 'XAUTUSD';
-      const wsUrl = `wss://public-socket.india.delta.exchange`;
+      const wsUrl = `wss://socket.india.delta.exchange`;
 
       if (deltaSocket && deltaSocket.url === wsUrl &&
         (deltaSocket.readyState === WebSocket.OPEN || deltaSocket.readyState === WebSocket.CONNECTING)) {
@@ -5608,32 +5608,42 @@
           "payload": {
             "channels": [
               {
-                "name": "candlesticks",
-                "symbols": [deltaSymbol],
-                "granularity": tf
+                "name": `candlestick_${tf}`,
+                "symbols": [deltaSymbol]
               }
             ]
           }
         };
         deltaSocketInstance.send(JSON.stringify(subscribeMsg));
-        console.log(`Subscribed to Delta Exchange candlesticks for ${deltaSymbol} at granularity ${tf}`);
+        console.log(`Subscribed to Delta Exchange candlestick_${tf} for ${deltaSymbol}`);
       };
 
       deltaSocketInstance.onmessage = (event) => {
         const msg = JSON.parse(event.data);
-        if (msg.channel !== "candlesticks" || msg.symbol !== deltaSymbol || msg.granularity !== tf) {
+        const type = msg.type;
+        const symbol = msg.symbol !== undefined ? msg.symbol : msg.sy;
+
+        if (type !== `candlestick_${tf}` || symbol !== deltaSymbol) {
           return;
         }
 
-        const candleData = msg.data;
-        if (!candleData) return;
+        const rawTime = msg.candle_start_time !== undefined ? msg.candle_start_time : msg.cst;
+        if (rawTime === undefined) return;
 
-        const t = candleData.time; // time is in seconds
-        const o = parseFloat(candleData.open);
-        const h = parseFloat(candleData.high);
-        const l = parseFloat(candleData.low);
-        const c = parseFloat(candleData.close);
-        const v = parseFloat(candleData.volume || 0);
+        let t;
+        if (rawTime > 1000000000000000) {
+          t = Math.floor(rawTime / 1000000000); // Nanoseconds to seconds
+        } else if (rawTime > 100000000000) {
+          t = Math.floor(rawTime / 1000); // Milliseconds to seconds
+        } else {
+          t = rawTime; // Already in seconds
+        }
+
+        const o = parseFloat(msg.open !== undefined ? msg.open : msg.o);
+        const h = parseFloat(msg.high !== undefined ? msg.high : msg.h);
+        const l = parseFloat(msg.low !== undefined ? msg.low : msg.l);
+        const c = parseFloat(msg.close !== undefined ? msg.close : msg.c);
+        const v = parseFloat(msg.volume !== undefined ? msg.volume : (msg.v !== undefined ? msg.v : 0));
 
         const candle = { time: t * 1000, open: o, high: h, low: l, close: c, volume: v };
         activeCandleOpenTime = t;
