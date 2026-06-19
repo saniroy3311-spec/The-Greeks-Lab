@@ -720,6 +720,95 @@
       margin-top: 2px;
     }
 
+    /* Beginner Friendly Signal Card Styling */
+    .beginner-signal-banner {
+      border-radius: 8px;
+      padding: 14px 12px;
+      color: #ffffff !important;
+      text-align: center;
+      margin-bottom: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .beginner-signal-banner.buy {
+      background: linear-gradient(135deg, #10b981, #059669) !important;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    .beginner-signal-banner.sell {
+      background: linear-gradient(135deg, #f43f5e, #e11d48) !important;
+      box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
+    }
+    .beginner-signal-banner.skip {
+      background: linear-gradient(135deg, #64748b, #475569) !important;
+      box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2);
+    }
+    .beginner-signal-icon {
+      font-size: 28px;
+      margin-bottom: 6px;
+      display: block;
+      line-height: 1;
+    }
+    .beginner-signal-title {
+      font-size: 18px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      letter-spacing: 0.8px;
+    }
+    .beginner-signal-desc {
+      font-size: 11px;
+      font-weight: 400;
+      opacity: 0.95;
+      line-height: 1.4;
+      max-width: 260px;
+    }
+    
+    .confidence-meter-container {
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+    .confidence-meter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .confidence-meter-bar {
+      height: 8px;
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    body.dark-theme .confidence-meter-bar {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .confidence-meter-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+      width: 0%;
+    }
+    .confidence-meter-fill.buy {
+      background: linear-gradient(90deg, #34d399, #10b981) !important;
+    }
+    .confidence-meter-fill.sell {
+      background: linear-gradient(90deg, #fb7185, #f43f5e) !important;
+    }
+    .confidence-meter-fill.skip {
+      background: linear-gradient(90deg, #94a3b8, #64748b) !important;
+    }
+
     /* Echoes Panel Overlay */
     .echoes-card {
       border-left: 4px solid var(--flat);
@@ -2831,7 +2920,7 @@
         <option value="NIFTY">Nifty 50</option>
         <option value="BANKNIFTY">Bank Nifty</option>
         <option value="BTC">Bitcoin (BTC)</option>
-        <option value="GOLD">Gold (GC=F)</option>
+        <option value="GOLD">Gold (XAUTUSD)</option>
       </select>
     </div>
     <div class="divider"></div>
@@ -3063,8 +3152,26 @@
             <div class="chart-overlays-inner">
               <!-- Kronos Unified Forecast Card -->
               <div class="overlay-card signal flat" id="sig">
+                <!-- Beginner Friendly Visual Banner -->
+                <div class="beginner-signal-banner skip" id="beginner-signal-banner">
+                  <span class="beginner-signal-icon" id="beginner-signal-icon">⏸</span>
+                  <div class="beginner-signal-title" id="beginner-signal-action">WAIT / SKIP</div>
+                  <div class="beginner-signal-desc" id="beginner-signal-desc">Scanning market conditions. No clear direction detected yet.</div>
+                </div>
+
+                <!-- Beginner Friendly Confidence Meter -->
+                <div class="confidence-meter-container">
+                  <div class="confidence-meter-header">
+                    <span>Signal Strength</span>
+                    <span id="beginner-signal-conf">0%</span>
+                  </div>
+                  <div class="confidence-meter-bar">
+                    <div class="confidence-meter-fill skip" id="beginner-signal-conf-bar" style="width: 0%;"></div>
+                  </div>
+                </div>
+
                 <div class="sig-header-row"
-                  style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px;">
+                  style="display: none !important; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px;">
                   <div>
                     <div class="sig-label">KRONOS PREDICTION</div>
                     <div class="sig-dir" id="dir">—</div>
@@ -3389,8 +3496,26 @@
 
               <!-- Kronos Unified Forecast Card (Scalper) -->
               <div class="overlay-card signal flat" id="scalper-sig" style="margin-top: 8px;">
+                <!-- Beginner Friendly Visual Banner -->
+                <div class="beginner-signal-banner skip" id="scalper-beginner-signal-banner">
+                  <span class="beginner-signal-icon" id="scalper-beginner-signal-icon">⏸</span>
+                  <div class="beginner-signal-title" id="scalper-beginner-signal-action">WAIT / SKIP</div>
+                  <div class="beginner-signal-desc" id="scalper-beginner-signal-desc">Scanning market conditions. No clear direction detected yet.</div>
+                </div>
+
+                <!-- Beginner Friendly Confidence Meter -->
+                <div class="confidence-meter-container">
+                  <div class="confidence-meter-header">
+                    <span>Signal Strength</span>
+                    <span id="scalper-beginner-signal-conf">0%</span>
+                  </div>
+                  <div class="confidence-meter-bar">
+                    <div class="confidence-meter-fill skip" id="scalper-beginner-signal-conf-bar" style="width: 0%;"></div>
+                  </div>
+                </div>
+
                 <div class="sig-header-row"
-                  style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px;">
+                  style="display: none !important; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px;">
                   <div>
                     <div class="sig-label">KRONOS PREDICTION</div>
                     <div class="sig-dir" id="scalper-dir">—</div>
@@ -3569,7 +3694,7 @@
 
     let currentTrade = null;
     let timer = null, countdown = 0, countTimer = null;
-    let btcSocket = null;
+    let deltaSocket = null;
     let wsLastClosedTime = null;
     let activeCandleOpenTime = null;
 
@@ -4155,11 +4280,12 @@
         if ($('symbol').value !== sym || $('tf').value !== tf) return;
         lastLoadedLiveKey = sym + ":" + tf;
 
-        if (sym === 'BTC' && wsLastClosedTime !== null && d.candles.length > 0) {
+        if ((sym === 'BTC' || sym === 'GOLD') && wsLastClosedTime !== null && d.candles.length > 0) {
           const serverLastCandleTime = d.candles[d.candles.length - 1].time;
           if (serverLastCandleTime < wsLastClosedTime) {
             setTimeout(() => {
-              if (activeTab === 'live-signal' && $('symbol').value === 'BTC') load();
+              const currentSym = $('symbol').value;
+              if (activeTab === 'live-signal' && (currentSym === 'BTC' || currentSym === 'GOLD')) load();
             }, 1500);
             return;
           }
@@ -4348,6 +4474,7 @@
         updateIdText('s-p5', fmt(d.pred_5));
         updateIdText('s-pn', fmt(d.pred_n));
         updateIdText('s-mv', (d.move >= 0 ? '+' : '') + fmt(d.move) + '  (' + d.move_pct + '%)');
+        updateBeginnerSignal(d, '');
 
         // Update mobile forecast trigger button text (always — confidence/action
         // text can change even when direction doesn't).
@@ -4406,8 +4533,8 @@
         $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · horizon ${d.pred_len}`;
         if ($('status')) $('status').textContent = 'Live';
         evaluateAntigravityAlerts(d, liveCandles);
-        connectBtcWebSocket(tf);
-        if (sym !== 'BTC') {
+        connectDeltaWebSocket(tf);
+        if (sym !== 'BTC' && sym !== 'GOLD') {
           startSimulatedTicks();
         }
       } catch (e) {
@@ -4947,11 +5074,12 @@
         if ($('symbol').value !== sym || $('tf').value !== tf) return;
         lastLoadedScalperKey = sym + ":" + tf;
 
-        if (sym === 'BTC' && wsLastClosedTime !== null && d.candles.length > 0) {
+        if ((sym === 'BTC' || sym === 'GOLD') && wsLastClosedTime !== null && d.candles.length > 0) {
           const serverLastCandleTime = d.candles[d.candles.length - 1].time;
           if (serverLastCandleTime < wsLastClosedTime) {
             setTimeout(() => {
-              if (activeTab === 'scalper' && $('symbol').value === 'BTC') loadScalper();
+              const currentSym = $('symbol').value;
+              if (activeTab === 'scalper' && (currentSym === 'BTC' || currentSym === 'GOLD')) loadScalper();
             }, 1500);
             return;
           }
@@ -5017,6 +5145,7 @@
         updateIdText('scalper-s-p5', fmt(d.pred_5));
         updateIdText('scalper-s-pn', fmt(d.pred_n));
         updateIdText('scalper-s-mv', (d.move >= 0 ? '+' : '') + fmt(d.move) + '  (' + d.move_pct + '%)');
+        updateBeginnerSignal(d, 'scalper-');
 
         // Update ECHOES CONFIRMATION card on Scalper tab
         const lastClose = scalperCandles[scalperCandles.length - 1].close;
@@ -5249,7 +5378,7 @@
           }
         }
 
-        connectBtcWebSocket(tf);
+        connectDeltaWebSocket(tf);
         loadEmaKronos();
         const timeText = 'Last update: ' + d.updated;
         if ($('updated')) $('updated').textContent = timeText;
@@ -5287,7 +5416,7 @@
     function startSimulatedTicks() {
       if (simulatedTickInterval) return; // already running — avoid restart cycle
       const sym = $('symbol').value;
-      if (sym === 'BTC') return; // relies on real Binance WebSocket
+      if (sym === 'BTC' || sym === 'GOLD') return; // relies on real Delta Exchange WebSocket
 
       simulatedTickInterval = setInterval(() => {
         const isLive = (activeTab === 'live-signal');
@@ -5384,9 +5513,9 @@
       timer = setInterval(() => {
         const sym = $('symbol').value;
 
-        if (sym === 'BTC') {
+        if (sym === 'BTC' || sym === 'GOLD') {
           btcSkipCounter++;
-          // Poll for predictions every 30s even for BTC;
+          // Poll for predictions every 30s even for BTC/GOLD;
           // real-time price comes from WebSocket.
           if (btcSkipCounter < 30) return;
           btcSkipCounter = 0;
@@ -5431,13 +5560,13 @@
       }, 500);
     }
 
-    function connectBtcWebSocket(tf) {
+    function connectDeltaWebSocket(tf) {
       const symbol = $('symbol').value;
-      if (symbol !== 'BTC') {
+      if (symbol !== 'BTC' && symbol !== 'GOLD') {
         stopSimulatedTicks();
-        if (btcSocket) {
-          const socketToClose = btcSocket;
-          btcSocket = null;
+        if (deltaSocket) {
+          const socketToClose = deltaSocket;
+          deltaSocket = null;
           socketToClose.onmessage = null;
           socketToClose.onclose = null;
           socketToClose.onerror = null;
@@ -5447,43 +5576,74 @@
       }
 
       stopSimulatedTicks();
-      const binanceTf = tf.toLowerCase();
-      const wsUrl = `wss://fstream.binance.com/ws/btcusdt@kline_${binanceTf}`;
+      const deltaSymbol = symbol === 'BTC' ? 'BTCUSD' : 'XAUTUSD';
+      const wsUrl = `wss://public-socket.india.delta.exchange`;
 
-      if (btcSocket && btcSocket.url === wsUrl &&
-        (btcSocket.readyState === WebSocket.OPEN || btcSocket.readyState === WebSocket.CONNECTING)) {
-        return;
+      if (deltaSocket && deltaSocket.url === wsUrl &&
+        (deltaSocket.readyState === WebSocket.OPEN || deltaSocket.readyState === WebSocket.CONNECTING)) {
+        if (window.currentDeltaSub && window.currentDeltaSub.symbol === symbol && window.currentDeltaSub.tf === tf) {
+          return;
+        }
       }
 
-      if (btcSocket) {
-        const socketToClose = btcSocket;
-        btcSocket = null;
+      if (deltaSocket) {
+        const socketToClose = deltaSocket;
+        deltaSocket = null;
         socketToClose.onmessage = null;
         socketToClose.onclose = null;
         socketToClose.onerror = null;
         socketToClose.close();
       }
 
-      const btcSocketInstance = new WebSocket(wsUrl);
-      btcSocket = btcSocketInstance;
+      const deltaSocketInstance = new WebSocket(wsUrl);
+      deltaSocket = deltaSocketInstance;
+      window.currentDeltaSub = { symbol, tf };
 
-      btcSocketInstance.onmessage = (event) => {
+      deltaSocketInstance.onopen = () => {
+        const subscribeMsg = {
+          "type": "subscribe",
+          "payload": {
+            "channels": [
+              {
+                "name": `candlestick_${tf}`,
+                "symbols": [deltaSymbol]
+              }
+            ]
+          }
+        };
+        deltaSocketInstance.send(JSON.stringify(subscribeMsg));
+        console.log(`Subscribed to Delta Exchange candlestick_${tf} for ${deltaSymbol}`);
+      };
+
+      deltaSocketInstance.onmessage = (event) => {
         const msg = JSON.parse(event.data);
-        const k = msg.k;
+        if (msg.type !== `candlestick_${tf}` || msg.symbol !== deltaSymbol) {
+          return;
+        }
 
-        const t = Math.floor(k.t / 1000);
-        const o = parseFloat(k.o);
-        const h = parseFloat(k.h);
-        const l = parseFloat(k.l);
-        const c = parseFloat(k.c);
-        const isClosed = k.x;
+        const t = Math.floor(msg.candle_start_time / 1000000000);
+        const o = parseFloat(msg.open);
+        const h = parseFloat(msg.high);
+        const l = parseFloat(msg.low);
+        const c = parseFloat(msg.close);
+        const v = parseFloat(msg.volume);
 
-        // Candl works with epoch milliseconds
-        const candle = { time: t * 1000, open: o, high: h, low: l, close: c, volume: parseFloat(k.v) };
+        const candle = { time: t * 1000, open: o, high: h, low: l, close: c, volume: v };
         activeCandleOpenTime = t;
 
-        if (isClosed) {
-          wsLastClosedTime = t;
+        let isClosed = false;
+        if (activeTab === 'scalper') {
+          const lastCandle = scalperCandles[scalperCandles.length - 1];
+          if (lastCandle && t > Math.floor(lastCandle.time / 1000)) {
+            isClosed = true;
+            wsLastClosedTime = lastCandle.time / 1000;
+          }
+        } else {
+          const lastCandle = liveCandles[liveCandles.length - 1];
+          if (lastCandle && t > Math.floor(lastCandle.time / 1000)) {
+            isClosed = true;
+            wsLastClosedTime = lastCandle.time / 1000;
+          }
         }
 
         if (activeTab === 'scalper') {
@@ -5492,7 +5652,6 @@
             updateLocalCandles(scalperCandles, candle);
             updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
 
-            // Simulating the target/stop check for scalper active trade
             if (currentTrade && currentTrade.active) {
               let hit = false;
               let result = "";
@@ -5515,7 +5674,8 @@
           }
           if (isClosed) {
             setTimeout(() => {
-              if ($('symbol').value === 'BTC') loadScalper();
+              const currentSym = $('symbol').value;
+              if (currentSym === 'BTC' || currentSym === 'GOLD') loadScalper();
             }, 1000);
           }
         } else {
@@ -5530,27 +5690,31 @@
           }
           if (isClosed) {
             setTimeout(() => {
-              if ($('symbol').value === 'BTC') load();
+              const currentSym = $('symbol').value;
+              if (currentSym === 'BTC' || currentSym === 'GOLD') load();
             }, 1000);
           }
         }
       };
 
-      btcSocketInstance.onclose = (event) => {
-        console.log("WebSocket disconnected:", event);
-        if ($('symbol').value === 'BTC' && btcSocket === btcSocketInstance) {
-          btcSocket = null;
+      deltaSocketInstance.onclose = (event) => {
+        console.log("Delta WebSocket disconnected:", event);
+        const currentSym = $('symbol').value;
+        if ((currentSym === 'BTC' || currentSym === 'GOLD') && deltaSocket === deltaSocketInstance) {
+          deltaSocket = null;
+          window.currentDeltaSub = null;
           setTimeout(() => {
-            if ($('symbol').value === 'BTC') {
-              connectBtcWebSocket(tf);
+            const recheckSym = $('symbol').value;
+            if (recheckSym === 'BTC' || recheckSym === 'GOLD') {
+              connectDeltaWebSocket(tf);
             }
           }, 3000);
         }
       };
 
-      btcSocketInstance.onerror = (err) => {
-        console.error("WebSocket error observed:", err);
-        btcSocketInstance.close();
+      deltaSocketInstance.onerror = (err) => {
+        console.error("Delta WebSocket error observed:", err);
+        deltaSocketInstance.close();
       };
     }
 
@@ -5879,6 +6043,52 @@
       });
     };
     window.updateIdText = updateIdText;
+
+    function updateBeginnerSignal(d, prefix = '') {
+      const banner = $(prefix + 'beginner-signal-banner');
+      const iconEl = $(prefix + 'beginner-signal-icon');
+      const actionEl = $(prefix + 'beginner-signal-action');
+      const descEl = $(prefix + 'beginner-signal-desc');
+      const confEl = $(prefix + 'beginner-signal-conf');
+      const confBar = $(prefix + 'beginner-signal-conf-bar');
+
+      if (!banner) return;
+
+      const direction = d.direction || 'Flat';
+      const action = d.action || 'SKIP';
+      const confidence = d.confidence || 0;
+
+      // Update text/content
+      if (confEl) confEl.textContent = confidence + '%';
+      if (confBar) {
+        confBar.style.width = confidence + '%';
+      }
+
+      // Reset classes
+      banner.className = 'beginner-signal-banner';
+      if (confBar) confBar.className = 'confidence-meter-fill';
+
+      if (direction === 'Long') {
+        banner.classList.add('buy');
+        if (confBar) confBar.classList.add('buy');
+        if (iconEl) iconEl.textContent = '▲';
+        if (actionEl) actionEl.textContent = 'BUY / LONG';
+        if (descEl) descEl.textContent = `Bullish momentum detected. Expected direction is UP. Recommended entry: BUY / LONG.`;
+      } else if (direction === 'Short') {
+        banner.classList.add('sell');
+        if (confBar) confBar.classList.add('sell');
+        if (iconEl) iconEl.textContent = '▼';
+        if (actionEl) actionEl.textContent = 'SELL / SHORT';
+        if (descEl) descEl.textContent = `Bearish momentum detected. Expected direction is DOWN. Recommended stance: SELL / SHORT.`;
+      } else {
+        banner.classList.add('skip');
+        if (confBar) confBar.classList.add('skip');
+        if (iconEl) iconEl.textContent = '⏸';
+        if (actionEl) actionEl.textContent = 'WAIT / SKIP';
+        if (descEl) descEl.textContent = `Market consolidates or direction is unclear. Recommended stance: WAIT / SKIP.`;
+      }
+    }
+    window.updateBeginnerSignal = updateBeginnerSignal;
 
     function toggleDrawingToolbar() {
       const containers = document.querySelectorAll('.drawing-toolbar-container');

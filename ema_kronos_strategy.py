@@ -65,17 +65,17 @@ class EmaKronosStrategy:
         ema_fast = ema(df["close"], self.fast).values
         ema_slow = ema(df["close"], self.slow).values
 
-        # Detect last crossover
-        bars_since_cross = len(df)
-        prev_diff = 0
+        # Detect last crossover sequentially
+        bars_since_cross_list = [len(df)] * len(df)
+        current_bars_since = len(df)
         for i in range(1, len(df)):
             diff = ema_fast[i] - ema_slow[i]
-            if i >= 1:
-                prev_diff = ema_fast[i - 1] - ema_slow[i - 1]
+            prev_diff = ema_fast[i - 1] - ema_slow[i - 1]
             if (prev_diff <= 0 and diff > 0) or (prev_diff >= 0 and diff < 0):
-                bars_since_cross = 0
+                current_bars_since = 0
             else:
-                bars_since_cross += 1
+                current_bars_since += 1
+            bars_since_cross_list[i] = current_bars_since
 
         markers = []
         trades_out = []
@@ -104,7 +104,7 @@ class EmaKronosStrategy:
             bottom_ema = min(e_fast, e_slow)
             body_touches_both = (body_high >= top_ema) and (body_low <= bottom_ema)
 
-            cross_age = bars_since_cross - (len(df) - 1 - i) if bars_since_cross < len(df) else bars_since_cross
+            cross_age = bars_since_cross_list[i]
             cross_ok = cross_age >= 5
 
             is_latest = (i == len(df) - 1)
@@ -254,7 +254,7 @@ class EmaKronosStrategy:
             "ema_slow": ema_slow_out,
             "markers": markers,
             "trend": current_trend,
-            "bars_since_cross": bars_since_cross,
+            "bars_since_cross": bars_since_cross_list[-1] if len(bars_since_cross_list) > 0 else len(df),
             "body_touches_both": bool(
                 max(close[-1], open_p[-1]) >= max(ema_fast[-1], ema_slow[-1]) and
                 min(close[-1], open_p[-1]) <= min(ema_fast[-1], ema_slow[-1])

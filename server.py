@@ -36,12 +36,17 @@ PRED_LEN        = int(os.environ.get("KRONOS_PRED_LEN", "24"))
 PORT            = int(os.environ.get("KRONOS_PORT", "8080"))
 CACHE_SECONDS   = int(os.environ.get("KRONOS_CACHE", "10"))  # min seconds between recomputes per symbol/tf
 
-# symbols on yfinance.  ^NSEI = Nifty 50, ^NSEBANK = Bank Nifty, BTC-USD = Bitcoin
+# symbols on yfinance.  ^NSEI = Nifty 50, ^NSEBANK = Bank Nifty, BTCUSD = Bitcoin, XAUTUSD = Gold
 SYMBOL_MAP = {
     "NIFTY":     "^NSEI",
     "BANKNIFTY": "^NSEBANK",
-    "BTC":       "BTC-USD",
-    "GOLD":      "GC=F",
+    "BTC":       "BTCUSD",     # Delta Exchange India
+    "GOLD":      "XAUTUSD",    # Delta Exchange India (Tether Gold)
+}
+
+YFINANCE_FALLBACK_MAP = {
+    "BTC":  "BTC-USD",
+    "GOLD": "GC=F",
 }
 
 # yfinance supports: 1m,2m,5m,15m,30m,60m,90m,1h,1d ... (1m only last 7 days)
@@ -75,8 +80,40 @@ model = Kronos.from_pretrained(MODEL_NAME)
 predictor = KronosPredictor(model, tokenizer, device=DEVICE, max_context=512)
 print(f"[Kronos] Model ready on device={DEVICE}")
 
+import json
+
+PERSISTENT_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "persistent_cache.json")
+
 _cache = {}        # key -> (timestamp, result_dict)
 _cache_lock = threading.Lock()
+
+def load_persistent_cache():
+    global _cache
+    if os.path.exists(PERSISTENT_CACHE_FILE):
+        try:
+            with open(PERSISTENT_CACHE_FILE, "r") as f:
+                data = json.load(f)
+            with _cache_lock:
+                for key, val in data.items():
+                    # val is [timestamp, result_dict]
+                    _cache[key] = (val[0], val[1])
+            print(f"[Kronos] Loaded {len(data)} cached entries from {PERSISTENT_CACHE_FILE}")
+        except Exception as e:
+            print(f"[Kronos] Error loading persistent cache: {e}")
+
+def save_persistent_cache():
+    try:
+        with _cache_lock:
+            # Serialise the current memory cache
+            data = {k: list(v) for k, v in _cache.items()}
+        with open(PERSISTENT_CACHE_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"[Kronos] Error saving persistent cache: {e}")
+
+# Load cache on startup
+load_persistent_cache()
+
 ACTIVE_COMBINATIONS = {}  # key -> last_request_time
 active_lock = threading.Lock()
 prediction_lock = threading.Lock()
@@ -101,43 +138,80 @@ def _localize_index(df, symbol_key):
     return df
 
 
+def fetch_delta_exchange_candles(symbol_key, tf_key):
+    """Fetch candles from Delta Exchange India API."""
+    import requests
+    symbol = SYMBOL_MAP.get(symbol_key, "BTCUSD")
+    resolution = tf_key  # "1m", "3m", "5m", "15m", "30m", "1h", "1d"
+    
+    minutes = TF_MINUTES.get(tf_key, 5)
+    resolution_seconds = minutes * 60
+    
+    end_time = int(time.time())
+    # Request slightly more than LOOKBACK to ensure we get enough candles
+    start_time = end_time - (LOOKBACK + 50) * resolution_seconds
+    
+    url = "https://api.india.delta.exchange/v2/history/candles"
+    params = {
+        "symbol": symbol,
+        "resolution": resolution,
+        "start": start_time,
+        "end": end_time
+    }
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json"
+    }
+    
+    r = requests.get(url, params=params, headers=headers, timeout=5)
+    r.raise_for_status()
+    resp_json = r.json()
+    if not resp_json.get("success"):
+        error_msg = resp_json.get("error", {}).get("context", {}).get("message", "Unknown error")
+        raise RuntimeError(f"Delta Exchange API error: {error_msg}")
+        
+    data = resp_json.get("result", [])
+    if not data:
+        raise RuntimeError(f"No candles returned from Delta Exchange for {symbol} {resolution}")
+        
+    df = pd.DataFrame(data)
+    
+    # Delta Exchange returns newest candles first; sort oldest first
+    df = df.sort_values(by="time", ascending=True)
+    
+    # Set floats
+    df["open"] = df["open"].astype(float)
+    df["high"] = df["high"].astype(float)
+    df["low"] = df["low"].astype(float)
+    df["close"] = df["close"].astype(float)
+    df["volume"] = df["volume"].astype(float)
+    
+    # Timestamp is Unix seconds (UTC) -> convert to Asia/Kolkata
+    df.index = pd.to_datetime(df["time"], unit="s", utc=True)
+    df.index = df.index.tz_convert('Asia/Kolkata')
+    
+    df = df[["open", "high", "low", "close", "volume"]].copy()
+    df = df.dropna()
+    df = df.tail(LOOKBACK)
+    return df
+
+
 def fetch_candles(symbol_key, tf_key):
     """Pull live OHLCV candles and return a clean DataFrame with Asia/Kolkata timezone index."""
-    if symbol_key == "BTC":
+    if symbol_key in ["BTC", "GOLD"]:
         try:
-            import requests
-            binance_tf = tf_key
-            url = f"https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval={binance_tf}&limit={LOOKBACK}"
-            
-            headers = {"User-Agent": "Mozilla/5.0"}
-            r = requests.get(url, headers=headers, timeout=5)
-            r.raise_for_status()
-            data = r.json()
-            
-            df = pd.DataFrame(data, columns=[
-                "open_time", "open", "high", "low", "close", "volume",
-                "close_time", "quote_volume", "count", "taker_buy_base", "taker_buy_quote", "ignore"
-            ])
-            
-            df["open"] = df["open"].astype(float)
-            df["high"] = df["high"].astype(float)
-            df["low"] = df["low"].astype(float)
-            df["close"] = df["close"].astype(float)
-            df["volume"] = df["volume"].astype(float)
-            
-            # Binance open_time is UTC ms → localize to Asia/Kolkata
-            df.index = pd.to_datetime(df["open_time"], unit="ms", utc=True).tz_convert('Asia/Kolkata')
-            df = df[["open", "high", "low", "close", "volume"]].copy()
-            df = df.dropna()
-            df = df.tail(LOOKBACK)
-            return df
+            return fetch_delta_exchange_candles(symbol_key, tf_key)
         except Exception as e:
-            print(f"[Binance Fetch Error] {e}. Falling back to yfinance.")
+            print(f"[Delta Exchange Fetch Error] {e}. Falling back to yfinance.")
             pass
 
     # Fallback / Default: yfinance
     import yfinance as yf
-    ticker = SYMBOL_MAP.get(symbol_key, "^NSEI")
+    if symbol_key in YFINANCE_FALLBACK_MAP:
+        ticker = YFINANCE_FALLBACK_MAP[symbol_key]
+    else:
+        ticker = SYMBOL_MAP.get(symbol_key, "^NSEI")
     interval, period = TF_MAP.get(tf_key, ("5m", "5d"))
 
     df = yf.download(ticker, period=period, interval=interval,
@@ -147,7 +221,20 @@ def fetch_candles(symbol_key, tf_key):
 
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = [c[0] for c in df.columns]
-    df.columns = [str(c).lower() for c in df.columns]
+    df.columns = [str(c).strip().lower() for c in df.columns]
+
+    # Ensure all required columns are present, case-insensitively
+    required_cols = ["open", "high", "low", "close", "volume"]
+    for col in required_cols:
+        if col not in df.columns:
+            matched = False
+            for c in df.columns:
+                if str(c).strip().lower() == col:
+                    df.rename(columns={c: col}, inplace=True)
+                    matched = True
+                    break
+            if not matched:
+                raise RuntimeError(f"Missing required column: {col} in data. Available: {list(df.columns)}")
 
     if tf_key == "3m":
         df = df.resample('3min').agg({
@@ -160,6 +247,8 @@ def fetch_candles(symbol_key, tf_key):
 
     df = df[["open", "high", "low", "close", "volume"]].copy()
     df = df.dropna()
+    if len(df) == 0:
+        raise RuntimeError(f"No valid data remaining after dropping NaNs for {ticker} {interval}")
     df = df.tail(LOOKBACK)
     
     # Standardise timezone: localise to Asia/Kolkata for all assets
@@ -351,6 +440,7 @@ def background_cache_worker():
                         result = run_prediction(sym, tf)
                         with _cache_lock:
                             _cache[key] = (time.time(), result)
+                        save_persistent_cache()
                         # Only sleep after an actual compute/download to save CPU/yfinance rate limit
                         time.sleep(0.5 if is_active else 2.0)
                     except Exception as e:
@@ -386,6 +476,11 @@ def api_scan_all():
                 cached = _cache.get(key)
                 if cached:
                     res_dict = cached[1]
+                    # Check if stale
+                    is_active = True
+                    max_age = get_max_age(tf, is_active)
+                    is_stale = (now - cached[0]) >= max_age
+
                     light_res = {
                         "symbol": res_dict.get("symbol"),
                         "timeframe": res_dict.get("timeframe"),
@@ -401,6 +496,9 @@ def api_scan_all():
                         "pred_len": res_dict.get("pred_len"),
                         "updated": res_dict.get("updated"),
                     }
+                    if is_stale or res_dict.get("stale"):
+                        light_res["stale"] = True
+
                     if "predicted" in res_dict:
                         light_res["predicted"] = res_dict["predicted"]
                     if "candles" in res_dict:
@@ -424,18 +522,31 @@ def api_signal(symbol, tf):
 
     with _cache_lock:
         cached = _cache.get(key)
-        # Serve immediately if present to make switching instant
         if cached:
-            return jsonify(cached[1])
+            # Serve immediately if present to make switching instant
+            is_active = True
+            max_age = get_max_age(tf, is_active)
+            is_stale = (now - cached[0]) >= max_age
+            res = cached[1].copy()
+            if is_stale:
+                res["stale"] = True
+            return jsonify(res)
 
     # Fallback: compute synchronously if not in cache at all
     try:
         result = run_prediction(symbol, tf)
         with _cache_lock:
             _cache[key] = (now, result)
+        save_persistent_cache()
         return jsonify(result)
     except Exception as e:
         traceback.print_exc()
+        with _cache_lock:
+            cached = _cache.get(key)
+        if cached:
+            res = cached[1].copy()
+            res["stale"] = True
+            return jsonify(res)
         return jsonify({"error": str(e)}), 500
 
 
@@ -463,12 +574,19 @@ def api_scalper(symbol, tf):
             result = run_prediction(symbol, tf)
             with _cache_lock:
                 _cache[key] = (now, result)
+            save_persistent_cache()
             cached_result = result
         except Exception as e:
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
     else:
-        cached_result = cached[1]
+        # Check if cache is stale
+        is_active = True
+        max_age = get_max_age(tf, is_active)
+        is_stale = (now - cached[0]) >= max_age
+        cached_result = cached[1].copy()
+        if is_stale:
+            cached_result["stale"] = True
 
     try:
         candles = cached_result["candles"]
@@ -669,12 +787,19 @@ def api_ema_kronos(symbol, tf):
         cached = _cache.get(key)
 
     if cached:
-        cached_result = cached[1]
+        # Check if cache is stale
+        is_active = True
+        max_age = get_max_age(tf, is_active)
+        is_stale = (now - cached[0]) >= max_age
+        cached_result = cached[1].copy()
+        if is_stale:
+            cached_result["stale"] = True
     else:
         try:
             result = run_prediction(symbol, tf)
             with _cache_lock:
                 _cache[key] = (now, result)
+            save_persistent_cache()
             cached_result = result
         except Exception as e:
             traceback.print_exc()
