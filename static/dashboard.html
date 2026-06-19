@@ -5423,9 +5423,14 @@
         const candlesArray = isLive ? liveCandles : scalperCandles;
         const engine = isLive ? liveChartEngine : scalperChartEngine;
 
-        if (!candlesArray || candlesArray.length === 0 || !engine) return;
+        if (!candlesArray || candlesArray.length < 2 || !engine) return;
 
         const lastCandle = candlesArray[candlesArray.length - 1];
+
+        if (!window.currentPrice) {
+          window.currentPrice = lastCandle.close;
+        }
+
         const volatility = 0.00015;
         const changePct = (Math.random() - 0.5) * 2 * volatility;
         const currentVal = window.currentPrice || lastCandle.close;
@@ -5563,7 +5568,7 @@
     function connectDeltaWebSocket(tf) {
       const symbol = $('symbol').value;
       if (symbol !== 'BTC' && symbol !== 'GOLD') {
-        stopSimulatedTicks();
+        // Don't stop simulated ticks — they provide live candle updates for NSE symbols
         if (deltaSocket) {
           const socketToClose = deltaSocket;
           deltaSocket = null;
