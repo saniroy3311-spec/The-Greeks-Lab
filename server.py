@@ -24,6 +24,8 @@ from flask_cors import CORS
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from model import Kronos, KronosTokenizer, KronosPredictor
 from ema_kronos_strategy import EmaKronosStrategy
+from echoes import build_echo_scan
+from a1_strategy import A1Strategy
 
 # ----------------------------------------------------------------------------
 # Config (override with environment variables if you want)
@@ -841,6 +843,99 @@ def api_ema_kronos(symbol, tf):
             "confidence": confidence,
             "direction": kronos_dir,
             "move_pct": cached_result.get("move_pct"),
+            "updated": datetime.now(IST).strftime("%H:%M:%S")
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/a1/<symbol>/<tf>")
+def api_a1(symbol, tf):
+    """A1 Standalone System — 6-Gate confluence of EMA, Kronos AI, and Echoes."""
+    symbol = symbol.upper()
+    tf = tf.lower()
+    key = f"{symbol}:{tf}"
+    now = time.time()
+
+    with active_lock:
+        ACTIVE_COMBINATIONS[key] = now
+
+    with _cache_lock:
+        cached = _cache.get(key)
+
+    if cached:
+        is_active = True
+        max_age = get_max_age(tf, is_active)
+        is_stale = (now - cached[0]) >= max_age
+        cached_result = cached[1].copy()
+        if is_stale:
+            cached_result["stale"] = True
+    else:
+        try:
+            result = run_prediction(symbol, tf)
+            with _cache_lock:
+                _cache[key] = (now, result)
+            save_persistent_cache()
+            cached_result = result
+        except Exception as e:
+            traceback.print_exc()
+            return jsonify({"error": str(e)}), 500
+
+    try:
+        candles = cached_result["candles"]
+        if len(candles) < 80:
+            return jsonify({"error": "Insufficient history"}), 400
+
+        df = pd.DataFrame(candles)
+        df.set_index('time', inplace=True)
+        df.index = pd.to_datetime(df.index, unit='s', utc=True).tz_convert('Asia/Kolkata')
+
+        # Run Echoes scan on the candle data
+        echo_window = 30
+        echo_horizon = PRED_LEN
+        echo_k = 5
+        echoes_result = build_echo_scan(df, window_len=echo_window, horizon=echo_horizon, k=echo_k)
+
+        # Run A1 strategy
+        kronos_dir = cached_result.get("direction", "Flat")
+        kronos_conf = cached_result.get("confidence", 0)
+        kronos_move_pct = cached_result.get("move_pct", 0.0)
+        # move_pct in cached_result is stored as % (e.g. 0.4 for 0.40%)
+        kronos_move_decimal = kronos_move_pct / 100.0 if abs(kronos_move_pct) > 0 else 0.0
+
+        strat = A1Strategy()
+        a1_out = strat.evaluate(
+            df.tail(500),
+            kronos_direction=kronos_dir,
+            kronos_confidence=kronos_conf,
+            kronos_move_pct=kronos_move_decimal,
+            echoes_stats=echoes_result,
+        )
+
+        return jsonify({
+            "symbol": symbol,
+            "timeframe": tf,
+            "decision": a1_out["decision"],
+            "trend": a1_out["trend"],
+            "bars_since_cross": a1_out["bars_since_cross"],
+            "gates": a1_out["gates"],
+            "skip_reasons": a1_out["skip_reasons"],
+            "kronos_direction": kronos_dir,
+            "kronos_confidence": kronos_conf,
+            "kronos_move_pct": kronos_move_pct,
+            "echoes": echoes_result,
+            "echo_win_rate": a1_out["echo_win_rate"],
+            "echo_asymmetry_long": a1_out["echo_asymmetry_long"],
+            "echo_asymmetry_short": a1_out["echo_asymmetry_short"],
+            "echo_count": a1_out["echo_count"],
+            "echo_up_count": a1_out["echo_up_count"],
+            "echo_best_end_pct": a1_out["echo_best_end_pct"],
+            "echo_worst_end_pct": a1_out["echo_worst_end_pct"],
+            "candles": candles,
+            "predicted": cached_result.get("predicted", []),
+            "current": cached_result.get("current"),
             "updated": datetime.now(IST).strftime("%H:%M:%S")
         })
 
