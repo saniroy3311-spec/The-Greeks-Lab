@@ -4569,7 +4569,11 @@
         return;
       }
 
-      const t = data.time; // Already in seconds from server
+      // Align tick time to timeframe boundary to prevent chart timeline mismatch
+      const TF_TO_MS = { "1m": 60000, "3m": 180000, "5m": 300000, "15m": 900000, "30m": 1800000, "1h": 3600000, "1d": 86400000 };
+      const step = (TF_TO_MS[tf] || 60000) / 1000;
+      const t = Math.floor(data.time / step) * step;
+
       const o = data.open;
       const h = data.high;
       const l = data.low;
@@ -4606,8 +4610,8 @@
       // Update chart
       if (activeTab === 'scalper') {
         if (scalperChartEngine) {
-          scalperChartEngine.updateLast(candle);
           updateLocalCandles(scalperCandles, candle);
+          scalperChartEngine.updateLast(scalperCandles[scalperCandles.length - 1]);
           // Only recalculate indicators on bar close — not every tick
           if (isClosed) {
             updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
@@ -4641,7 +4645,7 @@
       } else {
         if (liveChartEngine) {
           updateLocalCandles(liveCandles, candle);
-          liveChartEngine.updateLast(candle);
+          liveChartEngine.updateLast(liveCandles[liveCandles.length - 1]);
           // Only recalculate indicators on bar close (not every tick) —
           // avoids unnecessary series rebuilds on the TV chart.
           if (isClosed) {
@@ -4885,7 +4889,11 @@
         return;
       }
       if (last.time === candle.time) {
-        arr[arr.length - 1] = candle;
+        // Correctly aggregate period values: keep original open, update high/low/close/volume
+        last.high = Math.max(last.high, candle.high);
+        last.low = Math.min(last.low, candle.low);
+        last.close = candle.close;
+        last.volume = (last.volume || 0) + (candle.volume || 0);
       } else {
         arr.push(candle);
         if (arr.length > 500) arr.shift();
@@ -5222,7 +5230,7 @@
     // -------------------------------------------------------------
     // Forecast Loader (Tab 1)
     // -------------------------------------------------------------
-    async function load(isFirstLoad = false) {
+    async function load(isFirstLoad = false, isBackground = false) {
       const sym = $('symbol').value, tf = $('tf').value;
       const mySeq = ++liveLoadSeq;
       liveLoadInflight++;
@@ -5231,7 +5239,7 @@
       const chartContainer = $('chart');
       if (isFirstLoad) {
         if ($('live-chart-loading')) $('live-chart-loading').style.display = 'flex';
-      } else {
+      } else if (!isBackground) {
         if (chartContainer) chartContainer.classList.add('scalper-chart-soft-loading');
       }
       try {
@@ -6306,7 +6314,7 @@ This is informational only — you decide whether to take the trade.`;
       stopBox.style.display = 'block';
     }
 
-    async function loadScalper(isFirstLoad = false) {
+    async function loadScalper(isFirstLoad = false, isBackground = false) {
       const sym = $('symbol').value, tf = $('tf').value;
       const mySeq = ++scalperLoadSeq;
       scalperLoadInflight++;
@@ -6315,7 +6323,7 @@ This is informational only — you decide whether to take the trade.`;
       const chartContainer = $('scalper-chart');
       if (isFirstLoad) {
         if ($('scalper-chart-loading')) $('scalper-chart-loading').style.display = 'flex';
-      } else {
+      } else if (!isBackground) {
         if (chartContainer) chartContainer.classList.add('scalper-chart-soft-loading');
       }
 
@@ -6703,10 +6711,10 @@ This is informational only — you decide whether to take the trade.`;
         // Periodic prediction refresh (AI inference) — price comes from Socket.IO
         if (activeTab === 'live-signal') {
           if (liveLoadInflight > 0) return;
-          load();
+          load(false, true);
         } else {
           if (scalperLoadInflight > 0) return;
-          loadScalper();
+          loadScalper(false, true);
         }
       }, pollSecs * 1000);
     }
