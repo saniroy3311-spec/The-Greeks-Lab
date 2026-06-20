@@ -2915,6 +2915,164 @@
         color: #ffffff;
         border-color: var(--blue);
       }
+    }
+
+    /* ===== MOBILE SCREEN RESPONSIVE QUALITY-OF-LIFE FIXES (<= 768px) ===== */
+    @media (max-width: 768px) {
+      /* RULE 1 — Minimum Readable Text Size: Floor at 11px */
+      .entry-light-label,
+      .entry-label,
+      .entry-dot,
+      .entry-light-dot,
+      .details-toggle-btn,
+      .card-title,
+      .sig-sub,
+      .sig-sub *,
+      .confidence-meter-header *,
+      .hud-item,
+      .hud-item .lbl,
+      .hud-item .val,
+      .sidebar-section-title,
+      .view-mode-container .label,
+      .live-entry-pill,
+      .live-target-pill,
+      .drawing-toolbar-toggle-btn,
+      .overlay-card-header::after,
+      .sig-header-row::after,
+      .scalper-logs-head::after,
+      .setup-alert-header,
+      .alerts-table-wrapper th,
+      .alerts-table-wrapper td,
+      .scalper-table-wrapper th,
+      .scalper-table-wrapper td,
+      .alerts-table,
+      .scalper-table,
+      .prediction-table-title,
+      .prediction-table th,
+      .prediction-table td,
+      .metric-label,
+      .forecast-title,
+      .forecast-badge,
+      .mobile-hud-strip .hud-item .lbl,
+      .mobile-hud-strip .hud-item .val,
+      [style*="font-size: 7px"],
+      [style*="font-size: 8px"],
+      [style*="font-size: 9px"],
+      [style*="font-size: 10px"] {
+        font-size: 11px !important;
+      }
+
+      /* RULE 2 — Minimum Tap Target Size (44x44px) & Spacing (>= 8px) */
+      .top-btn-icon#hamburger-menu-btn {
+        width: 44px !important;
+        height: 44px !important;
+        padding: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+      
+      .mobile-tf-pill {
+        height: 44px !important;
+        min-width: 44px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 12px !important;
+      }
+      
+      .candl-topbar .search-select {
+        height: 44px !important;
+        padding: 0 12px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+      }
+
+      .mobile-hud-strip {
+        height: 50px !important; /* increased height for tap target and text scaling spacing */
+      }
+
+      .drawing-toolbar {
+        width: 44px !important;
+      }
+
+      .drawing-toolbar button {
+        width: 44px !important;
+        height: 44px !important;
+      }
+
+      .drawing-toolbar-toggle-btn {
+        width: 24px !important;
+        height: 64px !important;
+      }
+
+      .sidebar-close-btn,
+      .sheet-close-btn,
+      .close-forecast-btn {
+        width: 44px !important;
+        height: 44px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+      }
+
+      /* Ensure at least 8px gap between topbar controls */
+      .candl-topbar {
+        gap: 8px !important;
+      }
+
+      .tab-container {
+        height: 46px !important;
+      }
+      .tab-btn {
+        height: 46px !important;
+        padding: 0 12px !important;
+      }
+
+      /* RULE 3 — No Forced Sideways Scrolling Without a Hint */
+      .alerts-table-wrapper,
+      .scalper-table-wrapper {
+        position: relative;
+        -webkit-overflow-scrolling: touch;
+      }
+      /* Right-edge overlay gradient scroll hint */
+      .alerts-table-wrapper::after,
+      .scalper-table-wrapper::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 24px;
+        background: linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,0.12));
+        pointer-events: none;
+        z-index: 10;
+      }
+      body.dark-theme .alerts-table-wrapper::after,
+      body.dark-theme .scalper-table-wrapper::after {
+        background: linear-gradient(to right, rgba(0,0,0,0), rgba(9, 13, 26, 0.45));
+      }
+
+      /* RULE 7 — Mobile performance, slow down pulse/glow animations */
+      .mobile-forecast-btn.glowing-green {
+        animation: mobile-pulse-green 3s infinite alternate !important;
+      }
+      .mobile-forecast-btn.glowing-red {
+        animation: mobile-pulse-red 3s infinite alternate !important;
+      }
+      .live-status-indicator .dot.active {
+        animation: pulse 3s infinite !important;
+      }
+      .badge-pos-long.active,
+      #badge-pos-long.active {
+        animation: flash-pulse-green 3s infinite alternate !important;
+      }
+      .badge-pos-short.active,
+      #badge-pos-short.active {
+        animation: flash-pulse-red 3s infinite alternate !important;
+      }
+    }
   </style>
 </head>
 

@@ -4325,11 +4325,8 @@ function wf(t, e) {
       for (; Y >= 0 && a[Y].isPrediction; )
         Y--;
       if (Y >= 0) {
-        let Z = a[Y].time + C.intervalMs - Date.now();
-        if (Z <= 0 || Z > C.intervalMs + 6e4) {
-          Z = C.intervalMs - (Date.now() % C.intervalMs);
-        }
-        if (Z > 0) {
+        const Z = a[Y].time + C.intervalMs - Date.now();
+        if (Z > 0 && Z <= C.intervalMs + 6e4) {
           let ot = D + 9 + 8;
           ot + 8 > y.bottom && (ot = D - 9 - 8), pc(
             o,
