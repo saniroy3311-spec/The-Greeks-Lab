@@ -4565,7 +4565,9 @@
       const tf = (activeTab === 'live-signal' ? $('tf') : $('scalper-tf')).value;
 
       // Only process ticks for the currently viewed symbol+timeframe
-      if (data.symbol !== sym || data.timeframe !== tf) return;
+      if (data.symbol !== sym || data.timeframe !== tf) {
+        return;
+      }
 
       const t = data.time; // Already in seconds from server
       const o = data.open;
@@ -5200,6 +5202,11 @@
         },
         onRender: () => {
           if (!scalperChartEngine) return;
+          const overlayCanvas = document.getElementById('scalper-trade-overlay');
+          if (overlayCanvas) {
+            overlayCanvas.getContext('2d').clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+          }
+          renderHistoricTradeBoxes(scalperChartEngine, emaKronosTradesHistory);
           updateShadedBoxes();
           renderEmaLines(scalperChartEngine);
           renderLiveTrackerLines(scalperChartEngine);
@@ -5546,24 +5553,17 @@
     }
     function renderHistoricTradeBoxes(engine, trades) {
       if (!engine || !trades || trades.length === 0) {
-        const overlayCanvas = document.getElementById('scalper-trade-overlay');
-        if (overlayCanvas) {
-          overlayCanvas.width = overlayCanvas.width;
-        }
         lastTradeMarkersKey = null;
         return;
       }
       const conv = engine.getMainConverters();
       const rect = engine.getMainPaneRect();
       if (!conv || !rect) return;
-      const tradesKey = JSON.stringify(trades.map(t => [t.entryTime, t.exitTime, t.entryPrice, t.slPrice, t.tpPrice, t.type, t.result, t.points]));
-      if (tradesKey === lastTradeMarkersKey && !resizeTradeOverlay()) return;
-      if (tradesKey !== lastTradeMarkersKey) lastTradeMarkersKey = tradesKey;
+      // Redraw every call — overlay is cleared each frame in onRender
       resizeTradeOverlay();
       const overlayCanvas = document.getElementById('scalper-trade-overlay');
       if (!overlayCanvas) return;
       const ctx = overlayCanvas.getContext('2d');
-      ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
       overlayCanvas.classList.add('drawn');
       try {
         const xMin = rect.x, xMax = rect.x + rect.width;
@@ -6331,9 +6331,7 @@ This is informational only — you decide whether to take the trade.`;
 
         emaKronosApiData = d;
         emaKronosTradesHistory = d.trades_history || [];
-        if (scalperChartEngine) {
-          renderHistoricTradeBoxes(scalperChartEngine, emaKronosTradesHistory);
-        }
+        lastTradeMarkersKey = null; // force overlay redraw on next onRender
 
         if ((sym === 'BTC' || sym === 'GOLD') && wsLastClosedTime !== null && d.candles.length > 0) {
           const serverLastCandleTime = d.candles[d.candles.length - 1].time;
@@ -7095,9 +7093,12 @@ This is informational only — you decide whether to take the trade.`;
 
       if (!banner) return;
 
+      // Use final gate decision as the source of truth for the banner verdict
+      const finalDecision = (d.decision || d.action || 'SKIP').toUpperCase();
       const direction = d.direction || 'Flat';
-      const action = d.action || 'SKIP';
       const confidence = d.confidence || 0;
+      const trend = d.trend || '—';
+      const kronosMove = d.move_pct || d.kronos_move_pct || 0;
 
       // Update text/content
       if (confEl) confEl.textContent = confidence + '%';
@@ -7109,51 +7110,53 @@ This is informational only — you decide whether to take the trade.`;
       banner.className = 'beginner-signal-banner';
       if (confBar) confBar.className = 'confidence-meter-fill';
 
-      // Pull Echoes historical pattern scan results
+      // Build multi-line data sources
+      const trendColor = finalDecision === 'BUY' ? '#a7f3d0' : finalDecision === 'SELL' ? '#fca5a5' : '#e2e8f0';
+      const trendLine = `<strong style="color: ${trendColor};">Trend:</strong> ${trend}`;
+
+      const aiColor = finalDecision === 'BUY' ? '#a7f3d0' : finalDecision === 'SELL' ? '#fca5a5' : '#e2e8f0';
+      const kronosDir = direction === 'Long' ? 'UP' : direction === 'Short' ? 'DOWN' : 'FLAT';
+      const aiLine = `<strong style="color: ${aiColor};">AI Forecast:</strong> ${direction} (${confidence}% conf, ${kronosMove >= 0 ? '+' : ''}${kronosMove.toFixed(2)}%)`;
+
+      // Echoes: always phrase percentage in same direction as conclusion
       const echoes = (prefix === 'scalper-') ? window.lastEchoScanScalper : window.lastEchoScan;
-      let echoesText = "";
+      let echoesLine = '';
       if (echoes && echoes.stats && echoes.stats.count > 0) {
-        const rate = Math.round((echoes.stats.upCount / echoes.stats.count) * 100);
-        if (direction === 'Long') {
-          if (rate >= 60) {
-            echoesText = ` <br><strong style="color: #a7f3d0;">Confluence:</strong> Historical matches confirm this upward trend (${rate}% UP).`;
-          } else if (rate <= 40) {
-            echoesText = ` <br><strong style="color: #fca5a5;">Warning:</strong> Historical matches show a downtrend bias (${rate}% UP). Exercise caution.`;
-          } else {
-            echoesText = ` <br><strong style="color: #e2e8f0;">Note:</strong> Historical matches are neutral (${rate}% UP).`;
-          }
-        } else if (direction === 'Short') {
-          if (rate <= 40) {
-            echoesText = ` <br><strong style="color: #a7f3d0;">Confluence:</strong> Historical matches confirm this downward trend (${rate}% UP).`;
-          } else if (rate >= 60) {
-            echoesText = ` <br><strong style="color: #fca5a5;">Warning:</strong> Historical matches show an uptrend bias (${rate}% UP). Exercise caution.`;
-          } else {
-            echoesText = ` <br><strong style="color: #e2e8f0;">Note:</strong> Historical matches are neutral (${rate}% UP).`;
-          }
+        const total = echoes.stats.count;
+        const upCount = echoes.stats.upCount;
+        const downCount = total - upCount;
+        const upRate = Math.round((upCount / total) * 100);
+        const downRate = Math.round((downCount / total) * 100);
+        if (finalDecision === 'BUY') {
+          echoesLine = `<strong style="color: #a7f3d0;">Pattern History:</strong> ${upCount} of ${total} matches went UP (${upRate}%)`;
+        } else if (finalDecision === 'SELL') {
+          echoesLine = `<strong style="color: #fca5a5;">Pattern History:</strong> ${downCount} of ${total} matches went DOWN (${downRate}%)`;
         } else {
-          echoesText = ` <br><strong style="color: #e2e8f0;">Historical:</strong> Matches show ${rate}% UP movement.`;
+          echoesLine = `<strong style="color: #e2e8f0;">Pattern History:</strong> ${upCount}/${total} UP (${upRate}%), ${downCount}/${total} DOWN (${downRate}%)`;
         }
       }
 
-      if (direction === 'Long') {
+      // Determine banner verdict — must match the final gate decision
+      if (finalDecision === 'BUY') {
         banner.classList.add('buy');
         if (confBar) confBar.classList.add('buy');
         if (iconEl) iconEl.textContent = '▲';
         if (actionEl) actionEl.textContent = 'BUY / LONG';
-        descEl.innerHTML = `Bullish momentum detected. Expected direction is UP. Recommended entry: BUY / LONG.${echoesText}`;
-      } else if (direction === 'Short') {
+      } else if (finalDecision === 'SELL') {
         banner.classList.add('sell');
         if (confBar) confBar.classList.add('sell');
         if (iconEl) iconEl.textContent = '▼';
         if (actionEl) actionEl.textContent = 'SELL / SHORT';
-        descEl.innerHTML = `Bearish momentum detected. Expected direction is DOWN. Recommended stance: SELL / SHORT.${echoesText}`;
       } else {
         banner.classList.add('skip');
         if (confBar) confBar.classList.add('skip');
         if (iconEl) iconEl.textContent = '⏸';
         if (actionEl) actionEl.textContent = 'WAIT / SKIP';
-        descEl.innerHTML = `Market consolidates or direction is unclear. Recommended stance: WAIT / SKIP.${echoesText}`;
       }
+
+      // Build description from parts, skipping any that are empty
+      const parts = [trendLine, aiLine, echoesLine].filter(p => p);
+      descEl.innerHTML = parts.join('<br>');
     }
     window.updateBeginnerSignal = updateBeginnerSignal;
 
