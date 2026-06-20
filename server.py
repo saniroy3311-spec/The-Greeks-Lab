@@ -20,6 +20,8 @@ import numpy as np
 import pandas as pd
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit, join_room, leave_room
+import websocket as ws_client  # websocket-client library
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from model import Kronos, KronosTokenizer, KronosPredictor
@@ -71,6 +73,7 @@ IST = timezone(timedelta(hours=5, minutes=30))
 
 app = Flask(__name__)
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading", ping_timeout=30, ping_interval=15)
 
 # ----------------------------------------------------------------------------
 # Load model once at startup
@@ -119,6 +122,13 @@ load_persistent_cache()
 ACTIVE_COMBINATIONS = {}  # key -> last_request_time
 active_lock = threading.Lock()
 prediction_lock = threading.Lock()
+
+# ----------------------------------------------------------------------------
+# Live Tick State — tracks current candle per symbol for real-time updates
+# ----------------------------------------------------------------------------
+_live_prices = {}  # symbol -> {price, time, candle: {time, open, high, low, close, volume}}
+_live_prices_lock = threading.Lock()
+_tick_subscribers = {}  # room_name -> set of session IDs (for tracking)
 
 
 def _localize_index(df, symbol_key):
@@ -944,12 +954,272 @@ def api_a1(symbol, tf):
         return jsonify({"error": str(e)}), 500
 
 
+# ----------------------------------------------------------------------------
+# Socket.IO Events — real-time tick push
+# ----------------------------------------------------------------------------
+@socketio.on('connect')
+def handle_connect():
+    print(f"[SocketIO] Client connected: {request.sid}")
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print(f"[SocketIO] Client disconnected: {request.sid}")
+
+@socketio.on('subscribe')
+def handle_subscribe(data):
+    """Client subscribes to tick updates for a symbol+timeframe."""
+    symbol = data.get('symbol', '').upper()
+    tf = data.get('timeframe', '5m').lower()
+    room = f"tick:{symbol}:{tf}"
+    join_room(room)
+    print(f"[SocketIO] {request.sid} joined room {room}")
+    # Send the latest known price immediately
+    with _live_prices_lock:
+        price_data = _live_prices.get(symbol)
+    if price_data:
+        emit('tick', price_data)
+
+@socketio.on('unsubscribe')
+def handle_unsubscribe(data):
+    """Client unsubscribes from tick updates."""
+    symbol = data.get('symbol', '').upper()
+    tf = data.get('timeframe', '5m').lower()
+    room = f"tick:{symbol}:{tf}"
+    leave_room(room)
+    print(f"[SocketIO] {request.sid} left room {room}")
+
+
+@app.route("/api/price/<symbol>")
+def api_price(symbol):
+    """Lightweight endpoint returning just the latest known price."""
+    symbol = symbol.upper()
+    with _live_prices_lock:
+        price_data = _live_prices.get(symbol)
+    if price_data:
+        return jsonify(price_data)
+    # Fallback to cached prediction data
+    for tf in ["1m", "3m", "5m"]:
+        key = f"{symbol}:{tf}"
+        with _cache_lock:
+            cached = _cache.get(key)
+        if cached:
+            result = cached[1]
+            candles = result.get("candles", [])
+            if candles:
+                last = candles[-1]
+                return jsonify({
+                    "symbol": symbol,
+                    "price": last["close"],
+                    "time": last["time"],
+                    "source": "cache"
+                })
+    return jsonify({"error": "No price data available"}), 404
+
+
+# ----------------------------------------------------------------------------
+# Server-Side Delta Exchange WebSocket (BTC & GOLD real-time candles)
+# ----------------------------------------------------------------------------
+def _emit_tick(symbol, tf, candle_data):
+    """Emit a tick event to all clients subscribed to this symbol+timeframe."""
+    room = f"tick:{symbol}:{tf}"
+    tick_payload = {
+        "symbol": symbol,
+        "timeframe": tf,
+        "time": candle_data["time"],
+        "open": candle_data["open"],
+        "high": candle_data["high"],
+        "low": candle_data["low"],
+        "close": candle_data["close"],
+        "volume": candle_data.get("volume", 0),
+        "source": "delta_ws"
+    }
+    with _live_prices_lock:
+        _live_prices[symbol] = {
+            "symbol": symbol,
+            "price": candle_data["close"],
+            "time": candle_data["time"],
+            "source": "delta_ws"
+        }
+    socketio.emit('tick', tick_payload, room=room)
+
+
+def _delta_ws_thread():
+    """Maintain persistent WebSocket connection to Delta Exchange for BTC & GOLD."""
+    DELTA_TFS = ["1m", "3m", "5m", "15m", "30m"]
+    DELTA_SYMBOLS = {
+        "BTCUSD": "BTC",
+        "XAUTUSD": "GOLD"
+    }
+    
+    def on_message(ws_conn, message):
+        try:
+            msg = json.loads(message)
+            msg_type = msg.get("type", "")
+            
+            # Match candlestick_Xm messages
+            matched_tf = None
+            for tf in DELTA_TFS:
+                if msg_type == f"candlestick_{tf}":
+                    matched_tf = tf
+                    break
+            
+            if not matched_tf:
+                return
+            
+            delta_symbol = msg.get("symbol") or msg.get("sy")
+            if delta_symbol not in DELTA_SYMBOLS:
+                return
+            
+            kronos_symbol = DELTA_SYMBOLS[delta_symbol]
+            
+            raw_time = msg.get("candle_start_time") or msg.get("cst")
+            if raw_time is None:
+                return
+            
+            # Normalize timestamp to seconds
+            if raw_time > 1000000000000000:
+                t = raw_time // 1000000000  # Nanoseconds
+            elif raw_time > 100000000000:
+                t = raw_time // 1000  # Milliseconds
+            else:
+                t = raw_time  # Already seconds
+            
+            o = float(msg.get("open") or msg.get("o", 0))
+            h = float(msg.get("high") or msg.get("h", 0))
+            l = float(msg.get("low") or msg.get("l", 0))
+            c = float(msg.get("close") or msg.get("c", 0))
+            v = float(msg.get("volume") or msg.get("v", 0))
+            
+            candle = {"time": int(t), "open": o, "high": h, "low": l, "close": c, "volume": v}
+            _emit_tick(kronos_symbol, matched_tf, candle)
+            
+        except Exception as e:
+            print(f"[Delta WS] Error processing message: {e}")
+    
+    def on_error(ws_conn, error):
+        print(f"[Delta WS] WebSocket error: {error}")
+    
+    def on_close(ws_conn, close_status_code, close_msg):
+        print(f"[Delta WS] Connection closed: {close_status_code} - {close_msg}")
+    
+    def on_open(ws_conn):
+        # Subscribe to all timeframes for both symbols
+        channels = []
+        for tf in DELTA_TFS:
+            channels.append({
+                "name": f"candlestick_{tf}",
+                "symbols": list(DELTA_SYMBOLS.keys())
+            })
+        
+        subscribe_msg = {
+            "type": "subscribe",
+            "payload": {"channels": channels}
+        }
+        ws_conn.send(json.dumps(subscribe_msg))
+        print(f"[Delta WS] Subscribed to {len(channels)} candlestick channels for {list(DELTA_SYMBOLS.keys())}")
+    
+    while True:
+        try:
+            print("[Delta WS] Connecting to wss://socket.india.delta.exchange ...")
+            ws = ws_client.WebSocketApp(
+                "wss://socket.india.delta.exchange",
+                on_message=on_message,
+                on_error=on_error,
+                on_close=on_close,
+                on_open=on_open
+            )
+            ws.run_forever(ping_interval=20, ping_timeout=10)
+        except Exception as e:
+            print(f"[Delta WS] Connection failed: {e}")
+        
+        print("[Delta WS] Reconnecting in 3 seconds...")
+        time.sleep(3)
+
+
+# ----------------------------------------------------------------------------
+# yfinance Rapid-Poll Thread (NIFTY & BANKNIFTY real-time candle approximation)
+# ----------------------------------------------------------------------------
+def _yfinance_poll_thread():
+    """Poll yfinance every 3-5s for NSE symbols to get near-real-time prices."""
+    import yfinance as yf
+    
+    NSE_SYMBOLS = {
+        "NIFTY": "^NSEI",
+        "BANKNIFTY": "^NSEBANK"
+    }
+    POLL_INTERVAL = 4  # seconds between polls
+    
+    print("[yfinance Poll] Started rapid polling for NSE symbols.")
+    
+    while True:
+        for kronos_sym, yf_ticker in NSE_SYMBOLS.items():
+            try:
+                # Fetch just the latest 1-minute candle
+                df = yf.download(yf_ticker, period="1d", interval="1m",
+                                 progress=False, auto_adjust=False)
+                if df is None or len(df) == 0:
+                    continue
+                
+                if isinstance(df.columns, pd.MultiIndex):
+                    df.columns = [c[0] for c in df.columns]
+                df.columns = [str(c).strip().lower() for c in df.columns]
+                
+                last_row = df.iloc[-1]
+                last_time = df.index[-1]
+                
+                # Convert to IST timestamp in seconds
+                if hasattr(last_time, 'tz') and last_time.tz is not None:
+                    ts = int(last_time.timestamp())
+                else:
+                    # Assume IST if no timezone
+                    import pytz
+                    ist = pytz.timezone('Asia/Kolkata')
+                    ts = int(ist.localize(last_time.to_pydatetime()).timestamp())
+                
+                price = float(last_row['close'])
+                
+                # Check if price actually changed
+                with _live_prices_lock:
+                    prev = _live_prices.get(kronos_sym, {})
+                    if prev.get('price') == price and prev.get('time') == ts:
+                        continue  # No change
+                
+                candle = {
+                    "time": ts,
+                    "open": round(float(last_row['open']), 2),
+                    "high": round(float(last_row['high']), 2),
+                    "low": round(float(last_row['low']), 2),
+                    "close": round(price, 2),
+                    "volume": int(float(last_row.get('volume', 0)))
+                }
+                
+                # Emit to ALL timeframe rooms — client will handle candle aggregation
+                for tf in ["1m", "3m", "5m", "15m", "30m"]:
+                    _emit_tick(kronos_sym, tf, candle)
+                
+            except Exception as e:
+                # Don't spam logs — yfinance can fail during market close
+                pass
+        
+        time.sleep(POLL_INTERVAL)
+
+
 if __name__ == "__main__":
     print(f"[Kronos] Dashboard:  http://0.0.0.0:{PORT}")
     print(f"[Kronos] API sample: http://0.0.0.0:{PORT}/api/signal/NIFTY/5m")
+    print(f"[Kronos] WebSocket:  ws://0.0.0.0:{PORT}/socket.io/")
     
     # Start background cache worker
     bg_thread = threading.Thread(target=background_cache_worker, daemon=True)
     bg_thread.start()
     
-    app.run(host="0.0.0.0", port=PORT, threaded=True)
+    # Start Delta Exchange WebSocket client for BTC & GOLD real-time ticks
+    delta_thread = threading.Thread(target=_delta_ws_thread, daemon=True)
+    delta_thread.start()
+    
+    # Start yfinance rapid-poll thread for NIFTY & BANKNIFTY
+    yf_thread = threading.Thread(target=_yfinance_poll_thread, daemon=True)
+    yf_thread.start()
+    
+    # Use socketio.run() instead of app.run() for WebSocket support
+    socketio.run(app, host="0.0.0.0", port=PORT, allow_unsafe_werkzeug=True)
