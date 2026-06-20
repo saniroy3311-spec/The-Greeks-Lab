@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, safe-area-inset-bottom" />
+    <title>CandL Charts — Kronos AI Live App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg: #090d1a;
+        --card-bg: rgba(15, 22, 42, 0.65);
+        --card-border: rgba(255, 255, 255, 0.08);
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --primary: #38bdf8;
+        --up: #22c55e;
+        --down: #ef4444;
+        --warning: #f59e0b;
+        --glow-up: rgba(34, 197, 94, 0.15);
+        --glow-down: rgba(239, 68, 68, 0.15);
+      }
+
+      body.light-theme {
+        --bg: #f8fafc;
+        --card-bg: rgba(255, 255, 255, 0.85);
+        --card-border: rgba(15, 23, 42, 0.08);
+        --text: #0f172a;
+        --muted: #64748b;
+        --primary: #0284c7;
+        --up: #16a34a;
+        --down: #dc2626;
+        --warning: #ea580c;
+        --glow-up: rgba(22, 163, 74, 0.12);
+        --glow-down: rgba(220, 38, 38, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Outfit', sans-serif;
+        overflow: hidden;
+      }
+
+      /* Glassmorphic Topbar */
+      .topbar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: rgba(9, 13, 26, 0.75);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        z-index: 100;
+        padding-top: env(safe-area-inset-top, 0px);
+      }
+
+      .logo-section {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        font-size: 18px;
+        letter-spacing: 0.5px;
+      }
+
+      .logo-icon {
+        color: var(--primary);
+        filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .search-select {
+        background: rgba(15, 22, 42, 0.8);
+        color: var(--text);
+        border: 1px solid var(--card-border);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 14px;
+        outline: none;
+        cursor: pointer;
+        transition: border-color 0.2s;
+        height: 38px;
+      }
+
+      .search-select:hover, .search-select:focus {
+        border-color: var(--primary);
+      }
+
+      .timeframe-group {
+        display: flex;
+        gap: 8px;
+        padding: 2px;
+      }
+
+      .tf-btn {
+        background: rgba(15, 22, 42, 0.8);
+        border: 1px solid var(--card-border);
+        color: var(--muted);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .tf-btn:hover {
+        border-color: var(--primary);
+        color: var(--text);
+      }
+
+      .tf-btn.active {
+        background: var(--primary);
+        color: #000;
+        border-color: var(--primary);
+        font-weight: 600;
+      }
+
+      .indicator-btn {
+        background: rgba(15, 22, 42, 0.8);
+        color: var(--text);
+        border: 1px solid var(--card-border);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+        height: 38px;
+      }
+
+      .indicator-btn:hover, .indicator-btn.active {
+        border-color: var(--primary);
+        background: rgba(56, 189, 248, 0.1);
+      }
+
+      .indicator-dropdown-panel {
+        position: absolute;
+        top: 65px;
+        right: 20px;
+        background: rgba(15, 22, 42, 0.95);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 12px;
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 180px;
+        z-index: 200;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      }
+
+      .indicator-dropdown-panel.active {
+        display: flex;
+      }
+
+      .indicator-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        padding: 6px 8px;
+        border-radius: 6px;
+        font-size: 13px;
+        transition: background 0.2s;
+      }
+
+      .indicator-option:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .indicator-checkbox {
+        accent-color: var(--primary);
+      }
+
+      /* Connection status */
+      .status-container {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--warning);
+        transition: background 0.3s;
+      }
+
+      .status-dot.connected {
+        background: var(--up);
+        box-shadow: 0 0 8px var(--up);
+      }
+
+      /* Main Chart Stage */
+      #chart {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        touch-action: manipulation;
+      }
+
+      /* Floating Collapsible Forecast Panel */
+      .forecast-card {
+        position: absolute;
+        top: 80px;
+        left: 20px;
+        width: 320px;
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        padding: 16px;
+        z-index: 90;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+      }
+
+      body.forecast-hidden .forecast-card {
+        transform: translateX(-350px);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .forecast-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 8px;
+      }
+
+      .forecast-title {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--muted);
+      }
+
+      .forecast-badge {
+        font-size: 12px;
+        font-weight: 800;
+        padding: 3px 8px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .forecast-badge.long {
+        background: var(--glow-up);
+        color: var(--up);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+      }
+
+      .forecast-badge.short {
+        background: var(--glow-down);
+        color: var(--down);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+
+      .close-forecast-btn {
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        transition: background 0.2s, color 0.2s;
+        margin-right: -10px;
+      }
+
+      .close-forecast-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text);
+      }
+
+      .forecast-toggle-btn {
+        position: absolute;
+        top: 80px;
+        left: 20px;
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--card-border);
+        color: var(--text);
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 95;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s;
+      }
+
+      .forecast-toggle-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      body.forecast-hidden .forecast-toggle-btn {
+        display: flex;
+      }
+
+      .forecast-metrics {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .metric-box {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.02);
+      }
+
+      .metric-label {
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 2px;
+      }
+
+      .metric-val {
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .metric-val.up {
+        color: var(--up);
+      }
+
+      .metric-val.down {
+        color: var(--down);
+      }
+
+      /* Predictions table */
+      .prediction-table-wrapper {
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: 10px;
+      }
+
+      .prediction-table-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+
+      .prediction-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+
+      .prediction-table th {
+        text-align: left;
+        color: var(--muted);
+        font-weight: 500;
+        padding: 4px 0;
+      }
+
+      .prediction-table td {
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        font-family: 'JetBrains Mono', monospace;
+      }
+
+      .prediction-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .trend-up {
+        color: var(--up);
+      }
+
+      .trend-down {
+        color: var(--down);
+      }
+
+      /* Timeframe scroll hint wrappers */
+      .timeframe-group-wrapper {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      /* Media Queries for Mobile Responsiveness */
+      @media (max-width: 768px) {
+        .logo-text {
+          display: none;
+        }
+        
+        .topbar {
+          padding: 0 10px;
+          height: 60px;
+        }
+
+        .controls {
+          gap: 8px;
+        }
+
+        .search-select {
+          height: 44px;
+          font-size: 14px;
+          padding: 8px 10px;
+        }
+
+        .timeframe-group {
+          gap: 8px;
+        }
+
+        .tf-btn {
+          height: 44px;
+          min-width: 44px;
+          font-size: 13px;
+          padding: 8px 10px;
+        }
+
+        .indicator-btn {
+          height: 44px;
+          font-size: 13px;
+          padding: 8px 12px;
+        }
+
+        #theme-btn {
+          height: 44px !important;
+          width: 44px !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          padding: 0 !important;
+        }
+
+        .forecast-card {
+          width: calc(100% - 40px);
+          max-width: 320px;
+          top: 70px;
+          left: 20px;
+        }
+
+        .forecast-toggle-btn {
+          width: 44px;
+          height: 44px;
+          top: 70px;
+          left: 15px;
+        }
+
+        /* Enforce mobile font size floor of 11px */
+        .metric-label,
+        .prediction-table-title,
+        .prediction-table th,
+        .prediction-table td,
+        .forecast-title,
+        .forecast-badge,
+        .tf-btn,
+        .indicator-btn,
+        .search-select {
+          font-size: 11px !important;
+        }
+      }
+
+      @media (max-width: 580px) {
+        .timeframe-group-wrapper::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          width: 16px;
+          background: linear-gradient(to right, rgba(0, 0, 0, 0), var(--bg));
+          pointer-events: none;
+          z-index: 5;
+        }
+
+        .timeframe-group {
+          max-width: 140px;
+          overflow-x: auto;
+          scrollbar-width: none; /* Hide scrollbar on Firefox */
+          display: flex;
+          gap: 8px;
+        }
+        
+        .timeframe-group::-webkit-scrollbar {
+          display: none; /* Hide scrollbar on Chrome/Safari */
+        }
+
+        .status-container {
+          display: none; /* Hide connection text on smaller screens */
+        }
+        
+        .forecast-card {
+          width: calc(100% - 20px);
+          left: 10px;
+          top: 70px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="logo-section">
+        <svg class="logo-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2.5 L21.5 21 L2.5 21 Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="rgba(56, 189, 248, 0.1)" />
+          <rect x="8.5" y="11" width="1.5" height="6.5" rx="0.5" fill="#22c55e" />
+          <rect x="11.25" y="8" width="1.5" height="9.5" rx="0.5" fill="currentColor" />
+          <rect x="14" y="12.5" width="1.5" height="5" rx="0.5" fill="#ef4444" />
+        </svg>
+        <span class="logo-text">CandL · Kronos Live</span>
+      </div>
+
+      <div class="controls">
+        <select id="symbol" class="search-select">
+          <option value="NIFTY">Nifty 50</option>
+          <option value="BANKNIFTY">Bank Nifty</option>
+          <option value="BTC" selected>Bitcoin (BTC)</option>
+          <option value="GOLD">Tether Gold (GOLD)</option>
+        </select>
+
+        <div class="timeframe-group-wrapper">
+          <div class="timeframe-group">
+            <button class="tf-btn" data-tf="1m">1m</button>
+            <button class="tf-btn" data-tf="3m">3m</button>
+            <button class="tf-btn active" data-tf="5m">5m</button>
+            <button class="tf-btn" data-tf="15m">15m</button>
+            <button class="tf-btn" data-tf="30m">30m</button>
+            <button class="tf-btn" data-tf="1h">1h</button>
+            <button class="tf-btn" data-tf="1d">1d</button>
+          </div>
+        </div>
+
+        <button class="indicator-btn" id="indicators-btn" onclick="toggleIndicatorsDropdown(event)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          Indicators
+        </button>
+
+        <div class="indicator-dropdown-panel" id="indicators-panel">
+          <label class="indicator-option">
+            <input type="checkbox" class="indicator-checkbox" data-ind="sma" checked> SMA (20)
+          </label>
+          <label class="indicator-option">
+            <input type="checkbox" class="indicator-checkbox" data-ind="ema" checked> EMA (9, 21)
+          </label>
+          <label class="indicator-option">
+            <input type="checkbox" class="indicator-checkbox" data-ind="bb"> Bollinger Bands
+          </label>
+          <label class="indicator-option">
+            <input type="checkbox" class="indicator-checkbox" data-ind="rsi"> RSI (14)
+          </label>
+          <label class="indicator-option">
+            <input type="checkbox" class="indicator-checkbox" data-ind="macd"> MACD
+          </label>
+        </div>
+
+        <button class="indicator-btn" id="theme-btn" onclick="toggleTheme(event)" title="Toggle Theme" style="padding: 0; width: 38px; justify-content: center;">
+          <span id="theme-icon">🌙</span>
+        </button>
+
+        <div class="divider" style="width: 1px; height: 20px; background: var(--card-border);"></div>
+
+        <div class="status-container">
+          <div class="status-dot" id="status-dot"></div>
+          <span id="status-text">Disconnected</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Forecast Widget -->
+    <div class="forecast-card" id="forecast-card">
+      <div class="forecast-header">
+        <span class="forecast-title" id="forecast-sub">BTC - 5m FORECAST</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="forecast-badge" id="forecast-badge">—</span>
+          <button class="close-forecast-btn" onclick="toggleForecast(false)" title="Hide forecast panel">×</button>
+        </div>
+      </div>
+
+      <div class="forecast-metrics">
+        <div class="metric-box">
+          <div class="metric-label">Current Price</div>
+          <div class="metric-val" id="metric-price">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Confidence</div>
+          <div class="metric-val" id="metric-conf">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Expected Move</div>
+          <div class="metric-val" id="metric-move">—</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Expected Target</div>
+          <div class="metric-val" id="metric-target">—</div>
+        </div>
+      </div>
+
+      <div class="prediction-table-wrapper">
+        <div class="prediction-table-title">Future Prediction Path</div>
+        <table class="prediction-table">
+          <thead>
+            <tr>
+              <th>Candle</th>
+              <th style="text-align: right;">Close</th>
+              <th style="text-align: right;">Change</th>
+            </tr>
+          </thead>
+          <tbody id="prediction-table-body">
+            <tr>
+              <td colspan="3" style="text-align: center; color: var(--muted); padding: 12px 0;">
+                Awaiting first forecast...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Floating Toggle Button when Forecast is Hidden -->
+    <button class="forecast-toggle-btn" id="forecast-toggle-btn" onclick="toggleForecast(true)" title="Show forecast panel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="9" y1="3" x2="9" y2="21"></line>
+      </svg>
+    </button>
+
+    <div id="chart"></div>
+
+    <!-- Socket.IO library via CDN -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script type="module" src="./main.ts"></script>
+    <script>
+      function toggleIndicatorsDropdown(event) {
+        event.stopPropagation();
+        const panel = document.getElementById('indicators-panel');
+        panel.classList.toggle('active');
+        const btn = document.getElementById('indicators-btn');
+        btn.classList.toggle('active');
+      }
+
+      window.addEventListener('click', () => {
+        const panel = document.getElementById('indicators-panel');
+        if (panel) panel.classList.remove('active');
+        const btn = document.getElementById('indicators-btn');
+        if (btn) btn.classList.remove('active');
+      });
+
+      document.getElementById('indicators-panel').addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+
+      function toggleForecast(show) {
+        if (show) {
+          document.body.classList.remove('forecast-hidden');
+        } else {
+          document.body.classList.add('forecast-hidden');
+        }
+        // Force resize the chart to ensure layout fits perfectly
+        window.dispatchEvent(new Event('resize'));
+      }
+      window.toggleForecast = toggleForecast;
+
+      function toggleTheme(event) {
+        event.stopPropagation();
+        const isLight = document.body.classList.toggle('light-theme');
+        const theme = isLight ? 'light' : 'dark';
+        localStorage.setItem('candl_theme', theme);
+        document.getElementById('theme-icon').textContent = isLight ? '☀️' : '🌙';
+        if (window.chartEngine) {
+          window.chartEngine.setTheme(theme);
+        }
+      }
+      window.toggleTheme = toggleTheme;
+
+      // Apply saved theme on load
+      const savedTheme = localStorage.getItem('candl_theme') || 'dark';
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        document.addEventListener('DOMContentLoaded', () => {
+          const icon = document.getElementById('theme-icon');
+          if (icon) icon.textContent = '☀️';
+        });
+      }
+    </script>
+  </body>
+</html>

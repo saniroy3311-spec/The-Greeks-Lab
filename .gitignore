@@ -10,3 +10,7 @@ __pycache__/
 prediction_results/
 *.csv
 *.feather
+node_modules/
+**/node_modules/
+.git_bak/
+**/dist/node_modules/
