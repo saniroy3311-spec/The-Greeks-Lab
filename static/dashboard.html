@@ -3991,7 +3991,8 @@
   </div>
 
   <script type="module">
-    import { createChartEngine, lab, playTune, ALERT_TUNES, checkAndFireAlerts, getIndicator } from './static/candl-charts.js';
+    import { createChartEngineTVSync as createChartEngine } from './static/tv-chart-adapter.js';
+    import { lab, playTune, ALERT_TUNES, checkAndFireAlerts, getIndicator } from './static/candl-charts.js';
 
     const API = window.location.pathname.endsWith('/') ? window.location.pathname.slice(0, -1) : window.location.pathname;
     const $ = id => document.getElementById(id);
@@ -4125,7 +4126,10 @@
         if (scalperChartEngine) {
           scalperChartEngine.updateLast(candle);
           updateLocalCandles(scalperCandles, candle);
-          updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
+          // Only recalculate indicators on bar close — not every tick
+          if (isClosed) {
+            updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
+          }
 
           if (currentTrade && currentTrade.active) {
             let hit = false;
@@ -4156,7 +4160,11 @@
         if (liveChartEngine) {
           updateLocalCandles(liveCandles, candle);
           liveChartEngine.updateLast(candle);
-          updateChartIndicators(liveChartEngine, liveCandles, liveActiveIndicators);
+          // Only recalculate indicators on bar close (not every tick) —
+          // avoids unnecessary series rebuilds on the TV chart.
+          if (isClosed) {
+            updateChartIndicators(liveChartEngine, liveCandles, liveActiveIndicators);
+          }
 
           window.currentPrice = c;
           updateIdText('s-cur', fmt(c));
