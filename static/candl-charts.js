@@ -4326,11 +4326,11 @@ function wf(t, e) {
         Y--;
       if (Y >= 0) {
         const Z = a[Y].time + C.intervalMs - Date.now();
-        if (Z > 0 && Z <= C.intervalMs + 6e4) {
+        if (Z > -C.intervalMs && Z <= C.intervalMs + 6e4) {
           let ot = D + 9 + 8;
           ot + 8 > y.bottom && (ot = D - 9 - 8), pc(
             o,
-            Ic(Z),
+            Ic(Math.max(0, Z)),
             ot,
             p.plotWidth,
             p.width - p.plotWidth,
@@ -4435,6 +4435,23 @@ function wf(t, e) {
     if (De || ((window.devicePixelRatio || 1) !== zt && Ye(), rt.width <= 0 || rt.height <= 0)) return;
     const p = Da[s], y = as(p), b = cs(), M = ct();
     o.save(), o.font = Yt, o.fillStyle = p.bg, o.fillRect(0, 0, M.width, M.height);
+    let overlayWidth = 0;
+    const liveOverlays = document.getElementById('live-overlays');
+    const scalperOverlays = document.getElementById('scalper-overlays');
+    const targetOverlays = liveOverlays || scalperOverlays;
+    if (targetOverlays) {
+      const style = window.getComputedStyle(targetOverlays);
+      if (style.position === 'absolute' && !targetOverlays.classList.contains('collapsed')) {
+        overlayWidth = targetOverlays.offsetWidth;
+      }
+    }
+    const leftMargin = overlayWidth > 0 ? (overlayWidth + 12) : 0;
+    if (leftMargin > 0) {
+      o.save();
+      o.beginPath();
+      o.rect(leftMargin, 0, M.width - leftMargin, M.height);
+      o.clip();
+    }
     const S = Xa(C);
     b && Ga(o, p, S, M.timeAxisTop);
     const { from: A, to: F } = C.visibleRange(), R = Math.min(F, dt() - 1), v = dt() > 0 && A <= R, D = se(l), Y = M.panes[0], X = ft(Y), Z = [X], ot = X.ticks(Math.pow(10, -r));
@@ -4498,7 +4515,11 @@ function wf(t, e) {
       o.restore();
     }
     const Ft = J && v && J.x >= 0 && J.x <= M.plotWidth && J.y < M.timeAxisTop ? ut(Math.floor(C.xToIndex(J.x)), 0, dt() - 1) : null;
-    fs() && Ws(M, Z, p), vs(M, p, Ft), o.restore(), (Lt = e.onRender) == null || Lt.call(e);
+    fs() && Ws(M, Z, p), vs(M, p, Ft);
+    if (leftMargin > 0) {
+      o.restore();
+    }
+    o.restore(), (Lt = e.onRender) == null || Lt.call(e);
   }
   const No = {
     setData(p) {

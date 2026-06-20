@@ -414,6 +414,7 @@
       width: 100%;
       height: 100%;
       touch-action: none;
+      z-index: 1;
     }
 
     /* Side Drawing Toolbar - a real layout column (not an overlay), so it can
@@ -498,7 +499,7 @@
       top: 12px;
       bottom: 12px;
       left: 12px;
-      z-index: 15;
+      z-index: 20;
       display: flex;
       flex-direction: column;
       width: 365px;
@@ -3962,27 +3963,28 @@
 
               <!-- Focus Confirmation Report Card -->
               <div class="overlay-card confirmation-card" id="focus-confirmation-card" style="margin-top: 8px;">
-                <div class="overlay-card-header">
-                  <span class="card-title">CONFIRMATION SUMMARY</span>
+                <div class="overlay-card-header" style="border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 8px;">
+                  <span class="card-title">CONFIRMATION GATE (5-RULE)</span>
                 </div>
-                <div id="focus-report-score" style="font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--blue);">0 / 0 AGREE</div>
-                <div class="focus-report-grid" style="display: flex; flex-direction: column; gap: 6px; font-size: 11px;">
-                  <div class="focus-row" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>EMA Trend (5/10)</span> <span id="f-ema-val" class="val">—</span>
-                  </div>
-                  <div class="focus-row" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>Kronos AI Forecast</span> <span id="f-kronos-val" class="val">—</span>
-                  </div>
-                  <div class="focus-row" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>Echoes Win Rate</span> <span id="f-echoes-val" class="val">—</span>
-                  </div>
-                  <div class="focus-row" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>Market Clock Session</span> <span id="f-clock-val" class="val">—</span>
-                  </div>
-                  <div class="focus-row" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>Oracle Probability</span> <span id="f-oracle-val" class="val">—</span>
-                  </div>
-                </div>
+                <div id="focus-report-score" style="font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">GATE: 0/5 PASS — TRADE REJECTED</div>
+                <div id="focus-report-blocking" style="font-size: 11px; color: var(--down); margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; min-height: 15px; font-weight: 600;">Blocking: None</div>
+                
+                <table class="focus-gate-table" style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; margin-bottom: 8px;">
+                  <thead>
+                    <tr style="border-bottom: 1px solid var(--border); color: var(--muted); font-size: 10px;">
+                      <th style="padding: 4px 0; font-weight: 600;">#</th>
+                      <th style="padding: 4px 0; font-weight: 600;">Parameter</th>
+                      <th style="padding: 4px 0; font-weight: 600;">Live Value</th>
+                      <th style="padding: 4px 0; font-weight: 600;">Threshold</th>
+                      <th style="padding: 4px 0; font-weight: 600; text-align: center;">Status</th>
+                      <th style="padding: 4px 0; font-weight: 600; text-align: right;">Direction</th>
+                    </tr>
+                  </thead>
+                  <tbody id="focus-table-body">
+                    <!-- Dynamic rows will be inserted here -->
+                  </tbody>
+                </table>
+
                 <div style="border-top: 1px solid var(--border); margin-top: 8px; padding-top: 8px;">
                   <div style="font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 4px;">Notes</div>
                   <div id="focus-report-notes" style="font-size: 10px; line-height: 1.4; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; white-space: pre-wrap;"></div>
@@ -6104,7 +6106,7 @@ SKIP REASONS: [${skips}]${entryStopProfit}`;
       updateFocusConfirmation();
     };
 
-    function formatFocusReport(scoreStr, emaText, kronosText, echoesText, clockText, oracleText, emaMark, kronosMark, echoesMark, clockMark, oracleMark, notes) {
+    function formatFocusReport(scoreStr, blockingStr, confidenceText, winRateText, asymmetryText, moveText, timerText, p1Mark, p2Mark, p3Mark, p4Mark, p5Mark, notes) {
       const sym = $('symbol').value;
       const tf = $('tf').value;
       const ts = liveCandles && liveCandles.length > 0 ? liveCandles[liveCandles.length - 1].time / 1000 : 0;
@@ -6113,13 +6115,14 @@ SKIP REASONS: [${skips}]${entryStopProfit}`;
       return `SETUP: [${traderDirectionBias}] on [${sym}/${tf}]
 CANDLE: [${dateStr}]
 
-CONFIRMATION SCORE: [${scoreStr}]
+${scoreStr}
+${blockingStr}
 
- EMA Trend:        ${emaText}   [${emaMark}]
- Kronos AI:         ${kronosText}   [${kronosMark}]
- Echoes:            ${echoesText}   [${echoesMark}]
- Market Clock:       ${clockText}   [${clockMark}]
- Oracle:             ${oracleText}   [${oracleMark}]
+ 1. Confidence:         ${confidenceText}   [${p1Mark}]
+ 2. Win Rate:           ${winRateText}   [${p2Mark}]
+ 3. Asymmetry:          ${asymmetryText}   [${p3Mark}]
+ 4. Expected Move:      ${moveText}   [${p4Mark}]
+ 5. Bar-Close Sync:     ${timerText}   [${p5Mark}]
 
 NOTES:
 ${notesBlock}
@@ -6131,108 +6134,252 @@ This is informational only — you decide whether to take the trade.`;
       const d = window.lastLiveSignalData;
       if (!d || !liveCandles || liveCandles.length === 0) return;
       const lastClose = liveCandles[liveCandles.length - 1].close;
-      const lastOpen = liveCandles[liveCandles.length - 1].open;
-      const ema5 = calculateEMA(liveCandles, 5);
-      const ema10 = calculateEMA(liveCandles, 10);
-      const lastEma5 = ema5[ema5.length - 1];
-      const lastEma10 = ema10[ema10.length - 1];
-      const emaTrend = lastEma5 > lastEma10 ? 'Up' : (lastEma5 < lastEma10 ? 'Down' : 'Flat');
-      let barsSinceCross = 0;
-      for (let i = ema5.length - 1; i > 0; i--) {
-        const diff = ema5[i] - ema10[i];
-        const prevDiff = ema5[i - 1] - ema10[i - 1];
-        if ((prevDiff <= 0 && diff > 0) || (prevDiff >= 0 && diff < 0)) {
-          break;
+      const lastCandle = liveCandles[liveCandles.length - 1];
+      const cacheKey = `${liveCandles.length}_${lastCandle.time}_${lastClose}_${lastCandle.volume}_${traderDirectionBias}_${d.direction || 'Flat'}_${d.confidence || 0}_${d.move_pct || 0.0}`;
+
+      let cache = window._focusConfCache;
+      if (!cache || cache.key !== cacheKey) {
+        const krDir = d.direction || 'Flat';
+        const krConf = d.confidence || 0;
+        const krMove = d.move_pct || 0.0;
+        const horizon = d.pred_len || 5;
+
+        const echoes = lab.buildEchoScan(liveCandles, 30, horizon, 5);
+        const count = echoes ? echoes.stats.count : 0;
+        const up = echoes ? echoes.stats.upCount : 0;
+        const winRate = count > 0 ? up / count : 0.0;
+
+        let asym = 0.0;
+        if (count > 0 && echoes.stats.bestEndPct !== 0 && echoes.stats.worstEndPct !== 0) {
+          const isShort = krDir.toLowerCase() === 'short';
+          asym = isShort ? 
+            Math.abs(echoes.stats.worstEndPct) / Math.abs(echoes.stats.bestEndPct) : 
+            Math.abs(echoes.stats.bestEndPct) / Math.abs(echoes.stats.worstEndPct);
         }
-        barsSinceCross++;
+
+        const clock = lab.computeMarketClock(liveCandles);
+        const dDate = new Date(lastCandle.time);
+        const currentHour = dDate.getUTCHours();
+        let sum = 0, clockCount = 0;
+        for (let h = 0; h < 24; h++) {
+          if (clock.byHourUtc[h].samples > 0) {
+            sum += clock.byHourUtc[h].meanAbsReturnPct;
+            clockCount++;
+          }
+        }
+        const avgAbsReturn = clockCount > 0 ? sum / clockCount : 0;
+        const currentBucket = clock.byHourUtc[currentHour];
+        const isQuiet = currentBucket.meanAbsReturnPct < avgAbsReturn;
+        const clockState = isQuiet ? 'Quiet window' : 'Active window';
+
+        const oracle = lab.buildOracle(liveCandles, horizon, 1000);
+        const medianEndPct = oracle ? oracle.medianEndPct : 0.0;
+        const oddsResult = oracle ? lab.targetOdds(oracle, 0) : null;
+        let odds = 0;
+        if (oddsResult) {
+          odds = Math.round(traderDirectionBias === 'Long' ? oddsResult.endAbovePct : (100 - oddsResult.endAbovePct));
+        }
+
+        cache = {
+          key: cacheKey,
+          krDir,
+          krConf,
+          krMove,
+          horizon,
+          count,
+          up,
+          winRate,
+          asym,
+          clockState,
+          isQuiet,
+          currentBucket,
+          oracle,
+          medianEndPct,
+          odds
+        };
+        window._focusConfCache = cache;
       }
-      const krDir = d.direction || 'Flat';
-      const krConf = d.confidence || 0;
-      const krMove = d.move_pct || 0.0;
-      const horizon = d.pred_len || 5;
-      const echoes = lab.buildEchoScan(liveCandles, 30, horizon, 5);
-      const count = echoes ? echoes.stats.count : 0;
-      const up = echoes ? echoes.stats.upCount : 0;
-      const winRate = count > 0 ? up / count : 0.0;
-      let asym = 0.0;
-      if (count > 0 && echoes.stats.bestEndPct !== 0 && echoes.stats.worstEndPct !== 0) {
-        asym = krDir === 'Short' ? Math.abs(echoes.stats.worstEndPct) / Math.abs(echoes.stats.bestEndPct) : Math.abs(echoes.stats.bestEndPct) / Math.abs(echoes.stats.worstEndPct);
+
+      // Timer & parameter 5 check
+      const intervalMs = getIntervalMs();
+      const remain = intervalMs - (Date.now() % intervalMs);
+      const totalSec = Math.max(0, Math.floor(remain / 1000));
+      const mins = Math.floor(totalSec / 60);
+      const secs = totalSec % 60;
+      const timerStr = mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+
+      const p1_pass = cache.krConf >= 80;
+      const dirUpper = cache.krDir.toUpperCase();
+      
+      let p2_pass = false;
+      if (dirUpper === 'LONG') {
+        p2_pass = (cache.count > 0) && (cache.winRate >= 0.80);
+      } else if (dirUpper === 'SHORT') {
+        p2_pass = (cache.count > 0) && (cache.winRate <= 0.20);
       }
-      const clock = lab.computeMarketClock(liveCandles);
-      const dDate = new Date(liveCandles[liveCandles.length - 1].time);
-      const currentHour = dDate.getUTCHours();
-      let sum = 0, clockCount = 0;
-      for (let h = 0; h < 24; h++) {
-        if (clock.byHourUtc[h].samples > 0) {
-          sum += clock.byHourUtc[h].meanAbsReturnPct;
-          clockCount++;
+
+      const p3_pass = (cache.count > 0) && (cache.asym >= 3.0);
+      const p4_pass = Math.abs(cache.krMove) >= 0.40;
+      const p5_pass = totalSec === 0;
+
+      const p1_val = `kronos_confidence = ${cache.krConf}%`;
+      const p2_val = `echoes_win_rate = ${cache.up}/${cache.count} UP (${Math.round(cache.winRate * 100)}%)`;
+      const p3_val = `asymmetry_ratio = ${cache.asym.toFixed(1)}`;
+      const p4_val = `move_pct = ${cache.krMove >= 0 ? '+' : ''}${cache.krMove.toFixed(2)}%`;
+      const p5_val = timerStr;
+
+      const p2_thresh = dirUpper === 'SHORT' ? '≤ 20%' : '≥ 80%';
+
+      const blockers = [];
+      if (!p1_pass) blockers.push(`Confidence (${cache.krConf}% < 80%)`);
+      if (!p2_pass) {
+        if (cache.count === 0) {
+          blockers.push(`Win Rate (No historical matches)`);
+        } else {
+          blockers.push(`Win Rate (${Math.round(cache.winRate * 100)}% does not match direction)`);
         }
       }
-      const avgAbsReturn = clockCount > 0 ? sum / clockCount : 0;
-      const currentBucket = clock.byHourUtc[currentHour];
-      const isQuiet = currentBucket.meanAbsReturnPct < avgAbsReturn;
-      const clockState = isQuiet ? 'Quiet window' : 'Active window';
-      const oracle = lab.buildOracle(liveCandles, horizon, 1000);
-      const medianEndPct = oracle ? oracle.medianEndPct : 0.0;
-      const oddsResult = oracle ? lab.targetOdds(oracle, 0) : null;
-      let odds = 0;
-      if (oddsResult) {
-        odds = Math.round(traderDirectionBias === 'Long' ? oddsResult.endAbovePct : (100 - oddsResult.endAbovePct));
+      if (!p3_pass) {
+        if (cache.count === 0) {
+          blockers.push(`Asymmetry (Cannot calculate safely)`);
+        } else {
+          blockers.push(`Asymmetry (${cache.asym.toFixed(1)} < 3.0)`);
+        }
       }
-      let layersCount = 0;
-      let agreesCount = 0;
-      const mark = (agrees, isFlat, isNA) => {
-        if (isNA) return '⚪';
-        layersCount++;
-        if (agrees) { agreesCount++; return '✅'; }
-        if (isFlat) return '⚠️';
-        return '❌';
-      };
-      const emaAgrees = emaTrend === traderDirectionBias;
-      const emaFlat = emaTrend === 'Flat';
-      const emaMark = mark(emaAgrees, emaFlat, false);
-      const krAgrees = krDir === traderDirectionBias;
-      const krFlat = krDir === 'Flat';
-      const krMark = mark(krAgrees, krFlat, false);
-      const echoesNA = count === 0;
-      const echoesAgrees = traderDirectionBias === 'Long' ? winRate >= 0.60 : winRate <= 0.40;
-      const echoesFlat = traderDirectionBias === 'Long' ? (winRate > 0.40 && winRate < 0.60) : (winRate > 0.40 && winRate < 0.60);
-      const echoesMark = mark(echoesAgrees, echoesFlat, echoesNA);
-      const clockAgrees = clockState === 'Active window';
-      const clockMark = mark(clockAgrees, !clockAgrees, false);
-      const oracleNA = !oracle;
-      const oracleAgrees = traderDirectionBias === 'Long' ? medianEndPct > 0 : medianEndPct < 0;
-      const oracleFlat = medianEndPct === 0;
-      const oracleMark = mark(oracleAgrees, oracleFlat, oracleNA);
-      const scoreStr = `${agreesCount} / ${layersCount} AGREE`;
+      if (!p4_pass) blockers.push(`Expected Move (${Math.abs(cache.krMove).toFixed(2)}% < 0.40%)`);
+      if (!p5_pass) blockers.push(`Bar-Close Sync (${timerStr} != 00:00)`);
+
+      const passCount = (p1_pass ? 1 : 0) + (p2_pass ? 1 : 0) + (p3_pass ? 1 : 0) + (p4_pass ? 1 : 0) + (p5_pass ? 1 : 0);
+      const isCleared = passCount === 5;
+
       const scoreEl = $('focus-report-score');
-      if (scoreEl) {
-        scoreEl.textContent = scoreStr;
-        scoreEl.className = agreesCount >= Math.ceil(layersCount / 2) ? 'trend-up' : 'trend-down';
-      }
-      const setVal = (id, text, mark) => {
-        const el = $(id);
-        if (el) {
-          el.textContent = `${text}  [${mark}]`;
-          el.className = 'val ' + (mark === '✅' ? 'trend-up' : mark === '❌' ? 'trend-down' : mark === '⚠️' ? 'confluence-no' : 'muted');
+      const blockingEl = $('focus-report-blocking');
+
+      if (isCleared) {
+        if (scoreEl) {
+          scoreEl.textContent = `GATE: 5/5 PASS — ${dirUpper} CLEARED TO FIRE`;
+          scoreEl.style.color = dirUpper === 'LONG' ? 'var(--up)' : 'var(--down)';
         }
-      };
-      setVal('f-ema-val', emaTrend + ' (cross: ' + barsSinceCross + ')', emaMark);
-      setVal('f-kronos-val', krDir + ' (' + krConf + '% conf)', krMark);
-      setVal('f-echoes-val', Math.round(winRate * 100) + '% (asym: ' + asym.toFixed(1) + 'x)', echoesMark);
-      setVal('f-clock-val', clockState, clockMark);
-      setVal('f-oracle-val', (oracle ? (medianEndPct >= 0 ? '+' : '') + medianEndPct.toFixed(2) + '% (odds: ' + odds + '%)' : 'N/A'), oracleMark);
+        if (blockingEl) {
+          blockingEl.textContent = `Blocking: None`;
+          blockingEl.style.color = 'var(--muted)';
+        }
+      } else {
+        if (scoreEl) {
+          scoreEl.textContent = `GATE: ${passCount}/5 PASS — TRADE REJECTED`;
+          scoreEl.style.color = 'var(--muted)';
+        }
+        if (blockingEl) {
+          blockingEl.textContent = `Blocking: ${blockers.join(', ')}`;
+          blockingEl.style.color = 'var(--down)';
+        }
+      }
+
+      // Update Table Rows
+      const tableBody = $('focus-table-body');
+      if (tableBody) {
+        const rows = [
+          {
+            num: 1,
+            param: 'Confidence',
+            val: p1_val,
+            thresh: '≥ 80%',
+            pass: p1_pass,
+            dir: dirUpper
+          },
+          {
+            num: 2,
+            param: 'Historical Win Rate',
+            val: p2_val,
+            thresh: p2_thresh,
+            pass: p2_pass,
+            dir: '—'
+          },
+          {
+            num: 3,
+            param: 'Risk/Reward Asymmetry',
+            val: p3_val,
+            thresh: '≥ 3.0',
+            pass: p3_pass,
+            dir: '—'
+          },
+          {
+            num: 4,
+            param: 'Expected Move',
+            val: p4_val,
+            thresh: '≥ 0.40% (abs)',
+            pass: p4_pass,
+            dir: '—'
+          },
+          {
+            num: 5,
+            param: 'Bar-Close Sync',
+            val: p5_val,
+            thresh: '= 00:00',
+            pass: p5_pass,
+            dir: '—'
+          }
+        ];
+
+        tableBody.innerHTML = rows.map(r => {
+          const statusText = r.pass ? '✅ PASS' : '❌ FAIL';
+          const statusColor = r.pass ? 'var(--up)' : 'var(--down)';
+          const dirColor = r.dir === '—' ? 'var(--muted)' : (r.dir === 'LONG' ? 'var(--up)' : 'var(--down)');
+          const dirWeight = r.dir === '—' ? 'normal' : 'bold';
+          return `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); height: 26px;">
+              <td style="padding: 4px 0; color: var(--muted);">${r.num}</td>
+              <td style="padding: 4px 0; font-weight: 600;">${r.param}</td>
+              <td style="padding: 4px 0; font-family: 'JetBrains Mono', monospace;">${r.val}</td>
+              <td style="padding: 4px 0; color: var(--muted); font-family: 'JetBrains Mono', monospace;">${r.thresh}</td>
+              <td style="padding: 4px 0; text-align: center; font-weight: bold; color: ${statusColor};">${statusText}</td>
+              <td style="padding: 4px 0; text-align: right; font-weight: ${dirWeight}; color: ${dirColor};">${r.dir}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Update Beginner Signal Banner Swap on 5/5 PASS
+      const banner = $('beginner-signal-banner');
+      const iconEl = $('beginner-signal-icon');
+      const actionEl = $('beginner-signal-action');
+      const descEl = $('beginner-signal-desc');
+      const confEl = $('beginner-signal-conf');
+      const confBar = $('beginner-signal-conf-bar');
+
+      if (isCleared) {
+        const emoji = dirUpper === 'LONG' ? '🟢' : '🔴';
+        const bannerClass = dirUpper === 'LONG' ? 'buy' : 'sell';
+        const moveText = `${cache.krMove >= 0 ? '+' : ''}${cache.krMove.toFixed(2)}%`;
+        const firedAt = new Date().toTimeString().split(' ')[0];
+
+        if (banner) banner.className = `beginner-signal-banner ${bannerClass}`;
+        if (iconEl) iconEl.textContent = emoji;
+        if (actionEl) actionEl.textContent = `${dirUpper} — CLEARED`;
+        if (descEl) {
+          descEl.innerHTML = `Confidence: ${cache.krConf}% | Win Rate: ${Math.round(cache.winRate * 100)}% | R:R: ${cache.asym.toFixed(1)} | Move: ${moveText}<br>Fired: ${firedAt}`;
+        }
+        if (confEl) confEl.textContent = cache.krConf + '%';
+        if (confBar) {
+          confBar.className = `confidence-meter-fill ${bannerClass}`;
+          confBar.style.width = cache.krConf + '%';
+        }
+      } else {
+        updateBeginnerSignal(d, '');
+      }
+
+      // Update Notes
       const notes = [];
-      if (krDir !== 'Flat' && krDir !== traderDirectionBias && krConf >= 80) {
-        notes.push(`STRONG CONTRADICTION: Kronos AI predicted ${krDir} with high confidence (${krConf}%).`);
+      if (cache.krDir !== 'Flat' && cache.krDir !== traderDirectionBias && cache.krConf >= 80) {
+        notes.push(`STRONG CONTRADICTION: Kronos AI predicted ${cache.krDir} with high confidence (${cache.krConf}%).`);
       }
-      if (isQuiet) {
-        notes.push(`TIMING WARNING: Current hour is a historically quiet Market Clock window (${currentBucket.meanAbsReturnPct.toFixed(2)}% avg return). Moves may be slow to play out.`);
+      if (cache.isQuiet) {
+        notes.push(`TIMING WARNING: Current hour is a historically quiet Market Clock window (${cache.currentBucket.meanAbsReturnPct.toFixed(2)}% avg return). Moves may be slow to play out.`);
       }
-      if (count === 0) {
+      if (cache.count === 0) {
         notes.push(`Missing Data: Echoes found 0 historical pattern matches.`);
       }
-      if (!oracle) {
+      if (!cache.oracle) {
         notes.push(`Missing Data: Oracle probability model unavailable.`);
       }
       if (notes.length === 0) {
@@ -6242,15 +6389,34 @@ This is informational only — you decide whether to take the trade.`;
       if (notesEl) {
         notesEl.textContent = notes.map(n => '• ' + n).join('\n');
       }
+
+      // Update Copy Report
       const reportTextEl = $('focus-report-text');
       if (reportTextEl) {
-        const scoreReport = `${agreesCount} / ${layersCount} agree`;
-        const emaText = `[${emaTrend}]  Bars since cross: [${barsSinceCross}]`;
-        const kronosText = `[${krDir}]  Conf: [${krConf}]%  Move: [${krMove >= 0 ? '+' : ''}${krMove.toFixed(2)}%]`;
-        const echoesText = `Win rate [${Math.round(winRate * 100)}%]  Asymmetry [${asym.toFixed(2)}x]  Sample [${count}]`;
-        const clockText = `[${clockState}]`;
-        const oracleText = oracle ? `[${(medianEndPct >= 0 ? '+' : '') + medianEndPct.toFixed(2)}% (odds: ${odds}%)]` : `[N/A]`;
-        reportTextEl.textContent = formatFocusReport(scoreReport, emaText, kronosText, echoesText, clockText, oracleText, emaMark, krMark, echoesMark, clockMark, oracleMark, notes);
+        const scoreReport = isCleared ? `GATE: 5/5 PASS — ${dirUpper} CLEARED` : `GATE: ${passCount}/5 PASS — REJECTED`;
+        const blockingReport = isCleared ? `Blocking: None` : `Blocking: ${blockers.join(', ')}`;
+        
+        const p1Mark = p1_pass ? '✅' : '❌';
+        const p2Mark = p2_pass ? '✅' : '❌';
+        const p3Mark = p3_pass ? '✅' : '❌';
+        const p4Mark = p4_pass ? '✅' : '❌';
+        const p5Mark = p5_pass ? '✅' : '❌';
+
+        reportTextEl.textContent = formatFocusReport(
+          scoreReport,
+          blockingReport,
+          p1_val,
+          p2_val,
+          p3_val,
+          p4_val,
+          p5_val,
+          p1Mark,
+          p2Mark,
+          p3Mark,
+          p4Mark,
+          p5Mark,
+          notes
+        );
       }
     };
 
@@ -6744,6 +6910,9 @@ This is informational only — you decide whether to take the trade.`;
           scalperEl.textContent = label;
           scalperEl.style.display = 'block';
           if (liveEl) liveEl.style.display = 'none';
+        }
+        if (activeTab === 'live-signal' && typeof updateFocusConfirmation === 'function') {
+          updateFocusConfirmation();
         }
       }, 500);
     }
