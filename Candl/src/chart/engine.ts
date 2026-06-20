@@ -2068,7 +2068,7 @@ export function createChartEngine(container: HTMLElement, options: ChartEngineOp
       canvas.remove()
     },
 
-    setProjections(lines: ProjectionLine[], band?: ProjectionBand | null): void {
+    setProjections(lines: ProjectionLine[], band?: ProjectionBand | null, preserveViewport?: boolean): void {
       projLines = lines.slice()
       projBand = band ?? null
       // If the viewport is following the right edge (same criterion as the
@@ -2077,21 +2077,25 @@ export function createChartEngine(container: HTMLElement, options: ChartEngineOp
       // width is preserved; we never shrink an offset the user already has,
       // and panning away afterwards is respected (no re-expansion until the
       // next setProjections call).
-      const n = ts.count
-      if (projLines.length > 0 && n > 0 && ts.view.end >= n - 0.5) {
-        let maxOffset = 0
-        for (const line of projLines) {
-          for (const p of line.points) if (p.barOffset > maxOffset) maxOffset = p.barOffset
-        }
-        if (projBand) {
-          for (const p of projBand.upper) if (p.barOffset > maxOffset) maxOffset = p.barOffset
-          for (const p of projBand.lower) if (p.barOffset > maxOffset) maxOffset = p.barOffset
-        }
-        const desiredEnd = n + maxOffset + 3
-        if (ts.view.end < desiredEnd) {
-          const range = ts.range
-          ts.view = { start: desiredEnd - range, end: desiredEnd }
-          clampView() // keep at least a couple of candles on screen when zoomed far in
+      // preserveViewport=true skips this expansion — used during live updates
+      // to prevent candle reflow on every prediction refresh.
+      if (!preserveViewport) {
+        const n = ts.count
+        if (projLines.length > 0 && n > 0 && ts.view.end >= n - 0.5) {
+          let maxOffset = 0
+          for (const line of projLines) {
+            for (const p of line.points) if (p.barOffset > maxOffset) maxOffset = p.barOffset
+          }
+          if (projBand) {
+            for (const p of projBand.upper) if (p.barOffset > maxOffset) maxOffset = p.barOffset
+            for (const p of projBand.lower) if (p.barOffset > maxOffset) maxOffset = p.barOffset
+          }
+          const desiredEnd = n + maxOffset + 3
+          if (ts.view.end < desiredEnd) {
+            const range = ts.range
+            ts.view = { start: desiredEnd - range, end: desiredEnd }
+            clampView() // keep at least a couple of candles on screen when zoomed far in
+          }
         }
       }
       invalidate()

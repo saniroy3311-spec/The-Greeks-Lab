@@ -640,20 +640,16 @@
       }
     }
 
-    /* Hide clutter by default (kept in DOM, collapsed via CSS) */
-    #beginner-signal-banner,
-    #predictions-card,
-    #echoes-card {
+    /* Force bare-minimum signal banner/confidence inside accordion section 1 */
+    .accordion-section#acc-sig .beginner-signal-banner,
+    .accordion-section#acc-sig .confidence-meter-container {
+      display: block !important;
+    }
+    .accordion-section#acc-sig .sig-header-row {
       display: none !important;
     }
 
-    #scalper-beginner-signal-banner,
-    #predictions-card-scalper,
-    #scalper-echoes-card {
-      display: none !important;
-    }
-
-    /* Details toggle - shows the hidden clutter cards */
+    /* Scalper details toggle (kept for backward compat) */
     .details-toggle-btn {
       position: absolute;
       top: 6px;
@@ -674,20 +670,50 @@
       color: var(--text);
       border-color: var(--accent);
     }
-    body.details-visible #beginner-signal-banner,
-    body.details-visible #predictions-card,
-    body.details-visible #echoes-card,
     body.details-visible #scalper-beginner-signal-banner,
-    body.details-visible #predictions-card-scalper,
     body.details-visible #scalper-echoes-card {
       display: block !important;
     }
-    /* Allow the signal card wrapper itself to be shown when details are visible */
-    body.details-visible .chart-overlays-inner {
-      gap: 8px;
-    }
 
     /* Entry Light Widget - Desktop */
+    /* ── Reconnecting Banner ── */
+    .reconnecting-banner {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+      height: 32px;
+      background: #ea580c;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.3px;
+      animation: bannerPulse 1.5s ease-in-out infinite;
+    }
+    .reconnecting-banner.active {
+      display: flex;
+    }
+    .reconnecting-banner .dot-pulse {
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border-radius: 50%;
+      animation: dotPulse 1s ease-in-out infinite;
+    }
+    @keyframes bannerPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.85; }
+    }
+    @keyframes dotPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.6); }
+    }
+
     .entry-light-widget {
       display: none;
       position: fixed;
@@ -779,6 +805,69 @@
       .entry-light-widget {
         display: flex;
       }
+
+      /* Desktop: Signal panel as side column (never floats over chart) */
+      .chart-stage {
+        display: flex;
+        flex-direction: row;
+      }
+      #chart, #scalper-chart {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+      }
+      .chart-overlays-container {
+        position: relative;
+        top: auto;
+        bottom: auto;
+        left: auto;
+        width: 365px;
+        min-width: 365px;
+        max-height: 100%;
+        overflow: hidden;
+        border-left: 1px solid var(--border);
+        pointer-events: auto;
+        transform: none;
+      }
+      .chart-overlays-container.collapsed {
+        width: 0;
+        min-width: 0;
+        overflow: hidden;
+        border-left: none;
+        transform: none;
+      }
+      .chart-overlays-inner {
+        max-height: 100%;
+        overflow-y: auto;
+        pointer-events: auto;
+      }
+      .overlay-card {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        box-shadow: none;
+        background: var(--surface);
+      }
+      body.dark-theme .overlay-card {
+        background: var(--surface);
+      }
+      .overlays-collapse-btn {
+        right: auto;
+        left: -24px;
+        border-left: 1px solid var(--border);
+        border-right: none;
+        border-radius: 8px 0 0 8px;
+        box-shadow: -2px 0 8px rgba(0,0,0,0.05);
+      }
+      .chart-overlays-container.collapsed .overlays-collapse-btn svg {
+        transform: rotate(0deg);
+      }
+      .chart-overlays-container .overlays-collapse-btn svg {
+        transform: rotate(180deg);
+      }
+      .details-toggle-btn {
+        right: 12px;
+      }
     }
 
     /* Mobile: Entry Light vertical strip on left edge */
@@ -819,8 +908,73 @@
       }
     }
 
+    /* Accordion-style signal panel */
+    .accordion-root {
+      gap: 0 !important;
+    }
+    .accordion-section {
+      border-bottom: 1px solid var(--border);
+    }
+    .accordion-section:last-child {
+      border-bottom: none;
+    }
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      user-select: none;
+      background: var(--surface);
+      transition: background 0.15s;
+    }
+    .accordion-header:hover {
+      background: rgba(0,0,0,0.03);
+    }
+    body.dark-theme .accordion-header:hover {
+      background: rgba(255,255,255,0.04);
+    }
+    .accordion-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      flex: 1;
+    }
+    .accordion-badge {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .accordion-arrow {
+      font-size: 9px;
+      color: var(--muted);
+      transition: transform 0.25s ease;
+    }
+    .accordion-section.active .accordion-arrow {
+      transform: rotate(180deg);
+    }
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .accordion-section.active .accordion-body {
+      max-height: 600px;
+    }
+
     .chart-overlays-container.collapsed {
       transform: translateX(-377px);
+    }
+
+    .trade-overlay-canvas {
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .trade-overlay-canvas.drawn {
+      opacity: 1;
     }
 
     .chart-overlays-container .overlay-card,
@@ -2463,6 +2617,20 @@
         color: var(--text);
       }
 
+      .mobile-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 1999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .mobile-backdrop.active {
+        display: block;
+        opacity: 1;
+      }
+
       .mobile-bottom-sheet {
         display: flex;
         flex-direction: column;
@@ -2476,13 +2644,17 @@
         border-top: 1px solid var(--border);
         box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
         z-index: 2000;
-        max-height: 80vh;
+        max-height: 75vh;
         transform: translateY(100%);
         transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
       .mobile-bottom-sheet.active {
         transform: translateY(0);
+      }
+      .mobile-bottom-sheet.active ~ .mobile-backdrop {
+        display: block;
+        opacity: 1;
       }
 
       .sheet-header {
@@ -3077,6 +3249,11 @@
 </head>
 
 <body>
+  <!-- Reconnecting Banner (hidden by default) -->
+  <div id="reconnecting-banner" class="reconnecting-banner">
+    <span class="dot-pulse"></span>
+    <span>Connection lost — reconnecting…</span>
+  </div>
   <!-- Sidebar Slide Drawer -->
   <div id="sidebar-drawer" class="sidebar-drawer">
     <div class="sidebar-header">
@@ -3633,115 +3810,134 @@
                 <polyline points="15 18 9 12 15 6"></polyline>
               </svg>
             </button>
-            <button class="details-toggle-btn" id="details-toggle-live" onclick="toggleDetails()">Details</button>
 
-            <div class="chart-overlays-inner">
-              <!-- Kronos Unified Forecast Card -->
-              <div class="overlay-card signal flat" id="sig">
-                <!-- Beginner Friendly Visual Banner -->
-                <div class="beginner-signal-banner skip" id="beginner-signal-banner">
-                  <span class="beginner-signal-icon" id="beginner-signal-icon">⏸</span>
-                  <div class="beginner-signal-title" id="beginner-signal-action">WAIT / SKIP</div>
-                  <div class="beginner-signal-desc" id="beginner-signal-desc">Scanning market conditions. No clear
-                    direction detected yet.</div>
+            <div class="chart-overlays-inner accordion-root">
+              <!-- Accordion Section 1: KRONOS PREDICTION (always visible) -->
+              <div class="accordion-section active" id="acc-sig">
+                <div class="accordion-header" onclick="toggleAccordion(this, true)">
+                  <span class="accordion-title">KRONOS PREDICTION</span>
+                  <span class="accordion-badge" id="acc-dir-badge">—</span>
+                  <span class="accordion-arrow">▼</span>
                 </div>
+                <div class="accordion-body">
+                  <div class="overlay-card signal flat" id="sig" style="border: none; box-shadow: none;">
+                    <!-- Beginner Friendly Visual Banner -->
+                    <div class="beginner-signal-banner skip" id="beginner-signal-banner">
+                      <span class="beginner-signal-icon" id="beginner-signal-icon">⏸</span>
+                      <div class="beginner-signal-title" id="beginner-signal-action">WAIT / SKIP</div>
+                      <div class="beginner-signal-desc" id="beginner-signal-desc">Scanning market conditions. No clear
+                        direction detected yet.</div>
+                    </div>
 
-                <!-- Beginner Friendly Confidence Meter -->
-                <div class="confidence-meter-container">
-                  <div class="confidence-meter-header">
-                    <span>Signal Strength</span>
-                    <span id="beginner-signal-conf">0%</span>
-                  </div>
-                  <div class="confidence-meter-bar">
-                    <div class="confidence-meter-fill skip" id="beginner-signal-conf-bar" style="width: 0%;"></div>
-                  </div>
-                </div>
+                    <!-- Beginner Friendly Confidence Meter -->
+                    <div class="confidence-meter-container">
+                      <div class="confidence-meter-header">
+                        <span>Signal Strength</span>
+                        <span id="beginner-signal-conf">0%</span>
+                      </div>
+                      <div class="confidence-meter-bar">
+                        <div class="confidence-meter-fill skip" id="beginner-signal-conf-bar" style="width: 0%;"></div>
+                      </div>
+                    </div>
 
-                <div class="sig-header-row"
-                  style="display: none !important; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px;">
-                  <div>
-                    <div class="sig-label">KRONOS PREDICTION</div>
-                    <div class="sig-dir" id="dir">—</div>
-                    <div class="sig-sub" style="font-size: 10px; color: var(--muted); margin-top: 2px;">Confidence <span
-                        id="conf">—</span></div>
-                  </div>
-                  <div style="text-align: right;">
-                    <div class="sig-label">ACTION</div>
-                    <div class="sig-action" id="act">—</div>
-                    <div class="sig-sub" id="bias" style="font-size: 10px; color: var(--muted); margin-top: 2px;">—
+                    <div class="sig-header-row"
+                      style="display: none !important; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px;">
+                      <div>
+                        <div class="sig-label">KRONOS PREDICTION</div>
+                        <div class="sig-dir" id="dir">—</div>
+                        <div class="sig-sub" style="font-size: 10px; color: var(--muted); margin-top: 2px;">Confidence <span
+                            id="conf">—</span></div>
+                      </div>
+                      <div style="text-align: right;">
+                        <div class="sig-label">ACTION</div>
+                        <div class="sig-action" id="act">—</div>
+                        <div class="sig-sub" id="bias" style="font-size: 10px; color: var(--muted); margin-top: 2px;">—
+                        </div>
+                      </div>
+                    </div>
+                    <div class="sig-metrics-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                      <div class="sig-metric-box">
+                        <div class="sig-metric-label">Current</div>
+                        <div class="sig-metric-val tnum" id="s-cur">—</div>
+                      </div>
+                      <div class="sig-metric-box">
+                        <div class="sig-metric-label">Predicted (5 bars)</div>
+                        <div class="sig-metric-val tnum" id="s-p5">—</div>
+                      </div>
+                      <div class="sig-metric-box">
+                        <div class="sig-metric-label">Predicted (end)</div>
+                        <div class="sig-metric-val tnum" id="s-pn">—</div>
+                      </div>
+                      <div class="sig-metric-box">
+                        <div class="sig-metric-label">Expected move</div>
+                        <div class="sig-metric-val tnum" id="s-mv">—</div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div class="sig-metrics-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                  <div class="sig-metric-box">
-                    <div class="sig-metric-label">Current</div>
-                    <div class="sig-metric-val tnum" id="s-cur">—</div>
-                  </div>
-                  <div class="sig-metric-box">
-                    <div class="sig-metric-label">Predicted (5 bars)</div>
-                    <div class="sig-metric-val tnum" id="s-p5">—</div>
-                  </div>
-                  <div class="sig-metric-box">
-                    <div class="sig-metric-label">Predicted (end)</div>
-                    <div class="sig-metric-val tnum" id="s-pn">—</div>
-                  </div>
-                  <div class="sig-metric-box">
-                    <div class="sig-metric-label">Expected move</div>
-                    <div class="sig-metric-val tnum" id="s-mv">—</div>
+              </div>
+
+              <!-- Accordion Section 2: ECHOES CONFIRMATION -->
+              <div class="accordion-section" id="acc-echoes">
+                <div class="accordion-header" onclick="toggleAccordion(this, true)">
+                  <span class="accordion-title">ECHOES CONFIRMATION</span>
+                  <span class="accordion-badge" id="acc-echoes-badge">—</span>
+                  <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="accordion-body">
+                  <div class="overlay-card echoes-card flat" id="echoes-card" style="border: none; box-shadow: none;">
+                    <div style="padding: 4px 0;">
+                      <div class="echoes-status" id="echoes-status">Scanning…</div>
+                    </div>
+                    <div class="echoes-stats-row">
+                      <div class="echoes-stat"><span class="lbl">Median</span> <span id="echoes-median" class="val">—</span>
+                      </div>
+                      <div class="echoes-stat"><span class="lbl">Best</span> <span id="echoes-best"
+                          class="val text-up">—</span></div>
+                      <div class="echoes-stat"><span class="lbl">Worst</span> <span id="echoes-worst"
+                          class="val text-down">—</span></div>
+                    </div>
+                    <div class="echoes-sparkline-container">
+                      <canvas id="echoes-sparkline" width="160" height="35"></canvas>
+                      <div class="sparkline-label">Query &<br>matches</div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Echoes Confirmation Card -->
-              <div class="overlay-card echoes-card flat" id="echoes-card">
-                <div class="overlay-card-header">
-                  <span class="card-title">ECHOES CONFIRMATION</span>
+              <!-- Accordion Section 3: FUTURE FORECAST -->
+              <div class="accordion-section" id="acc-pred">
+                <div class="accordion-header" onclick="toggleAccordion(this, true)">
+                  <span class="accordion-title">FUTURE FORECAST</span>
+                  <span class="accordion-badge" id="acc-pred-badge">—</span>
+                  <span class="accordion-arrow">▼</span>
                 </div>
-                <div>
-                  <div class="sig-label">Echoes Status</div>
-                  <div class="echoes-status" id="echoes-status">Scanning…</div>
-                </div>
-                <div class="echoes-stats-row">
-                  <div class="echoes-stat"><span class="lbl">Median</span> <span id="echoes-median" class="val">—</span>
+                <div class="accordion-body">
+                  <div class="overlay-card predictions-card" id="predictions-card" style="border: none; box-shadow: none;">
+                    <div class="overlay-card-body" style="padding: 0; overflow-x: auto;">
+                      <table style="width: 100%; border-collapse: collapse; font-size: 12px; font-weight: 600;">
+                        <thead>
+                          <tr style="border-bottom: 1.5px solid var(--border); color: var(--muted); text-align: left;">
+                            <th
+                              style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
+                              Candle</th>
+                            <th
+                              style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-align: right; text-transform: uppercase; letter-spacing: 0.5px;">
+                              Target</th>
+                            <th
+                              style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-align: right; text-transform: uppercase; letter-spacing: 0.5px;">
+                              Change</th>
+                          </tr>
+                        </thead>
+                        <tbody id="predictions-table-body" class="tnum predictions-table-body">
+                          <tr>
+                            <td colspan="3" style="text-align: center; color: var(--muted); padding: 12px 0;">No predictions
+                              available</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                  <div class="echoes-stat"><span class="lbl">Best</span> <span id="echoes-best"
-                      class="val text-up">—</span></div>
-                  <div class="echoes-stat"><span class="lbl">Worst</span> <span id="echoes-worst"
-                      class="val text-down">—</span></div>
-                </div>
-                <div class="echoes-sparkline-container">
-                  <canvas id="echoes-sparkline" width="160" height="35"></canvas>
-                  <div class="sparkline-label">Query &<br>matches</div>
-                </div>
-              </div>
-
-              <!-- Future Predictions Card -->
-              <div class="overlay-card predictions-card" id="predictions-card" style="margin-top: 8px;">
-                <div class="overlay-card-header">
-                  <span class="card-title">FUTURE 5-CANDLE FORECAST</span>
-                </div>
-                <div class="overlay-card-body" style="padding: 0; overflow-x: auto;">
-                  <table style="width: 100%; border-collapse: collapse; font-size: 12px; font-weight: 600;">
-                    <thead>
-                      <tr style="border-bottom: 1.5px solid var(--border); color: var(--muted); text-align: left;">
-                        <th
-                          style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
-                          Candle</th>
-                        <th
-                          style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-align: right; text-transform: uppercase; letter-spacing: 0.5px;">
-                          Target</th>
-                        <th
-                          style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-align: right; text-transform: uppercase; letter-spacing: 0.5px;">
-                          Change</th>
-                      </tr>
-                    </thead>
-                    <tbody id="predictions-table-body" class="tnum predictions-table-body">
-                      <tr>
-                        <td colspan="3" style="text-align: center; color: var(--muted); padding: 12px 0;">No predictions
-                          available</td>
-                      </tr>
-                    </tbody>
-                  </table>
                 </div>
               </div>
               <!-- Trader Idea Input Card -->
@@ -4164,6 +4360,7 @@
 
           <!-- Scalper Chart Canvas -->
           <div id="scalper-chart" style="width: 100%; height: 100%; position: relative;">
+            <canvas id="scalper-trade-overlay" class="trade-overlay-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5;"></canvas>
             <div id="countdown-overlay-scalper"
               style="position: absolute; right: 4px; bottom: 24px; z-index: 10; background: #475569; color: #fff; padding: 1px 4px; border-radius: 2px; font-size: 9px; font-weight: bold; pointer-events: none; box-shadow: 0 1px 3px rgba(0,0,0,0.2); display: none;">
             </div>
@@ -4274,19 +4471,24 @@
 
       sioSocket.on('connect', () => {
         console.log('[SocketIO] Connected:', sioSocket.id);
-        // Update connection indicator
         const statusEl = $('status');
         if (statusEl) statusEl.textContent = 'Live';
-        // Re-subscribe to current room on reconnect
+        document.getElementById('reconnecting-banner').classList.remove('active');
+        isStaleData = false;
+        lastUpdateTimestamp = Date.now();
         if (sioCurrentRoom) {
           sioSocket.emit('subscribe', sioCurrentRoom);
         }
+        if (activeTab === 'live-signal') { if (liveLoadInflight === 0) load(); }
+        else { if (scalperLoadInflight === 0) loadScalper(); }
       });
 
       sioSocket.on('disconnect', (reason) => {
         console.log('[SocketIO] Disconnected:', reason);
         const statusEl = $('status');
         if (statusEl) statusEl.textContent = 'Reconnecting…';
+        document.getElementById('reconnecting-banner').classList.add('active');
+        isStaleData = true;
       });
 
       sioSocket.on('tick', (data) => {
@@ -4305,7 +4507,60 @@
       console.log('[SocketIO] Subscribed to', symbol, timeframe);
     }
 
+    let lastUpdateTimestamp = Date.now();
+    const TF_TIMEOUT_FACTOR = {
+      "1m": 15, "3m": 25, "5m": 35, "15m": 60, "30m": 90, "1h": 180, "1d": 600
+    };
+    let watchdogInterval = null;
+    let isStaleData = false;
+    function getWatchdogTimeout() {
+      const tf = (activeTab === 'live-signal' ? $('tf') : $('scalper-tf')).value;
+      return (TF_TIMEOUT_FACTOR[tf] || 35) * 1000;
+    }
+    function startWatchdog() {
+      if (watchdogInterval) clearInterval(watchdogInterval);
+      watchdogInterval = setInterval(() => {
+        const elapsed = Date.now() - lastUpdateTimestamp;
+        const timeoutMs = getWatchdogTimeout();
+        const isStale = elapsed > timeoutMs;
+        if (isStale && !isStaleData) {
+          isStaleData = true;
+          document.getElementById('reconnecting-banner').classList.add('active');
+          if (sioSocket && sioSocket.connected) {
+            sioSocket.close();
+          }
+        } else if (!isStale && isStaleData) {
+          isStaleData = false;
+          document.getElementById('reconnecting-banner').classList.remove('active');
+        }
+      }, 2000);
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        const elapsed = Date.now() - lastUpdateTimestamp;
+        const timeoutMs = getWatchdogTimeout();
+        if (elapsed > timeoutMs) {
+          isStaleData = true;
+          document.getElementById('reconnecting-banner').classList.add('active');
+          if (sioSocket && sioSocket.connected) {
+            sioSocket.close();
+          }
+          if (activeTab === 'live-signal') { if (liveLoadInflight === 0) load(true); }
+          else { if (scalperLoadInflight === 0) loadScalper(true); }
+        } else {
+          lastUpdateTimestamp = Date.now();
+          if (isStaleData) {
+            isStaleData = false;
+            document.getElementById('reconnecting-banner').classList.remove('active');
+          }
+          if (activeTab === 'live-signal') { if (liveLoadInflight === 0) load(); }
+          else { if (scalperLoadInflight === 0) loadScalper(); }
+        }
+      }
+    });
+
     function handleTickUpdate(data) {
+      lastUpdateTimestamp = Date.now();
       const sym = $('symbol').value;
       const tf = (activeTab === 'live-signal' ? $('tf') : $('scalper-tf')).value;
 
@@ -4946,7 +5201,6 @@
         onRender: () => {
           if (!scalperChartEngine) return;
           updateShadedBoxes();
-          renderHistoricTradeBoxes(scalperChartEngine, emaKronosTradesHistory);
           renderEmaLines(scalperChartEngine);
           renderLiveTrackerLines(scalperChartEngine);
           renderLivePullbackWatch(scalperChartEngine);
@@ -5034,19 +5288,18 @@
 
         if (isFirstLoad || isNewCandle) {
           window.lastLoadedCandleTime = serverCandleTime;
-          window.lastPredKey = predKey;
           liveCandles = serverLiveCandles;
           window.currentPrice = d.current;
           liveChartEngine.setData(liveCandles.concat(cleanPredicted));
           loadDrawings(liveChartEngine, 'live');
+        }
+        if (isFirstLoad || isNewCandle) {
+          window.lastPredKey = predKey;
           if (!isFirstLoad && liveCandles.length > 0) {
             liveChartEngine.scrollToTime(liveCandles[liveCandles.length - 1].time);
           }
-        } else if (isNewPrediction) {
-          window.lastPredKey = predKey;
-          liveChartEngine.setData(liveCandles.concat(cleanPredicted));
         }
-        // else: same candle + same predictions — keep tick-updated candles, don't touch chart data
+        // else: same candle — keep tick-updated candles, don't touch chart data
 
         updateChartIndicators(liveChartEngine, liveCandles, liveActiveIndicators);
         renderPredictionsTable(window.lastPredictions);
@@ -5056,7 +5309,11 @@
           lastClosePrice = liveCandles[liveCandles.length - 1].close;
         }
 
-        if (isFirstLoad || isNewCandle || isNewPrediction) {
+        const projHashSeed = (d.current || 0).toFixed(2) + '|' + (d.pred_len || 0) + '|' + (window.lastPredictions || []).map(p => p.time + ':' + p.close).join(',');
+        const isSameProj = projHashSeed === window.lastProjHash;
+        window.lastProjHash = projHashSeed;
+
+        if (isFirstLoad || isNewCandle || (isNewPrediction && !isSameProj)) {
           // -------------------------------------------------------------
           // Simulating the Oracle Probability Cone & AI Prediction Lines
           // -------------------------------------------------------------
@@ -5131,6 +5388,7 @@
             echoesCard.className = `overlay-card echoes-card ${statusKlass}`;
             $('echoes-status').textContent = statusText;
             if ($('mobile-hud-echoes')) $('mobile-hud-echoes').textContent = statusText;
+            if ($('acc-echoes-badge')) $('acc-echoes-badge').textContent = statusText;
             $('echoes-median').textContent = `${echoScan.stats.medianEndPct >= 0 ? '+' : ''}${echoScan.stats.medianEndPct.toFixed(2)}%`;
             $('echoes-best').textContent = `+${echoScan.stats.bestEndPct.toFixed(2)}%`;
             $('echoes-worst').textContent = `${echoScan.stats.worstEndPct.toFixed(2)}%`;
@@ -5163,7 +5421,7 @@
             $('echoes-worst').textContent = '—';
           }
 
-          liveChartEngine.setProjections(projLines, projBand);
+          liveChartEngine.setProjections(projLines, projBand, !isFirstLoad);
           if (isFirstLoad) {
             liveChartEngine.resetView();
           }
@@ -5184,6 +5442,7 @@
         updateIdText('s-p5', fmt(d.pred_5));
         updateIdText('s-pn', fmt(d.pred_n));
         updateIdText('s-mv', (d.move >= 0 ? '+' : '') + fmt(d.move) + '  (' + d.move_pct + '%)');
+        if ($('acc-dir-badge')) $('acc-dir-badge').textContent = d.direction + ' ' + d.confidence + '%';
         updateBeginnerSignal(d, '');
 
         // Update mobile forecast trigger button text (always — confidence/action
@@ -5269,16 +5528,44 @@
     let emaKronosApiData = null;
     let emaKronosScalperCandleTimes = null;
 
+    let lastTradeMarkersKey = null;
+    let lastOverlaySizeKey = null;
+    function resizeTradeOverlay() {
+      const overlayCanvas = document.getElementById('scalper-trade-overlay');
+      if (!overlayCanvas) return;
+      const parent = overlayCanvas.parentElement;
+      if (!parent) return;
+      const w = parent.offsetWidth || parent.clientWidth;
+      const h = parent.offsetHeight || parent.clientHeight;
+      const sizeKey = w + 'x' + h;
+      if (sizeKey === lastOverlaySizeKey) return false;
+      lastOverlaySizeKey = sizeKey;
+      overlayCanvas.width = w;
+      overlayCanvas.height = h;
+      return true;
+    }
     function renderHistoricTradeBoxes(engine, trades) {
-      if (!engine || !trades || trades.length === 0) return;
+      if (!engine || !trades || trades.length === 0) {
+        const overlayCanvas = document.getElementById('scalper-trade-overlay');
+        if (overlayCanvas) {
+          overlayCanvas.width = overlayCanvas.width;
+        }
+        lastTradeMarkersKey = null;
+        return;
+      }
       const conv = engine.getMainConverters();
       const rect = engine.getMainPaneRect();
       if (!conv || !rect) return;
-      const container = document.getElementById('scalper-chart');
-      const canvas = container ? container.querySelector('canvas') : null;
-      if (!canvas) return;
+      const tradesKey = JSON.stringify(trades.map(t => [t.entryTime, t.exitTime, t.entryPrice, t.slPrice, t.tpPrice, t.type, t.result, t.points]));
+      if (tradesKey === lastTradeMarkersKey && !resizeTradeOverlay()) return;
+      if (tradesKey !== lastTradeMarkersKey) lastTradeMarkersKey = tradesKey;
+      resizeTradeOverlay();
+      const overlayCanvas = document.getElementById('scalper-trade-overlay');
+      if (!overlayCanvas) return;
+      const ctx = overlayCanvas.getContext('2d');
+      ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+      overlayCanvas.classList.add('drawn');
       try {
-        const ctx = canvas.getContext('2d');
         const xMin = rect.x, xMax = rect.x + rect.width;
 
         for (const trade of trades) {
@@ -5298,22 +5585,24 @@
 
           const isLong = trade.type === 'Long';
 
+          ctx.save();
+          ctx.globalAlpha = 1;
           // Profit zone (green): entry to TP
           const greenTop = Math.min(yEntry, yTP);
           const greenH = Math.max(1, Math.abs(yEntry - yTP));
-          ctx.fillStyle = 'rgba(76, 175, 80, 0.15)';
+          ctx.fillStyle = 'rgba(8, 153, 129, 0.08)';
           ctx.fillRect(xLeft, greenTop, w, greenH);
           ctx.strokeStyle = '#089981';
-          ctx.lineWidth = 1.5;
+          ctx.lineWidth = 0.5;
           ctx.strokeRect(xLeft, greenTop, w, greenH);
 
           // Loss zone (red): entry to SL
           const redTop = Math.min(yEntry, ySL);
           const redH = Math.max(1, Math.abs(yEntry - ySL));
-          ctx.fillStyle = 'rgba(244, 67, 54, 0.15)';
+          ctx.fillStyle = 'rgba(242, 54, 69, 0.08)';
           ctx.fillRect(xLeft, redTop, w, redH);
           ctx.strokeStyle = '#f23645';
-          ctx.lineWidth = 1.5;
+          ctx.lineWidth = 0.5;
           ctx.strokeRect(xLeft, redTop, w, redH);
 
           // ── Pullback Watch marker (yellow dashed vertical line at entry x) ──
@@ -5409,6 +5698,7 @@
             ctx.fillStyle = 'rgba(255,255,255,0.85)';
             ctx.fillText(pnlStr, xRight - 4, exitY + 14);
           }
+          ctx.restore();
         }
       } catch (e) {
         // Silently skip render errors
@@ -6041,6 +6331,9 @@ This is informational only — you decide whether to take the trade.`;
 
         emaKronosApiData = d;
         emaKronosTradesHistory = d.trades_history || [];
+        if (scalperChartEngine) {
+          renderHistoricTradeBoxes(scalperChartEngine, emaKronosTradesHistory);
+        }
 
         if ((sym === 'BTC' || sym === 'GOLD') && wsLastClosedTime !== null && d.candles.length > 0) {
           const serverLastCandleTime = d.candles[d.candles.length - 1].time;
@@ -6401,6 +6694,7 @@ This is informational only — you decide whether to take the trade.`;
       startCandleCountdown();
       // Initialize Socket.IO for real-time ticks
       initSocketIO();
+      startWatchdog();
       const pollSecs = 1; // Poll predictions every 1s
       countdown = pollSecs;
       countTimer = setInterval(() => {
@@ -6491,6 +6785,7 @@ This is informational only — you decide whether to take the trade.`;
       }
       if (liveChartEngine) liveChartEngine.resize();
       if (scalperChartEngine) scalperChartEngine.resize();
+      resizeTradeOverlay();
     });
 
     // ── Orientation change handler for mobile ──
@@ -6501,6 +6796,7 @@ This is informational only — you decide whether to take the trade.`;
         }
         if (liveChartEngine) liveChartEngine.resize();
         if (scalperChartEngine) scalperChartEngine.resize();
+        resizeTradeOverlay();
       }, 300);
     });
 
@@ -6584,6 +6880,7 @@ This is informational only — you decide whether to take the trade.`;
 
     function renderPredictionsTable(predicted) {
       const bodies = document.querySelectorAll('#predictions-table-body, #predictions-table-body-scalper');
+      const accPredBadge = $('acc-pred-badge');
       if (!predicted || predicted.length === 0) {
         bodies.forEach(tbody => {
           tbody.innerHTML = `
@@ -6592,8 +6889,10 @@ This is informational only — you decide whether to take the trade.`;
         </tr>
       `;
         });
+        if (accPredBadge) accPredBadge.textContent = '—';
         return;
       }
+      if (accPredBadge) accPredBadge.textContent = predicted.length + ' candles';
 
       const baseline = window.currentPrice || (predicted.length > 0 ? predicted[0].open : 0);
       const next5 = predicted.slice(0, 5);
@@ -7325,6 +7624,19 @@ This is informational only — you decide whether to take the trade.`;
     }
     window.checkStrategyAlerts = checkStrategyAlerts;
 
+    function toggleAccordion(headerEl, exclusive) {
+      const section = headerEl.closest('.accordion-section');
+      if (!section) return;
+      if (exclusive && !section.classList.contains('active')) {
+        const root = section.closest('.accordion-root');
+        if (root) {
+          root.querySelectorAll('.accordion-section.active').forEach(s => s.classList.remove('active'));
+        }
+      }
+      section.classList.toggle('active');
+    }
+    window.toggleAccordion = toggleAccordion;
+
     function toggleDetails() {
       document.body.classList.toggle('details-visible');
       const btns = document.querySelectorAll('.details-toggle-btn');
@@ -7611,6 +7923,8 @@ This is informational only — you decide whether to take the trade.`;
       return el;
     }
     function openMobileSheet() {
+      const backdrop = $('mobile-backdrop');
+      if (backdrop) backdrop.classList.add('active');
       const sheet = $('mobile-bottom-sheet');
       const content = $('mobile-sheet-content');
       if (sheet && content) {
@@ -7662,6 +7976,8 @@ This is informational only — you decide whether to take the trade.`;
     window.openMobileSheet = openMobileSheet;
 
     function closeMobileSheet() {
+      const backdrop = $('mobile-backdrop');
+      if (backdrop) backdrop.classList.remove('active');
       const sheet = $('mobile-bottom-sheet');
       if (sheet) sheet.classList.remove('active');
     }
@@ -7709,6 +8025,12 @@ This is informational only — you decide whether to take the trade.`;
     themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     window._theme = theme;
     applyOverlaysCollapse();
+    // Default-collapse secondary cards on first load (exclude main signal card)
+    document.querySelectorAll('.overlay-card').forEach(card => {
+      if (card.id !== 'sig' && card.id !== 'scalper-sig' && !card.classList.contains('card-collapsed')) {
+        card.classList.add('card-collapsed');
+      }
+    });
     // Toggle collapse state for individual overlay cards
     document.querySelectorAll('.overlay-card-header, .sig-header-row, .scalper-logs-head').forEach(header => {
       header.addEventListener('click', () => {
@@ -7789,6 +8111,9 @@ This is informational only — you decide whether to take the trade.`;
       </svg>
     </div>
   </div>
+
+  <!-- Mobile Backdrop -->
+  <div id="mobile-backdrop" class="mobile-backdrop" onclick="closeMobileSheet()"></div>
 
   <!-- Mobile Bottom Sheet Drawer -->
   <div id="mobile-bottom-sheet" class="mobile-bottom-sheet">
