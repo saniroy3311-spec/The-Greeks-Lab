@@ -18,7 +18,7 @@ from datetime import timedelta, datetime, timezone
 
 import numpy as np
 import pandas as pd
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import websocket as ws_client  # websocket-client library
@@ -374,6 +374,18 @@ def run_prediction(symbol_key, tf_key):
 @app.route("/")
 def index():
     return app.send_static_file("dashboard.html")
+
+
+@app.route("/candl")
+def candl_index():
+    candl_app_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Candl", "examples", "basic", "dist")
+    return send_from_directory(candl_app_dir, "index.html")
+
+
+@app.route("/candl/<path:path>")
+def candl_assets(path):
+    candl_app_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Candl", "examples", "basic", "dist")
+    return send_from_directory(candl_app_dir, path)
 
 
 def get_max_age(tf_key, is_active):
