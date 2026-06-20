@@ -19,6 +19,7 @@
     }
   }
 </script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <style>
     :root {
       --bg: #F5F6F8;
@@ -505,6 +506,319 @@
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
+    /* Entry Light (new unified widget) + default clutter hiding */
+    #entry-light-live,
+    #entry-light-scalper {
+      position: fixed;
+      z-index: 120;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 10px 8px 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Desktop placement: small fixed card, top-left within chart area */
+    #entry-light-live {
+      top: 64px;
+      left: 18px;
+      width: 92px;
+    }
+
+    #entry-light-scalper {
+      top: 64px;
+      left: 18px;
+      width: 92px;
+    }
+
+    #entry-light-live .entry-light-label,
+    #entry-light-scalper .entry-light-label {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      text-align: center;
+      background: rgba(112, 117, 122, 0.18);
+      color: var(--text);
+      border: 1px solid rgba(112, 117, 122, 0.25);
+      border-radius: 8px;
+      padding: 6px 0;
+      margin-bottom: 2px;
+    }
+
+    #entry-light-live .entry-light-label.buy,
+    #entry-light-scalper .entry-light-label.buy {
+      background: rgba(16, 185, 129, 0.18);
+      color: #10b981;
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    #entry-light-live .entry-light-label.sell,
+    #entry-light-scalper .entry-light-label.sell {
+      background: rgba(239, 83, 80, 0.18);
+      color: #ef5350;
+      border-color: rgba(239, 83, 80, 0.35);
+    }
+
+    #entry-light-live .entry-light-label.wait,
+    #entry-light-scalper .entry-light-label.wait {
+      background: rgba(112, 117, 122, 0.18);
+      color: var(--text);
+      border-color: rgba(112, 117, 122, 0.25);
+    }
+
+    #entry-light-live .entry-light-dots,
+    #entry-light-scalper .entry-light-dots {
+      display: flex;
+      flex-direction: row;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    /* Dot states: gray (pending), fail (red), pass (green) */
+    .entry-light-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(156, 163, 175, 0.65);
+      border: 1px solid rgba(156, 163, 175, 0.35);
+      box-shadow: none;
+    }
+
+    .entry-light-dot.pass {
+      background: rgba(16, 185, 129, 0.95);
+      border-color: rgba(16, 185, 129, 0.85);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+    }
+
+    .entry-light-dot.fail {
+      background: rgba(239, 83, 80, 0.95);
+      border-color: rgba(239, 83, 80, 0.85);
+      box-shadow: 0 0 12px rgba(239, 83, 80, 0.35);
+    }
+
+    /* Mobile placement strip/stack (as requested) */
+    @media (max-width: 768px) {
+      .entry-light-mobile {
+        position: fixed;
+        top: 60px;
+        left: 8px;
+        width: 64px;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 6px;
+      }
+
+      #entry-light-live,
+      #entry-light-scalper {
+        width: auto;
+        padding: 8px 6px;
+      }
+
+      #entry-light-live .entry-light-dots,
+      #entry-light-scalper .entry-light-dots {
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      #entry-light-live .entry-light-label,
+      #entry-light-scalper .entry-light-label {
+        width: 100%;
+        font-size: 10px;
+        padding: 5px 0;
+      }
+    }
+
+    /* Hide clutter by default (kept in DOM, collapsed via CSS) */
+    #beginner-signal-banner,
+    #predictions-card,
+    #echoes-card {
+      display: none !important;
+    }
+
+    #scalper-beginner-signal-banner,
+    #predictions-card-scalper,
+    #scalper-echoes-card {
+      display: none !important;
+    }
+
+    /* Details toggle - shows the hidden clutter cards */
+    .details-toggle-btn {
+      position: absolute;
+      top: 6px;
+      right: 36px;
+      z-index: 5;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 9px;
+      padding: 2px 6px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+    }
+    .details-toggle-btn:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+    body.details-visible #beginner-signal-banner,
+    body.details-visible #predictions-card,
+    body.details-visible #echoes-card,
+    body.details-visible #scalper-beginner-signal-banner,
+    body.details-visible #predictions-card-scalper,
+    body.details-visible #scalper-echoes-card {
+      display: block !important;
+    }
+    /* Allow the signal card wrapper itself to be shown when details are visible */
+    body.details-visible .chart-overlays-inner {
+      gap: 8px;
+    }
+
+    /* Entry Light Widget - Desktop */
+    .entry-light-widget {
+      display: none;
+      position: fixed;
+      top: 74px;
+      left: 12px;
+      z-index: 50;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      backdrop-filter: blur(8px);
+    }
+    body.dark-theme .entry-light-widget {
+      background: rgba(19, 26, 46, 0.92);
+    }
+    .entry-light-dots {
+      display: flex;
+      flex-direction: row;
+      gap: 6px;
+    }
+    .entry-label {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .entry-label.wait {
+      color: var(--muted);
+      background: transparent;
+    }
+    .entry-label.buy {
+      color: #065f46;
+      background: #a7f3d0;
+    }
+    .entry-label.sell {
+      color: #991b1b;
+      background: #fca5a5;
+    }
+    body.dark-theme .entry-label.buy {
+      color: #a7f3d0;
+      background: rgba(5, 150, 105, 0.25);
+    }
+    body.dark-theme .entry-label.sell {
+      color: #fca5a5;
+      background: rgba(220, 38, 38, 0.25);
+    }
+    .entry-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: transparent;
+      font-size: 7px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      line-height: 1;
+    }
+    .entry-dot.pass {
+      background: #22c55e;
+      border-color: #22c55e;
+      color: #fff;
+    }
+    .entry-dot.fail {
+      background: #ef4444;
+      border-color: #ef4444;
+      color: #fff;
+    }
+    body.dark-theme .entry-dot.pass {
+      background: #22c55e;
+      border-color: #22c55e;
+    }
+    body.dark-theme .entry-dot.fail {
+      background: #ef4444;
+      border-color: #ef4444;
+    }
+
+    /* Always show entry-light-widget on desktop */
+    @media (min-width: 769px) {
+      .entry-light-widget {
+        display: flex;
+      }
+    }
+
+    /* Mobile: Entry Light vertical strip on left edge */
+    @media (max-width: 768px) {
+      .entry-light-widget {
+        display: flex;
+        position: fixed;
+        top: 60px;
+        left: 8px;
+        width: 48px;
+        z-index: 100;
+        flex-direction: column;
+        gap: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        backdrop-filter: blur(8px);
+      }
+      body.dark-theme .entry-light-widget {
+        background: rgba(19, 26, 46, 0.95);
+      }
+      .entry-light-dots {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .entry-label {
+        font-size: 10px;
+        text-align: center;
+        padding: 2px 4px;
+      }
+      .entry-dot {
+        width: 16px;
+        height: 16px;
+        font-size: 8px;
+      }
+    }
+
     .chart-overlays-container.collapsed {
       transform: translateX(-377px);
     }
@@ -736,30 +1050,36 @@
       align-items: center;
       justify-content: center;
     }
+
     .beginner-signal-banner.buy {
       background: linear-gradient(135deg, #10b981, #059669) !important;
       box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
     }
+
     .beginner-signal-banner.sell {
       background: linear-gradient(135deg, #f43f5e, #e11d48) !important;
       box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
     }
+
     .beginner-signal-banner.skip {
       background: linear-gradient(135deg, #64748b, #475569) !important;
       box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2);
     }
+
     .beginner-signal-icon {
       font-size: 28px;
       margin-bottom: 6px;
       display: block;
       line-height: 1;
     }
+
     .beginner-signal-title {
       font-size: 18px;
       text-transform: uppercase;
       margin-bottom: 4px;
       letter-spacing: 0.8px;
     }
+
     .beginner-signal-desc {
       font-size: 11px;
       font-weight: 400;
@@ -767,11 +1087,12 @@
       line-height: 1.4;
       max-width: 260px;
     }
-    
+
     .confidence-meter-container {
       margin-bottom: 12px;
       padding: 0 4px;
     }
+
     .confidence-meter-header {
       display: flex;
       justify-content: space-between;
@@ -783,6 +1104,7 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
+
     .confidence-meter-bar {
       height: 8px;
       background: rgba(0, 0, 0, 0.05);
@@ -790,21 +1112,26 @@
       overflow: hidden;
       position: relative;
     }
+
     body.dark-theme .confidence-meter-bar {
       background: rgba(255, 255, 255, 0.08);
     }
+
     .confidence-meter-fill {
       height: 100%;
       border-radius: 4px;
       transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
       width: 0%;
     }
+
     .confidence-meter-fill.buy {
       background: linear-gradient(90deg, #34d399, #10b981) !important;
     }
+
     .confidence-meter-fill.sell {
       background: linear-gradient(90deg, #fb7185, #f43f5e) !important;
     }
+
     .confidence-meter-fill.skip {
       background: linear-gradient(90deg, #94a3b8, #64748b) !important;
     }
@@ -3148,6 +3475,7 @@
                 <polyline points="15 18 9 12 15 6"></polyline>
               </svg>
             </button>
+            <button class="details-toggle-btn" id="details-toggle-live" onclick="toggleDetails()">Details</button>
 
             <div class="chart-overlays-inner">
               <!-- Kronos Unified Forecast Card -->
@@ -3156,7 +3484,8 @@
                 <div class="beginner-signal-banner skip" id="beginner-signal-banner">
                   <span class="beginner-signal-icon" id="beginner-signal-icon">⏸</span>
                   <div class="beginner-signal-title" id="beginner-signal-action">WAIT / SKIP</div>
-                  <div class="beginner-signal-desc" id="beginner-signal-desc">Scanning market conditions. No clear direction detected yet.</div>
+                  <div class="beginner-signal-desc" id="beginner-signal-desc">Scanning market conditions. No clear
+                    direction detected yet.</div>
                 </div>
 
                 <!-- Beginner Friendly Confidence Meter -->
@@ -3444,6 +3773,7 @@
                 <polyline points="15 18 9 12 15 6"></polyline>
               </svg>
             </button>
+            <button class="details-toggle-btn" id="details-toggle-scalper" onclick="toggleDetails()">Details</button>
 
             <div class="chart-overlays-inner">
               <!-- State Badges Overlay Card -->
@@ -3500,7 +3830,8 @@
                 <div class="beginner-signal-banner skip" id="scalper-beginner-signal-banner">
                   <span class="beginner-signal-icon" id="scalper-beginner-signal-icon">⏸</span>
                   <div class="beginner-signal-title" id="scalper-beginner-signal-action">WAIT / SKIP</div>
-                  <div class="beginner-signal-desc" id="scalper-beginner-signal-desc">Scanning market conditions. No clear direction detected yet.</div>
+                  <div class="beginner-signal-desc" id="scalper-beginner-signal-desc">Scanning market conditions. No
+                    clear direction detected yet.</div>
                 </div>
 
                 <!-- Beginner Friendly Confidence Meter -->
@@ -3510,7 +3841,8 @@
                     <span id="scalper-beginner-signal-conf">0%</span>
                   </div>
                   <div class="confidence-meter-bar">
-                    <div class="confidence-meter-fill skip" id="scalper-beginner-signal-conf-bar" style="width: 0%;"></div>
+                    <div class="confidence-meter-fill skip" id="scalper-beginner-signal-conf-bar" style="width: 0%;">
+                    </div>
                   </div>
                 </div>
 
@@ -3697,6 +4029,151 @@
     let deltaSocket = null;
     let wsLastClosedTime = null;
     let activeCandleOpenTime = null;
+
+    // ── Socket.IO Real-Time Tick Connection ──
+    let sioSocket = null;
+    let sioCurrentRoom = null;
+
+    function initSocketIO() {
+      if (sioSocket) return;
+      const protocol = window.location.protocol;
+      const host = window.location.host;
+      sioSocket = io(protocol + '//' + host, {
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: Infinity
+      });
+
+      sioSocket.on('connect', () => {
+        console.log('[SocketIO] Connected:', sioSocket.id);
+        // Update connection indicator
+        const statusEl = $('status');
+        if (statusEl) statusEl.textContent = 'Live';
+        // Re-subscribe to current room on reconnect
+        if (sioCurrentRoom) {
+          sioSocket.emit('subscribe', sioCurrentRoom);
+        }
+      });
+
+      sioSocket.on('disconnect', (reason) => {
+        console.log('[SocketIO] Disconnected:', reason);
+        const statusEl = $('status');
+        if (statusEl) statusEl.textContent = 'Reconnecting…';
+      });
+
+      sioSocket.on('tick', (data) => {
+        handleTickUpdate(data);
+      });
+    }
+
+    function subscribeToTicks(symbol, timeframe) {
+      if (!sioSocket) initSocketIO();
+      // Unsubscribe from previous room
+      if (sioCurrentRoom) {
+        sioSocket.emit('unsubscribe', sioCurrentRoom);
+      }
+      sioCurrentRoom = { symbol: symbol, timeframe: timeframe };
+      sioSocket.emit('subscribe', sioCurrentRoom);
+      console.log('[SocketIO] Subscribed to', symbol, timeframe);
+    }
+
+    function handleTickUpdate(data) {
+      const sym = $('symbol').value;
+      const tf = (activeTab === 'live-signal' ? $('tf') : $('scalper-tf')).value;
+
+      // Only process ticks for the currently viewed symbol+timeframe
+      if (data.symbol !== sym || data.timeframe !== tf) return;
+
+      const t = data.time; // Already in seconds from server
+      const o = data.open;
+      const h = data.high;
+      const l = data.low;
+      const c = data.close;
+      const v = data.volume || 0;
+
+      const candle = { time: t * 1000, open: o, high: h, low: l, close: c, volume: v };
+      activeCandleOpenTime = t;
+
+      // Detect candle close (new candle timestamp > last candle)
+      let isClosed = false;
+      if (activeTab === 'scalper') {
+        const lastCandle = scalperCandles[scalperCandles.length - 1];
+        if (lastCandle && t > Math.floor(lastCandle.time / 1000)) {
+          const closeTime = Math.floor(lastCandle.time / 1000);
+          if (window.lastScheduledClosedTimeScalper !== closeTime) {
+            window.lastScheduledClosedTimeScalper = closeTime;
+            isClosed = true;
+            wsLastClosedTime = closeTime;
+          }
+        }
+      } else {
+        const lastCandle = liveCandles[liveCandles.length - 1];
+        if (lastCandle && t > Math.floor(lastCandle.time / 1000)) {
+          const closeTime = Math.floor(lastCandle.time / 1000);
+          if (window.lastScheduledClosedTime !== closeTime) {
+            window.lastScheduledClosedTime = closeTime;
+            isClosed = true;
+            wsLastClosedTime = closeTime;
+          }
+        }
+      }
+
+      // Update chart
+      if (activeTab === 'scalper') {
+        if (scalperChartEngine) {
+          scalperChartEngine.updateLast(candle);
+          updateLocalCandles(scalperCandles, candle);
+          updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
+
+          if (currentTrade && currentTrade.active) {
+            let hit = false;
+            let result = "";
+            if (currentTrade.type === 'Long') {
+              if (l <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
+              else if (h >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+            } else if (currentTrade.type === 'Short') {
+              if (h >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
+              else if (l <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+            }
+            if (hit) {
+              document.querySelectorAll('#scalper-info-text').forEach(el => {
+                el.innerHTML = `<strong>Trade update:</strong> ${currentTrade.type} position has hit ${result} at price ${c}. Syncing...`;
+              });
+              setTimeout(() => loadScalper(), 1000);
+            }
+          }
+          if (typeof updateShadedBoxes === 'function') updateShadedBoxes();
+          if (typeof loadEmaKronos === 'function') loadEmaKronos();
+        }
+        if (isClosed) {
+          setTimeout(() => {
+            loadScalper();
+          }, 2000);
+        }
+      } else {
+        if (liveChartEngine) {
+          updateLocalCandles(liveCandles, candle);
+          liveChartEngine.updateLast(candle);
+          updateChartIndicators(liveChartEngine, liveCandles, liveActiveIndicators);
+
+          window.currentPrice = c;
+          updateIdText('s-cur', fmt(c));
+          renderPredictionsTable(window.lastPredictions);
+          if (typeof checkAlerts === 'function') checkAlerts(candle);
+        }
+        if (isClosed) {
+          setTimeout(() => {
+            load();
+          }, 2000);
+        }
+      }
+    }
+
+    // Initialize scheduled closed time tracking
+    if (!window.lastScheduledClosedTime) window.lastScheduledClosedTime = 0;
+    if (!window.lastScheduledClosedTimeScalper) window.lastScheduledClosedTimeScalper = 0;
 
     let liveActiveIndicators = ['ema9', 'ema15'];
     let scalperActiveIndicators = ['ema9', 'ema15'];
@@ -4533,10 +5010,9 @@
         $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · horizon ${d.pred_len}`;
         if ($('status')) $('status').textContent = 'Live';
         evaluateAntigravityAlerts(d, liveCandles);
-        connectDeltaWebSocket(tf);
-        if (sym !== 'BTC' && sym !== 'GOLD') {
-          startSimulatedTicks();
-        }
+        updateEntryLight(d, liveCandles);
+        // Subscribe to real-time ticks via Socket.IO (all symbols)
+        subscribeToTicks(sym, tf);
       } catch (e) {
         if (mySeq === liveLoadSeq) {
           $('err').textContent = 'Error: ' + e.message + ' — is the market open and the server reachable?';
@@ -5378,7 +5854,8 @@
           }
         }
 
-        connectDeltaWebSocket(tf);
+        // Subscribe to real-time ticks via Socket.IO (all symbols)
+        subscribeToTicks(sym, tf);
         loadEmaKronos();
         const timeText = 'Last update: ' + d.updated;
         if ($('updated')) $('updated').textContent = timeText;
@@ -5386,6 +5863,7 @@
         $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · EMA 5/10`;
         if ($('status')) $('status').textContent = 'Live';
         evaluateAntigravityAlerts(d, scalperCandles);
+        updateEntryLight(d, scalperCandles);
         // Sync mobile HUD strip (scalper)
         if ($('mobile-hud-signal')) $('mobile-hud-signal').textContent = d.direction;
         if ($('mobile-hud-conf')) $('mobile-hud-conf').textContent = d.confidence + '%';
@@ -5394,10 +5872,6 @@
         const scalperEchoesStatus = $('scalper-echoes-status');
         if ($('mobile-hud-echoes') && scalperEchoesStatus) {
           $('mobile-hud-echoes').textContent = scalperEchoesStatus.textContent;
-        }
-
-        if (sym !== 'BTC') {
-          startSimulatedTicks();
         }
       } catch (e) {
         if (mySeq === scalperLoadSeq) {
@@ -5413,85 +5887,10 @@
     }
 
     let simulatedTickInterval = null;
+    // Legacy stubs — simulated ticks are replaced by Socket.IO real-time feed
     function startSimulatedTicks() {
-      if (simulatedTickInterval) return; // already running — avoid restart cycle
-      const sym = $('symbol').value;
-      if (sym === 'BTC' || sym === 'GOLD') return; // relies on real Delta Exchange WebSocket
-
-      simulatedTickInterval = setInterval(() => {
-        const isLive = (activeTab === 'live-signal');
-        const candlesArray = isLive ? liveCandles : scalperCandles;
-        const engine = isLive ? liveChartEngine : scalperChartEngine;
-
-        if (!candlesArray || candlesArray.length < 2 || !engine) return;
-
-        const lastCandle = candlesArray[candlesArray.length - 1];
-
-        if (!window.currentPrice) {
-          window.currentPrice = lastCandle.close;
-        }
-
-        const volatility = 0.00015;
-        const changePct = (Math.random() - 0.5) * 2 * volatility;
-        const currentVal = window.currentPrice || lastCandle.close;
-        const newPrice = currentVal * (1 + changePct);
-
-        const serverClose = lastCandle.close;
-        const maxDrift = 0.001;
-        let boundedPrice = newPrice;
-        if (Math.abs(newPrice - serverClose) / serverClose > maxDrift) {
-          boundedPrice = newPrice + (serverClose - newPrice) * 0.1;
-        }
-
-        window.currentPrice = boundedPrice;
-
-        const tickCandle = {
-          time: lastCandle.time,
-          open: lastCandle.open,
-          high: Math.max(lastCandle.high, boundedPrice),
-          low: Math.min(lastCandle.low, boundedPrice),
-          close: boundedPrice,
-          volume: lastCandle.volume + Math.floor(Math.random() * 2)
-        };
-
-        if (isLive) {
-          updateLocalCandles(liveCandles, tickCandle);
-          engine.updateLast(tickCandle);
-          updateChartIndicators(engine, liveCandles, liveActiveIndicators);
-          updateIdText('s-cur', fmt(boundedPrice));
-          renderPredictionsTable(window.lastPredictions);
-          if (typeof checkAlerts === 'function') {
-            checkAlerts(tickCandle);
-          }
-        } else {
-          updateLocalCandles(scalperCandles, tickCandle);
-          engine.updateLast(tickCandle);
-          updateChartIndicators(engine, scalperCandles, scalperActiveIndicators);
-          renderPredictionsTable(window.lastPredictions);
-          if (typeof updateShadedBoxes === 'function') {
-            updateShadedBoxes();
-          }
-
-          if (currentTrade && currentTrade.active) {
-            let hit = false;
-            let result = "";
-            const tickH = tickCandle.high, tickL = tickCandle.low;
-            if (currentTrade.type === 'Long') {
-              if (tickL <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
-              else if (tickH >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
-            } else if (currentTrade.type === 'Short') {
-              if (tickH >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
-              else if (tickL <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
-            }
-            if (hit) {
-              document.querySelectorAll('#scalper-info-text').forEach(el => {
-                el.innerHTML = `<strong>Trade update:</strong> ${currentTrade.type} position has hit ${result} at price ${boundedPrice}. Syncing...`;
-              });
-              setTimeout(() => loadScalper(), 1000);
-            }
-          }
-        }
-      }, 400);
+      // No-op: real-time ticks now come from server via Socket.IO
+      return;
     }
 
     function stopSimulatedTicks() {
@@ -5508,24 +5907,16 @@
       if (timer) clearInterval(timer);
       if (countTimer) clearInterval(countTimer);
       startCandleCountdown();
-      let btcSkipCounter = 0;
-      const secs = 1;
-      countdown = secs;
+      // Initialize Socket.IO for real-time ticks
+      initSocketIO();
+      const pollSecs = 1; // Poll predictions every 1s
+      countdown = pollSecs;
       countTimer = setInterval(() => {
         countdown--;
-        if (countdown <= 0) countdown = secs;
+        if (countdown <= 0) countdown = pollSecs;
       }, 1000);
       timer = setInterval(() => {
-        const sym = $('symbol').value;
-
-        if (sym === 'BTC' || sym === 'GOLD') {
-          btcSkipCounter++;
-          // Poll for predictions every 30s even for BTC/GOLD;
-          // real-time price comes from WebSocket.
-          if (btcSkipCounter < 30) return;
-          btcSkipCounter = 0;
-        }
-
+        // Periodic prediction refresh (AI inference) — price comes from Socket.IO
         if (activeTab === 'live-signal') {
           if (liveLoadInflight > 0) return;
           load();
@@ -5533,7 +5924,7 @@
           if (scalperLoadInflight > 0) return;
           loadScalper();
         }
-      }, secs * 1000);
+      }, pollSecs * 1000);
     }
 
     // ── Wall-clock countdown overlay ──
@@ -5565,187 +5956,12 @@
       }, 500);
     }
 
+    // Legacy stub — Delta WebSocket is now handled server-side via Socket.IO
     function connectDeltaWebSocket(tf) {
+      // No-op: server maintains persistent Delta Exchange WS connection
+      // and pushes ticks to us via Socket.IO.
       const symbol = $('symbol').value;
-      if (symbol !== 'BTC' && symbol !== 'GOLD') {
-        // Don't stop simulated ticks — they provide live candle updates for NSE symbols
-        if (deltaSocket) {
-          const socketToClose = deltaSocket;
-          deltaSocket = null;
-          socketToClose.onmessage = null;
-          socketToClose.onclose = null;
-          socketToClose.onerror = null;
-          socketToClose.close();
-        }
-        return;
-      }
-
-      stopSimulatedTicks();
-      const deltaSymbol = symbol === 'BTC' ? 'BTCUSD' : 'XAUTUSD';
-      const wsUrl = `wss://socket.india.delta.exchange`;
-
-      if (deltaSocket && deltaSocket.url === wsUrl &&
-        (deltaSocket.readyState === WebSocket.OPEN || deltaSocket.readyState === WebSocket.CONNECTING)) {
-        if (window.currentDeltaSub && window.currentDeltaSub.symbol === symbol && window.currentDeltaSub.tf === tf) {
-          return;
-        }
-      }
-
-      if (deltaSocket) {
-        const socketToClose = deltaSocket;
-        deltaSocket = null;
-        socketToClose.onmessage = null;
-        socketToClose.onclose = null;
-        socketToClose.onerror = null;
-        socketToClose.close();
-      }
-
-      if (!window.lastScheduledClosedTime) window.lastScheduledClosedTime = 0;
-      if (!window.lastScheduledClosedTimeScalper) window.lastScheduledClosedTimeScalper = 0;
-
-      const deltaSocketInstance = new WebSocket(wsUrl);
-      deltaSocket = deltaSocketInstance;
-      window.currentDeltaSub = { symbol, tf };
-
-      deltaSocketInstance.onopen = () => {
-        const subscribeMsg = {
-          "type": "subscribe",
-          "payload": {
-            "channels": [
-              {
-                "name": `candlestick_${tf}`,
-                "symbols": [deltaSymbol]
-              }
-            ]
-          }
-        };
-        deltaSocketInstance.send(JSON.stringify(subscribeMsg));
-        console.log(`Subscribed to Delta Exchange candlestick_${tf} for ${deltaSymbol}`);
-      };
-
-      deltaSocketInstance.onmessage = (event) => {
-        const msg = JSON.parse(event.data);
-        const type = msg.type;
-        const symbol = msg.symbol !== undefined ? msg.symbol : msg.sy;
-
-        if (type !== `candlestick_${tf}` || symbol !== deltaSymbol) {
-          return;
-        }
-
-        const rawTime = msg.candle_start_time !== undefined ? msg.candle_start_time : msg.cst;
-        if (rawTime === undefined) return;
-
-        let t;
-        if (rawTime > 1000000000000000) {
-          t = Math.floor(rawTime / 1000000000); // Nanoseconds to seconds
-        } else if (rawTime > 100000000000) {
-          t = Math.floor(rawTime / 1000); // Milliseconds to seconds
-        } else {
-          t = rawTime; // Already in seconds
-        }
-
-        const o = parseFloat(msg.open !== undefined ? msg.open : msg.o);
-        const h = parseFloat(msg.high !== undefined ? msg.high : msg.h);
-        const l = parseFloat(msg.low !== undefined ? msg.low : msg.l);
-        const c = parseFloat(msg.close !== undefined ? msg.close : msg.c);
-        const v = parseFloat(msg.volume !== undefined ? msg.volume : (msg.v !== undefined ? msg.v : 0));
-
-        const candle = { time: t * 1000, open: o, high: h, low: l, close: c, volume: v };
-        activeCandleOpenTime = t;
-
-        let isClosed = false;
-        if (activeTab === 'scalper') {
-          const lastCandle = scalperCandles[scalperCandles.length - 1];
-          if (lastCandle && t > Math.floor(lastCandle.time / 1000)) {
-            const closeTime = Math.floor(lastCandle.time / 1000);
-            if (window.lastScheduledClosedTimeScalper !== closeTime) {
-              window.lastScheduledClosedTimeScalper = closeTime;
-              isClosed = true;
-              wsLastClosedTime = closeTime;
-            }
-          }
-        } else {
-          const lastCandle = liveCandles[liveCandles.length - 1];
-          if (lastCandle && t > Math.floor(lastCandle.time / 1000)) {
-            const closeTime = Math.floor(lastCandle.time / 1000);
-            if (window.lastScheduledClosedTime !== closeTime) {
-              window.lastScheduledClosedTime = closeTime;
-              isClosed = true;
-              wsLastClosedTime = closeTime;
-            }
-          }
-        }
-
-        if (activeTab === 'scalper') {
-          if (scalperChartEngine) {
-            scalperChartEngine.updateLast(candle);
-            updateLocalCandles(scalperCandles, candle);
-            updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
-
-            if (currentTrade && currentTrade.active) {
-              let hit = false;
-              let result = "";
-              if (currentTrade.type === 'Long') {
-                if (l <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
-                else if (h >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
-              } else if (currentTrade.type === 'Short') {
-                if (h >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
-                else if (l <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
-              }
-              if (hit) {
-                document.querySelectorAll('#scalper-info-text').forEach(el => {
-                  el.innerHTML = `<strong>Trade update:</strong> ${currentTrade.type} position has hit ${result} at price ${c}. Syncing...`;
-                });
-                setTimeout(() => loadScalper(), 1000);
-              }
-            }
-            updateShadedBoxes();
-            loadEmaKronos();
-          }
-          if (isClosed) {
-            setTimeout(() => {
-              const currentSym = $('symbol').value;
-              if (currentSym === 'BTC' || currentSym === 'GOLD') loadScalper();
-            }, 2000);
-          }
-        } else {
-          if (liveChartEngine) {
-            updateLocalCandles(liveCandles, candle);
-            liveChartEngine.updateLast(candle);
-            updateChartIndicators(liveChartEngine, liveCandles, liveActiveIndicators);
-
-            window.currentPrice = c;
-            renderPredictionsTable(window.lastPredictions);
-            checkAlerts(candle);
-          }
-          if (isClosed) {
-            setTimeout(() => {
-              const currentSym = $('symbol').value;
-              if (currentSym === 'BTC' || currentSym === 'GOLD') load();
-            }, 2000);
-          }
-        }
-      };
-
-      deltaSocketInstance.onclose = (event) => {
-        console.log("Delta WebSocket disconnected:", event);
-        const currentSym = $('symbol').value;
-        if ((currentSym === 'BTC' || currentSym === 'GOLD') && deltaSocket === deltaSocketInstance) {
-          deltaSocket = null;
-          window.currentDeltaSub = null;
-          setTimeout(() => {
-            const recheckSym = $('symbol').value;
-            if (recheckSym === 'BTC' || recheckSym === 'GOLD') {
-              connectDeltaWebSocket(tf);
-            }
-          }, 3000);
-        }
-      };
-
-      deltaSocketInstance.onerror = (err) => {
-        console.error("Delta WebSocket error observed:", err);
-        deltaSocketInstance.close();
-      };
+      subscribeToTicks(symbol, tf);
     }
 
     // -------------------------------------------------------------
@@ -5755,6 +5971,10 @@
       wsLastClosedTime = null;
       activeCandleOpenTime = null;
       stopSimulatedTicks();
+      // Re-subscribe Socket.IO to new symbol/tf
+      const sym = $('symbol').value;
+      const tf = (activeTab === 'live-signal' ? $('tf') : $('scalper-tf')).value;
+      subscribeToTicks(sym, tf);
       if (activeTab === 'live-signal') {
         load(true);
       } else {
@@ -6613,6 +6833,122 @@
     }
     window.checkStrategyAlerts = checkStrategyAlerts;
 
+    function toggleDetails() {
+      document.body.classList.toggle('details-visible');
+      const btns = document.querySelectorAll('.details-toggle-btn');
+      btns.forEach(btn => {
+        btn.textContent = document.body.classList.contains('details-visible') ? 'Hide' : 'Details';
+      });
+    }
+    window.toggleDetails = toggleDetails;
+
+    function getClosedCandles(candles, tf) {
+      if (!candles || candles.length < 2) return [];
+      return candles.slice(0, -1);
+    }
+    window.getClosedCandles = getClosedCandles;
+
+    let lastEntryLightClosedTime = null;
+    let lastEntryLightAlertKey = null;
+
+    function updateEntryLight(d, candles) {
+      if (!d || !candles || candles.length < 2) return;
+      const closedCandles = getClosedCandles(candles, d.timeframe || $('tf').value);
+      if (closedCandles.length < 2) return;
+      const closedTime = closedCandles[closedCandles.length - 1].time;
+      // Only re-evaluate on new closed candle
+      if (closedTime === lastEntryLightClosedTime) return;
+      lastEntryLightClosedTime = closedTime;
+
+      const direction = d.direction || 'Flat';
+      const confidence = d.confidence || 0;
+      const movePct = Math.abs(d.move_pct || 0);
+
+      // Dot 1: Signal direction
+      const dot1Pass = direction !== 'Flat';
+
+      // Dot 2: Confidence >= 80
+      const dot2Pass = confidence >= 80;
+
+      // Dot 3: Expected Move >= 0.50%
+      const dot3Pass = movePct >= 0.50;
+
+      // Echo scan for dots 4 and 5
+      const horizon = d.pred_len || 5;
+      let dot4Pass = false;
+      let dot5Pass = false;
+      try {
+        const echoScan = lab.buildEchoScan(closedCandles, 30, horizon, 5);
+        if (echoScan && echoScan.stats && echoScan.stats.count > 0) {
+          const upCount = echoScan.stats.upCount;
+          const count = echoScan.stats.count;
+          const upRate = upCount / count;
+
+          // Dot 4: Echoes Status
+          if (direction === 'Long') {
+            dot4Pass = upRate >= 0.8;
+          } else if (direction === 'Short') {
+            dot4Pass = upRate <= 0.2;
+          }
+
+          // Dot 5: Asymmetry
+          const best = echoScan.stats.bestEndPct;
+          const worst = echoScan.stats.worstEndPct;
+          if ((best >= 0 && worst >= 0) || (best <= 0 && worst <= 0)) {
+            dot5Pass = true;
+          } else if (direction === 'Long') {
+            dot5Pass = Math.abs(worst) === 0 ? true : (best / Math.abs(worst)) >= 3.0;
+          } else if (direction === 'Short') {
+            dot5Pass = best === 0 ? true : (Math.abs(worst) / best) >= 3.0;
+          }
+        }
+      } catch (e) {
+        // echo scan failed, dots 4/5 stay false
+      }
+
+      const allGreen = dot1Pass && dot2Pass && dot3Pass && dot4Pass && dot5Pass;
+
+      // Update dots
+      const dots = [dot1Pass, dot2Pass, dot3Pass, dot4Pass, dot5Pass];
+      dots.forEach((pass, i) => {
+        const el = document.getElementById('entry-dot-' + (i + 1));
+        if (!el) return;
+        el.className = 'entry-dot ' + (pass ? 'pass' : 'fail');
+      });
+
+      // Update label
+      const labelEl = document.getElementById('entry-light-label');
+      if (labelEl) {
+        if (allGreen && direction !== 'Flat') {
+          if (direction === 'Long') {
+            labelEl.textContent = 'BUY';
+            labelEl.className = 'entry-label buy';
+          } else {
+            labelEl.textContent = 'SELL';
+            labelEl.className = 'entry-label sell';
+          }
+        } else {
+          labelEl.textContent = 'WAIT';
+          labelEl.className = 'entry-label wait';
+        }
+      }
+
+      // Alert firing - only on transition to all-green
+      const sym = d.symbol || document.getElementById('symbol').value;
+      const tf = d.timeframe || document.getElementById('tf').value;
+      const alertKey = sym + ':' + tf + ':' + closedTime + ':entry-light';
+
+      if (allGreen && lastEntryLightAlertKey !== alertKey) {
+        lastEntryLightAlertKey = alertKey;
+        const signalMsg = direction === 'Long' ? 'BUY' : 'SELL';
+        try { window.playTune(3, 3); } catch (e) {}
+        showSetupAlert('Entry Light: ' + signalMsg + ' Signal Ready!');
+      } else if (!allGreen) {
+        lastEntryLightAlertKey = null;
+      }
+    }
+    window.updateEntryLight = updateEntryLight;
+
     function evaluateAntigravityAlerts(d, candles) {
       if (!candles || candles.length < 15) {
         return; // Not enough candles to compute indicators
@@ -6628,7 +6964,7 @@
         return;
       }
       const movePct = Math.abs(d.move_pct);
-      if (movePct < 0.75) {
+      if (movePct < 0.50) {
         return;
       }
 
@@ -6923,6 +7259,18 @@
     load(true);
     schedule();
   </script>
+
+  <!-- Entry Light Widget -->
+  <div class="entry-light-widget" id="entry-light-widget">
+    <div class="entry-label wait" id="entry-light-label">WAIT</div>
+    <div class="entry-light-dots">
+      <div class="entry-dot" id="entry-dot-1" title="Signal Direction">1</div>
+      <div class="entry-dot" id="entry-dot-2" title="Confidence ≥80">2</div>
+      <div class="entry-dot" id="entry-dot-3" title="Expected Move ≥0.50%">3</div>
+      <div class="entry-dot" id="entry-dot-4" title="Echoes Confirmation">4</div>
+      <div class="entry-dot" id="entry-dot-5" title="Asymmetry ≥3.0">5</div>
+    </div>
+  </div>
 
   <!-- Mobile HUD Strip -->
   <div class="mobile-hud-strip" onclick="openMobileSheet()">
