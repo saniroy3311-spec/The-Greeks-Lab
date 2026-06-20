@@ -14,3 +14,8 @@ node_modules/
 **/node_modules/
 .git_bak/
 **/dist/node_modules/
+CandL-win.exe
+persistent_cache.json
+scratch/
+.opencode/
+

@@ -2,7 +2,7 @@
 Kronos Live Trading Dashboard - Backend Server
 ================================================
 Serves:
-  - A live auto-refreshing candlestick dashboard (TradingView lightweight-charts)
+   - A live auto-refreshing candlestick dashboard (Candl Canvas Chart)
   - A JSON API that runs the real Kronos model on live NSE data
 
 Run:  python server.py
@@ -325,7 +325,7 @@ def _run_prediction_inner(symbol_key, tf_key):
 
     confidence = int(max(50, min(95, 50 + abs(move_pct) * 4000)))
 
-    # Build candlestick arrays for lightweight-charts (unix seconds, IST-localized)
+    # Build candlestick arrays for Candl Canvas Chart (unix seconds, IST-localized)
     hist_candles = [{
         "time": int(ts.timestamp()),
         "open": round(_safe_float(r.open, 0), 2),
@@ -634,7 +634,7 @@ def api_scalper(symbol, tf):
         df['longTrigger'] = df['upTrend'] & (~df['upTrend'].shift(1).fillna(False))
         df['shortTrigger'] = df['downTrend'] & (~df['downTrend'].shift(1).fillna(False))
 
-        # Build markers for TradingView Lightweight Charts
+        # Build markers for Candl Canvas Chart
         markers = []
         for _, row in df.iterrows():
             if row['longTrigger']:
@@ -927,16 +927,34 @@ def api_a1(symbol, tf):
         # move_pct in cached_result is stored as % (e.g. 0.4 for 0.40%)
         kronos_move_decimal = kronos_move_pct / 100.0 if abs(kronos_move_pct) > 0 else 0.0
 
+        # Compute EMA 5 and 10 for chart drawing
+        df_tail = df.tail(500)
+        ema5 = df_tail["close"].ewm(span=5, adjust=False).mean()
+        ema10 = df_tail["close"].ewm(span=10, adjust=False).mean()
+        
+        ema_fast_list = [{"time": int(ts.timestamp()), "value": float(val)} for ts, val in zip(ema5.index, ema5.values)]
+        ema_slow_list = [{"time": int(ts.timestamp()), "value": float(val)} for ts, val in zip(ema10.index, ema10.values)]
+
+        # Run A1 strategy evaluation
         strat = A1Strategy()
         a1_out = strat.evaluate(
-            df.tail(500),
+            df_tail,
             kronos_direction=kronos_dir,
             kronos_confidence=kronos_conf,
             kronos_move_pct=kronos_move_decimal,
             echoes_stats=echoes_result,
         )
 
+        # Run EmaKronosStrategy simulation for historical trade log
+        sim_strat = EmaKronosStrategy()
+        sim_out = sim_strat.evaluate(df_tail, kronos_direction=kronos_dir, kronos_confidence=kronos_conf)
+
         return jsonify({
+            "active_trade": sim_out["active_trade"],
+            "trades_history": sim_out["trades_history"],
+            "state": sim_out["state"],
+
+
             "symbol": symbol,
             "timeframe": tf,
             "decision": a1_out["decision"],
@@ -955,11 +973,23 @@ def api_a1(symbol, tf):
             "echo_up_count": a1_out["echo_up_count"],
             "echo_best_end_pct": a1_out["echo_best_end_pct"],
             "echo_worst_end_pct": a1_out["echo_worst_end_pct"],
+            "ema_fast": ema_fast_list,
+            "ema_slow": ema_slow_list,
             "candles": candles,
             "predicted": cached_result.get("predicted", []),
             "current": cached_result.get("current"),
+            "direction": cached_result.get("direction"),
+            "confidence": cached_result.get("confidence"),
+            "action": cached_result.get("action"),
+            "bias": cached_result.get("bias"),
+            "pred_5": cached_result.get("pred_5"),
+            "pred_n": cached_result.get("pred_n"),
+            "move": cached_result.get("move"),
+            "move_pct": cached_result.get("move_pct"),
+            "pred_len": cached_result.get("pred_len"),
             "updated": datetime.now(IST).strftime("%H:%M:%S")
         })
+
 
     except Exception as e:
         traceback.print_exc()

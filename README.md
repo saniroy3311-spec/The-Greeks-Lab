@@ -1,7 +1,7 @@
 # Kronos Live Trading Dashboard
 
 A standalone live signal dashboard for **Nifty 50** and **Bank Nifty** powered by the
-Kronos forecasting model. Shows a real candlestick chart (TradingView lightweight-charts)
+Kronos forecasting model. Shows a real candlestick chart (Candl Canvas Chart)
 with the historical candles plus Kronos's predicted future candles, a live LONG/SHORT/FLAT
 signal, confidence, and expected move. Auto-refreshes on a timer.
 
@@ -20,7 +20,7 @@ kronos_live/
 │   ├── kronos.py
 │   └── module.py
 ├── templates/
-│   └── dashboard.html      # Candlestick dashboard (lightweight-charts)
+│   └── dashboard.html      # Candlestick dashboard (Candl Canvas Chart)
 ├── server.py               # Flask server: live data + model + API + dashboard
 ├── strategy.py             # EMA crossover + Kronos filter (your live trading logic)
 ├── predict_csv.py          # Offline: predict from your own CSV (no live data)
