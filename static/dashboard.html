@@ -4516,7 +4516,7 @@
     let watchdogInterval = null;
     let isStaleData = false;
     function getWatchdogTimeout() {
-      const tf = (activeTab === 'live-signal' ? $('tf') : $('scalper-tf')).value;
+      const tf = $('tf').value;
       return (TF_TIMEOUT_FACTOR[tf] || 35) * 1000;
     }
     function startWatchdog() {
@@ -4564,7 +4564,7 @@
     function handleTickUpdate(data) {
       lastUpdateTimestamp = Date.now();
       const sym = $('symbol').value;
-      const tf = (activeTab === 'live-signal' ? $('tf') : $('scalper-tf')).value;
+      const tf = $('tf').value;
 
       // Only process ticks for the currently viewed symbol+timeframe
       if (data.symbol !== sym || data.timeframe !== tf) {
@@ -6888,7 +6888,7 @@ This is informational only — you decide whether to take the trade.`;
     // ── Wall-clock countdown overlay ──
     const TF_TO_MS = { "1m": 60000, "3m": 180000, "5m": 300000, "15m": 900000, "30m": 1800000, "1h": 3600000, "1d": 86400000 };
     function getIntervalMs() {
-      const tf = (activeTab === 'live-signal' ? $('tf') : $('scalper-tf')).value;
+      const tf = $('tf').value;
       return TF_TO_MS[tf] || 60000;
     }
     function startCandleCountdown() {
@@ -6934,7 +6934,7 @@ This is informational only — you decide whether to take the trade.`;
       stopSimulatedTicks();
       // Re-subscribe Socket.IO to new symbol/tf
       const sym = $('symbol').value;
-      const tf = (activeTab === 'live-signal' ? $('tf') : $('scalper-tf')).value;
+      const tf = $('tf').value;
       subscribeToTicks(sym, tf);
       if (activeTab === 'live-signal') {
         load(true);
