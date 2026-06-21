@@ -4694,23 +4694,23 @@ function handleTickUpdate(data) {
              if (currentTrade.type === 'Long') {
                if (l <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
                else if (h >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
-             } else if (currentTrade.type === 'Short') {
-               if (h >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
-               else if (l <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
-             }
-             if (hit) {
-               document.querySelectorAll('#scalper-info-text').forEach(el => {
-                 el.innerHTML = `<strong>Trade update:</strong> ${currentTrade.type} position has hit ${result} at price ${c}. Syncing...`;
-               });
-               setTimeout(() => loadScalper(), 1000);
-             }
-           }
-           if (typeof updateShadedBoxes === 'function') updateShadedBoxes();
-           if (typeof loadEmaKronos === 'function') loadEmaKronos();
-         }
-         if (isClosed) {
-           window.closeCountScalper = (window.closeCountScalper || 0) + 1;
-if (window.closeCountScalper % 3 === 0) {
+} else if (currentTrade.type === 'Short') {
+                if (h >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
+                else if (l <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+              }
+              if (hit) {
+                document.querySelectorAll('#scalper-info-text').forEach(el => {
+                  el.innerHTML = `<strong>Trade update:</strong> ${currentTrade.type} position has hit ${result} at price ${c}. Syncing...`;
+                });
+                setTimeout(() => loadScalper(), 1000);
+              }
+            }
+            if (typeof updateShadedBoxes === 'function') updateShadedBoxes();
+            if (typeof loadEmaKronos === 'function') loadEmaKronos();
+          }
+          if (isClosed) {
+            window.closeCountScalper = (window.closeCountScalper || 0) + 1;
+            if (window.closeCountScalper % 3 === 0) {
               setTimeout(() => {
                 loadScalper();
               }, 2000);
@@ -5316,11 +5316,20 @@ if (window.closeCountScalper % 3 === 0) {
       const sym = $('symbol').value, tf = $('tf').value;
       const mySeq = ++liveLoadSeq;
       liveLoadInflight++;
+      window._liveLoadStartedAt = Date.now();
       if ($('status')) $('status').textContent = 'Updating…';
       $('err').style.display = 'none';
       const chartContainer = $('chart');
       if (isFirstLoad) {
         if ($('live-chart-loading')) $('live-chart-loading').style.display = 'flex';
+        // Failsafe: hide loading overlay after 15s even if API hangs
+        setTimeout(() => {
+          const el = $('live-chart-loading');
+          if (el && el.style.display !== 'none') {
+            el.style.display = 'none';
+            console.warn('[Kronos] Loading overlay failsafe triggered (15s timeout)');
+          }
+        }, 15000);
       } else if (!isBackground) {
         if (chartContainer) chartContainer.classList.add('scalper-chart-soft-loading');
       }
@@ -6564,6 +6573,7 @@ This is informational only — you decide whether to take the trade.`;
       const sym = $('symbol').value, tf = $('tf').value;
       const mySeq = ++scalperLoadSeq;
       scalperLoadInflight++;
+      window._scalperLoadStartedAt = Date.now();
       if ($('status')) $('status').textContent = 'Updating…';
       $('err').style.display = 'none';
       const chartContainer = $('scalper-chart');
@@ -6944,6 +6954,9 @@ This is informational only — you decide whether to take the trade.`;
       if (timer) clearInterval(timer);
       if (countTimer) clearInterval(countTimer);
       startCandleCountdown();
+      // Initialize chart engine early so WebSocket ticks can flow
+      // even while the first API load is still pending.
+      initLiveChart();
       // Initialize Socket.IO for real-time ticks
       initSocketIO();
       startWatchdog();
@@ -6954,12 +6967,28 @@ This is informational only — you decide whether to take the trade.`;
         if (countdown <= 0) countdown = pollSecs;
       }, 1000);
       timer = setInterval(() => {
-        // Periodic prediction refresh (AI inference) — price comes from Socket.IO
+        // Guard: if liveLoadInflight has been stuck > 30s, force-reset it
+        // so polling can resume after a hung fetch.
         if (activeTab === 'live-signal') {
-          if (liveLoadInflight > 0) return;
+          if (liveLoadInflight > 0) {
+            const elapsed = Date.now() - (window._liveLoadStartedAt || Date.now());
+            if (elapsed > 30000) {
+              console.warn('[Kronos] liveLoadInflight stuck — resetting');
+              liveLoadInflight = 0;
+              if ($('live-chart-loading')) $('live-chart-loading').style.display = 'none';
+            }
+            return;
+          }
           load(false, true);
         } else {
-          if (scalperLoadInflight > 0) return;
+          if (scalperLoadInflight > 0) {
+            const elapsed = Date.now() - (window._scalperLoadStartedAt || Date.now());
+            if (elapsed > 30000) {
+              console.warn('[Kronos] scalperLoadInflight stuck — resetting');
+              scalperLoadInflight = 0;
+            }
+            return;
+          }
           loadScalper(false, true);
         }
       }, pollSecs * 1000);
