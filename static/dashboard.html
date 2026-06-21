@@ -3320,13 +3320,7 @@
       <div class="sidebar-menu-list" style="padding: 4px 12px; display: flex; flex-direction: column; gap: 6px;">
         <span style="font-size: 11px; color: var(--muted); font-weight: 500;">Timeframe</span>
         <select id="sidebar-tf" class="form-select" onchange="setTimeframe(this.value)">
-          <option value="1m">1m</option>
-          <option value="3m">3m</option>
-          <option value="5m" selected>5m</option>
-          <option value="15m">15m</option>
-          <option value="30m">30m</option>
-          <option value="1h">1h</option>
-          <option value="1d">1d</option>
+          <option value="3m" selected>3m</option>
         </select>
         <span style="font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 4px;">Candle Type</span>
         <select id="sidebar-chart-type" class="form-select"
@@ -3594,7 +3588,6 @@
     <div class="symbol-search-container">
       <select id="symbol" class="search-select">
         <option value="NIFTY">Nifty 50</option>
-        <option value="BANKNIFTY">Bank Nifty</option>
         <option value="BTC">Bitcoin (BTC)</option>
         <option value="GOLD">Gold (XAUTUSD)</option>
       </select>
@@ -3608,15 +3601,9 @@
       </svg>
     </button>
     <div class="timeframe-buttons" id="timeframe-container">
-      <button class="tf-btn" data-tf="1m" onclick="setTimeframe('1m')">1m</button>
-      <button class="tf-btn" data-tf="3m" onclick="setTimeframe('3m')">3m</button>
-      <button class="tf-btn active" data-tf="5m" onclick="setTimeframe('5m')">5m</button>
-      <button class="tf-btn" data-tf="15m" onclick="setTimeframe('15m')">15m</button>
-      <button class="tf-btn" data-tf="30m" onclick="setTimeframe('30m')">30m</button>
-      <button class="tf-btn" data-tf="1h" onclick="setTimeframe('1h')">1h</button>
-      <button class="tf-btn" data-tf="1d" onclick="setTimeframe('1d')">1d</button>
+      <button class="tf-btn active" data-tf="3m" onclick="setTimeframe('3m')">3m</button>
     </div>
-    <input type="hidden" id="tf" value="5m">
+    <input type="hidden" id="tf" value="3m">
     <div class="divider"></div>
     <select id="chart-type" class="search-select">
       <option value="candles">Candles</option>

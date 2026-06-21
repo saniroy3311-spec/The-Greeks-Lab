@@ -152,10 +152,9 @@ def background_cache_worker():
     
     # Core list of combinations to keep warm even if no one is watching
     default_combinations = [
-        ("NIFTY", "1m"), ("NIFTY", "3m"), ("NIFTY", "5m"), ("NIFTY", "15m"), ("NIFTY", "30m"),
-        ("BANKNIFTY", "1m"), ("BANKNIFTY", "3m"), ("BANKNIFTY", "5m"), ("BANKNIFTY", "15m"), ("BANKNIFTY", "30m"),
-        ("BTC", "1m"), ("BTC", "3m"), ("BTC", "5m"), ("BTC", "15m"), ("BTC", "30m"),
-        ("GOLD", "1m"), ("GOLD", "3m"), ("GOLD", "5m"), ("GOLD", "15m"), ("GOLD", "30m"),
+        ("NIFTY", "3m"),
+        ("BTC", "3m"),
+        ("GOLD", "3m"),
     ]
     
     while True:
@@ -212,8 +211,8 @@ def background_cache_worker():
                         SQLiteCache.set(key, res)
                         updated_any = True
                         
-                        # Throttle based on active vs idle
-                        time.sleep(1.0 if is_active else 10.0)
+                        # Throttle based on active vs idle (fast mode)
+                        time.sleep(0.1 if is_active else 1.0)
                     except Exception as e:
                         print(f"[Worker Error] Cache update failed for {key}: {e}")
                         time.sleep(1.0)
