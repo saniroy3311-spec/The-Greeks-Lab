@@ -3983,27 +3983,16 @@
 
               <!-- Focus Confirmation Report Card -->
               <div class="overlay-card confirmation-card" id="focus-confirmation-card" style="margin-top: 8px;">
-                <div class="overlay-card-header" style="border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 8px;">
-                  <span class="card-title">CONFIRMATION GATE (5-RULE)</span>
+                <!-- Master Box -->
+                <div id="master-box" style="padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; text-align: center;">
+                  <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px;">Confirmation Gate</div>
+                  <div id="focus-report-score" style="font-size: 18px; font-weight: 700; color: var(--text-primary);">0/5 CONDITIONS MATCH</div>
+                  <div id="focus-report-blocking" style="font-size: 11px; color: var(--down); margin-top: 4px; font-family: 'JetBrains Mono', monospace; min-height: 15px; font-weight: 600;">Blocking: None</div>
                 </div>
-                <div id="focus-report-score" style="font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">GATE: 0/5 PASS — TRADE REJECTED</div>
-                <div id="focus-report-blocking" style="font-size: 11px; color: var(--down); margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; min-height: 15px; font-weight: 600;">Blocking: None</div>
-                
-                <table class="focus-gate-table" style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; margin-bottom: 8px;">
-                  <thead>
-                    <tr style="border-bottom: 1px solid var(--border); color: var(--muted); font-size: 10px;">
-                      <th style="padding: 4px 0; font-weight: 600;">#</th>
-                      <th style="padding: 4px 0; font-weight: 600;">Parameter</th>
-                      <th style="padding: 4px 0; font-weight: 600;">Live Value</th>
-                      <th style="padding: 4px 0; font-weight: 600;">Threshold</th>
-                      <th style="padding: 4px 0; font-weight: 600; text-align: center;">Status</th>
-                      <th style="padding: 4px 0; font-weight: 600; text-align: right;">Direction</th>
-                    </tr>
-                  </thead>
-                  <tbody id="focus-table-body">
-                    <!-- Dynamic rows will be inserted here -->
-                  </tbody>
-                </table>
+
+                <div id="focus-table-body" style="display: flex; flex-direction: column; gap: 8px;">
+                  <!-- Dynamic parameter cards will be inserted here -->
+                </div>
 
                 <div style="border-top: 1px solid var(--border); margin-top: 8px; padding-top: 8px;">
                   <div style="font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 4px;">Notes</div>
@@ -6346,7 +6335,7 @@ This is informational only — you decide whether to take the trade.`;
 
       if (isCleared) {
         if (scoreEl) {
-          scoreEl.textContent = `GATE: 5/5 PASS — ${dirUpper} CLEARED TO FIRE`;
+          scoreEl.textContent = `5/5 MATCH — ${dirUpper} CLEARED`;
           scoreEl.style.color = dirUpper === 'LONG' ? 'var(--up)' : 'var(--down)';
         }
         if (blockingEl) {
@@ -6355,8 +6344,8 @@ This is informational only — you decide whether to take the trade.`;
         }
       } else {
         if (scoreEl) {
-          scoreEl.textContent = `GATE: ${passCount}/5 PASS — TRADE REJECTED`;
-          scoreEl.style.color = 'var(--muted)';
+          scoreEl.textContent = `${passCount}/5 CONDITIONS MATCH`;
+          scoreEl.style.color = 'var(--text-primary)';
         }
         if (blockingEl) {
           blockingEl.textContent = `Blocking: ${blockers.join(', ')}`;
@@ -6364,66 +6353,77 @@ This is informational only — you decide whether to take the trade.`;
         }
       }
 
-      // Update Table Rows
+      // Update Parameter Cards
       const tableBody = $('focus-table-body');
       if (tableBody) {
         const rows = [
           {
             num: 1,
-            param: 'Confidence',
-            val: p1_val,
-            thresh: '≥ 80%',
-            pass: p1_pass,
-            dir: dirUpper
+            title: 'Algorithmic Confidence Threshold',
+            val: cache.krConf + '%',
+            thresh: '>= 80%',
+            cond: 'The AI must output a definitive Long or Short signal. Flat or Skip signals are automatically rejected.',
+            mech: 'Any confidence score below 80% is classified as market noise, meaning the algorithm lacks the definitive data required to project a clean directional move.',
+            pass: p1_pass
           },
           {
             num: 2,
-            param: 'Historical Win Rate',
-            val: p2_val,
-            thresh: p2_thresh,
-            pass: p2_pass,
-            dir: '—'
+            title: 'Historical Probability Rate',
+            val: `${cache.up}/${cache.count} UP (${Math.round(cache.winRate * 100)}%)`,
+            thresh: p2_thresh + ' alignment',
+            cond: dirUpper === 'LONG' ? '4 / 5 matches (80%) or 5 / 5 matches (100%) must have closed UP.' : (dirUpper === 'SHORT' ? '0 / 5 matches (100% Down) or 1 / 5 matches (80% Down).' : '>= 80% alignment with the directional signal.'),
+            mech: 'Demands that identical past market structures resulted in the predicted outcome the vast majority of the time before putting capital at risk.',
+            pass: p2_pass
           },
           {
             num: 3,
-            param: 'Risk/Reward Asymmetry',
-            val: p3_val,
-            thresh: '≥ 3.0',
-            pass: p3_pass,
-            dir: '—'
+            title: 'Risk/Reward Asymmetry Ratio',
+            val: cache.asym.toFixed(2),
+            thresh: '>= 3.0',
+            cond: 'Ratio = Historical Max Profit (Best) / Historical Max Drawdown (Worst)',
+            mech: 'Evaluates the extreme edges of past pattern matches. If the historical worst-case drawdown was -0.20%, the best-case rally must have been at least +0.60%. This mathematical ratio ensures winning trades heavily outsize losing trades.',
+            pass: p3_pass
           },
           {
             num: 4,
-            param: 'Expected Move',
-            val: p4_val,
-            thresh: '≥ 0.40% (abs)',
-            pass: p4_pass,
-            dir: '—'
+            title: 'Expected Move Magnitude (Fee Buffer)',
+            val: `${cache.krMove >= 0 ? '+' : ''}${cache.krMove.toFixed(2)}%`,
+            thresh: '>= 0.40% (abs)',
+            cond: 'The projected percentage move must be deep enough to comfortably absorb exchange taker fees and execution slippage.',
+            mech: 'If the projected move is too shallow, the trade is rejected to prevent fee bleed.',
+            pass: p4_pass
           },
           {
             num: 5,
-            param: 'Bar-Close Sync',
-            val: p5_val,
-            thresh: '= 00:00',
-            pass: p5_pass,
-            dir: '—'
+            title: 'Execution Timing (Bar-Close Sync)',
+            val: timerStr,
+            thresh: '00:00',
+            cond: 'The execution engine is strictly locked out during intra-candle ticks.',
+            mech: 'Orders are only calculated and fired at the exact millisecond the bar officially closes. This locks in the data and prevents volatile, mid-candle fakeouts from triggering a false entry.',
+            pass: p5_pass
           }
         ];
 
         tableBody.innerHTML = rows.map(r => {
-          const statusText = r.pass ? '✅ PASS' : '❌ FAIL';
+          const statusText = r.pass ? 'PASS' : 'FAIL';
+          const statusBg = r.pass ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)';
           const statusColor = r.pass ? 'var(--up)' : 'var(--down)';
-          const dirColor = r.dir === '—' ? 'var(--muted)' : (r.dir === 'LONG' ? 'var(--up)' : 'var(--down)');
-          const dirWeight = r.dir === '—' ? 'normal' : 'bold';
+          
           return `
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); height: 26px;">
-              <td style="padding: 4px 0; color: var(--muted);">${r.num}</td>
-              <td style="padding: 4px 0; font-weight: 600;">${r.param}</td>
-              <td style="padding: 4px 0; font-family: 'JetBrains Mono', monospace;">${r.val}</td>
-              <td style="padding: 4px 0; color: var(--muted); font-family: 'JetBrains Mono', monospace;">${r.thresh}</td>
-              <td style="padding: 4px 0; text-align: center; font-weight: bold; color: ${statusColor};">${statusText}</td>
-              <td style="padding: 4px 0; text-align: right; font-weight: ${dirWeight}; color: ${dirColor};">${r.dir}</td>
-            </tr>
+            <div style="padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                <div style="font-size: 11px; font-weight: 700; color: var(--text-primary); text-transform: uppercase;">${r.num}. ${r.title}</div>
+                <div style="font-size: 10px; font-weight: 700; color: ${statusColor}; background: ${statusBg}; padding: 2px 6px; border-radius: 2px;">${statusText}</div>
+              </div>
+              <div style="font-size: 10px; color: var(--muted); margin-bottom: 8px; line-height: 1.4;">
+                <div style="margin-bottom: 4px;"><span style="color: var(--text-primary); font-weight: 600;">Condition:</span> ${r.cond}</div>
+                <div><span style="color: var(--text-primary); font-weight: 600;">Mechanism:</span> ${r.mech}</div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 10px; background: var(--surface); padding: 6px 8px; border-radius: 4px;">
+                <div style="color: var(--text-primary);"><span style="color: var(--muted);">Live Value:</span> ${r.val}</div>
+                <div style="color: var(--text-primary);"><span style="color: var(--muted);">Threshold:</span> ${r.thresh}</div>
+              </div>
+            </div>
           `;
         }).join('');
       }
@@ -6437,13 +6437,12 @@ This is informational only — you decide whether to take the trade.`;
       const confBar = $('beginner-signal-conf-bar');
 
       if (isCleared) {
-        const emoji = dirUpper === 'LONG' ? '🟢' : '🔴';
         const bannerClass = dirUpper === 'LONG' ? 'buy' : 'sell';
         const moveText = `${cache.krMove >= 0 ? '+' : ''}${cache.krMove.toFixed(2)}%`;
         const firedAt = new Date().toTimeString().split(' ')[0];
 
         if (banner) banner.className = `beginner-signal-banner ${bannerClass}`;
-        if (iconEl) iconEl.textContent = emoji;
+        if (iconEl) iconEl.textContent = dirUpper === 'LONG' ? 'L' : 'S';
         if (actionEl) actionEl.textContent = `${dirUpper} — CLEARED`;
         if (descEl) {
           descEl.innerHTML = `Confidence: ${cache.krConf}% | Win Rate: ${Math.round(cache.winRate * 100)}% | R:R: ${cache.asym.toFixed(1)} | Move: ${moveText}<br>Fired: ${firedAt}`;
@@ -6485,11 +6484,11 @@ This is informational only — you decide whether to take the trade.`;
         const scoreReport = isCleared ? `GATE: 5/5 PASS — ${dirUpper} CLEARED` : `GATE: ${passCount}/5 PASS — REJECTED`;
         const blockingReport = isCleared ? `Blocking: None` : `Blocking: ${blockers.join(', ')}`;
         
-        const p1Mark = p1_pass ? '✅' : '❌';
-        const p2Mark = p2_pass ? '✅' : '❌';
-        const p3Mark = p3_pass ? '✅' : '❌';
-        const p4Mark = p4_pass ? '✅' : '❌';
-        const p5Mark = p5_pass ? '✅' : '❌';
+        const p1Mark = p1_pass ? '[PASS]' : '[FAIL]';
+        const p2Mark = p2_pass ? '[PASS]' : '[FAIL]';
+        const p3Mark = p3_pass ? '[PASS]' : '[FAIL]';
+        const p4Mark = p4_pass ? '[PASS]' : '[FAIL]';
+        const p5Mark = p5_pass ? '[PASS]' : '[FAIL]';
 
         reportTextEl.textContent = formatFocusReport(
           scoreReport,
