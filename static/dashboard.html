@@ -25,38 +25,40 @@
       --bg: #F5F6F8;
       --chart-bg: #FFFFFF;
       --surface: #FFFFFF;
-      --border: #E0E3EB;
+      --border: #DCE0EA;
       --text-primary: #111827;
       --text: #111827;
-      --muted: #9CA3AF;
+      --muted: #8B95A5;
       --up: #26a69a;
       --down: #ef5350;
       --flat: #70757a;
       --pred: #ef9f27;
       --blue: #2962FF;
-      --card-bg: rgba(255, 255, 255, 0.95);
-      --pill-bg: rgba(255, 255, 255, 0.9);
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+      --accent: #3b82f6;
+      --card-bg: rgba(255, 255, 255, 0.96);
+      --pill-bg: rgba(255, 255, 255, 0.92);
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.08);
     }
 
     body.dark-theme {
       --bg: #0b1220;
       --chart-bg: #131a2e;
       --surface: #131a2e;
-      --border: #22293f;
+      --border: #1f2937;
       --text-primary: #ffffff;
       --text: #ffffff;
-      --muted: #848e9c;
+      --muted: #94a3b8;
       --up: #26a69a;
       --down: #ef5350;
       --flat: #848e9c;
       --pred: #ef9f27;
       --blue: #2962FF;
-      --card-bg: rgba(19, 26, 46, 0.95);
-      --pill-bg: rgba(15, 23, 42, 0.9);
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      --accent: #3b82f6;
+      --card-bg: rgba(19, 26, 46, 0.96);
+      --pill-bg: rgba(15, 23, 42, 0.92);
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+      --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
 
     * {
@@ -554,9 +556,9 @@
 
     #entry-light-live .entry-light-label.buy,
     #entry-light-scalper .entry-light-label.buy {
-      background: rgba(16, 185, 129, 0.18);
+      background: rgba(38, 166, 154, 0.18);
       color: var(--up);
-      border-color: rgba(16, 185, 129, 0.35);
+      border-color: rgba(38, 166, 154, 0.35);
     }
 
     #entry-light-live .entry-light-label.sell,
@@ -594,9 +596,9 @@
     }
 
     .entry-light-dot.pass {
-      background: rgba(16, 185, 129, 0.95);
-      border-color: rgba(16, 185, 129, 0.85);
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+      background: rgba(38, 166, 154, 0.95);
+      border-color: rgba(38, 166, 154, 0.85);
+      box-shadow: 0 0 12px rgba(38, 166, 154, 0.35);
     }
 
     .entry-light-dot.fail {
@@ -1208,13 +1210,13 @@
     }
 
     .beginner-signal-banner.buy {
-      background: linear-gradient(135deg, #10b981, #059669) !important;
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+      background: linear-gradient(135deg, #26a69a, #059669) !important;
+      box-shadow: 0 4px 15px rgba(38, 166, 154, 0.3);
     }
 
     .beginner-signal-banner.sell {
-      background: linear-gradient(135deg, #f43f5e, #e11d48) !important;
-      box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
+      background: linear-gradient(135deg, #ef5350, #e11d48) !important;
+      box-shadow: 0 4px 15px rgba(239, 83, 80, 0.3);
     }
 
     .beginner-signal-banner.skip {
@@ -1281,11 +1283,11 @@
     }
 
     .confidence-meter-fill.buy {
-      background: linear-gradient(90deg, #34d399, #10b981) !important;
+      background: linear-gradient(90deg, #34d399, #26a69a) !important;
     }
 
     .confidence-meter-fill.sell {
-      background: linear-gradient(90deg, #fb7185, #f43f5e) !important;
+      background: linear-gradient(90deg, #fb7185, #ef5350) !important;
     }
 
     .confidence-meter-fill.skip {
@@ -1526,7 +1528,7 @@
       color: #fff;
       background-color: var(--up);
       border-color: var(--up);
-      box-shadow: 0 0 12px #10b981;
+      box-shadow: 0 0 12px #26a69a;
       animation: flash-pulse-green 1.5s infinite alternate;
     }
 
@@ -1561,11 +1563,11 @@
 
     @keyframes flash-pulse-green {
       0% {
-        box-shadow: 0 0 4px #10b981;
+        box-shadow: 0 0 4px #26a69a;
       }
 
       100% {
-        box-shadow: 0 0 16px #10b981;
+        box-shadow: 0 0 16px #26a69a;
       }
     }
 
@@ -1737,7 +1739,7 @@
 
     .setup-alert-content.long {
       border-color: var(--up);
-      box-shadow: 0 0 24px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 24px rgba(38, 166, 154, 0.4);
     }
 
     .setup-alert-content.short {
@@ -2919,7 +2921,7 @@
         background-color: var(--up) !important;
         color: #fff !important;
         border-color: var(--up) !important;
-        box-shadow: 0 0 12px rgba(16, 185, 129, 0.7) !important;
+        box-shadow: 0 0 12px rgba(38, 166, 154, 0.7) !important;
         animation: mobile-pulse-green 1.5s infinite alternate;
       }
 
@@ -2934,11 +2936,11 @@
 
     @keyframes mobile-pulse-green {
       0% {
-        box-shadow: 0 0 4px rgba(16, 185, 129, 0.4);
+        box-shadow: 0 0 4px rgba(38, 166, 154, 0.4);
       }
 
       100% {
-        box-shadow: 0 0 16px rgba(16, 185, 129, 0.8);
+        box-shadow: 0 0 16px rgba(38, 166, 154, 0.8);
       }
     }
 
@@ -3327,91 +3329,12 @@
       flex-shrink: 0;
     }
 
-    /* ===== Signal Gate Panel (5-Parameter Match) ===== */
-    .gate-panel {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-height: 44px;
-      flex-shrink: 0;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 5px 10px;
-    }
-    .gate-panel-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-    .gate-direction-badge {
-      padding: 4px 11px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #fff;
-      background: var(--flat);
-    }
-    .gate-direction-badge.long { background: var(--up); }
-    .gate-direction-badge.short { background: var(--down); }
-    .gate-score {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-    .gate-score.cleared { color: var(--up); }
-    .gate-checks {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-      min-width: 0;
-      overflow-x: auto;
-      overflow-y: hidden;
-      scrollbar-width: none;
-    }
-    .gate-checks::-webkit-scrollbar { display: none; }
-    .gate-check {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 9px;
-      border-radius: 4px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      flex-shrink: 0;
-      white-space: nowrap;
-    }
-    .gate-check-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--muted);
-      flex-shrink: 0;
-    }
-    .gate-check-dot.pass { background: var(--up); }
-    .gate-check-dot.fail { background: var(--down); }
-    .gate-check-label {
-      font-size: 9px;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-    .gate-check-val {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
+    /* The 3rd top strip (Signal Gate Panel) was removed — its 5 pass/fail
+       checks are already rendered in the side Signal + Echoes detail cards.
+       Mobile ticker compaction rule is preserved below. */
     @media (max-width: 768px) {
       .asset-ticker-strip { height: 34px; padding: 0 8px; }
       .ticker-name { display: none; }
-      .gate-panel { flex-wrap: nowrap; padding: 5px 8px; gap: 8px; }
-      .gate-score { display: none; }
     }
 
   </style>
@@ -3577,14 +3500,14 @@
             <label>Up Color</label>
             <div class="color-picker-wrapper">
               <input type="color" id="settings-up-color" value="#26a69a">
-              <span class="color-hex" id="settings-up-hex">#26A69A</span>
+              <span class="color-hex" id="settings-up-hex">#26a69a</span>
             </div>
           </div>
           <div class="settings-row">
             <label>Down Color</label>
             <div class="color-picker-wrapper">
               <input type="color" id="settings-down-color" value="#ef5350">
-              <span class="color-hex" id="settings-down-hex">#EF5350</span>
+              <span class="color-hex" id="settings-down-hex">#ef5350</span>
             </div>
           </div>
           <div class="settings-row">
@@ -3793,6 +3716,27 @@
     </button>
 
     <div class="right-section">
+      <button class="top-btn-icon" id="topbar-theme-toggle" onclick="toggleTheme()" title="Toggle theme"
+        aria-label="Toggle light/dark theme">
+        <svg id="topbar-theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"
+          style="display:none;">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg id="topbar-theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"
+          style="display:none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
       <div class="live-status-indicator">
         <div class="dot active"></div>
         <span id="updated-topbar">Last update: —</span>
@@ -3840,40 +3784,6 @@
     </div>
   </div>
 
-  <!-- Signal Gate Panel: all 5 parameters + Long/Short status -->
-  <div class="gate-panel" id="gate-panel" title="">
-    <div class="gate-panel-left">
-      <span class="gate-direction-badge flat" id="gate-direction-badge">FLAT</span>
-      <span class="gate-score" id="gate-score-text">0 / 5 MATCHED</span>
-    </div>
-    <div class="gate-checks" id="gate-checks">
-      <div class="gate-check" id="gate-check-1" title="Algorithmic Confidence Threshold: confidence must be >= 80%">
-        <span class="gate-check-dot" id="gate-check-1-dot"></span>
-        <span class="gate-check-label">Confidence</span>
-        <span class="gate-check-val" id="gate-check-1-val">—</span>
-      </div>
-      <div class="gate-check" id="gate-check-2" title="Historical Probability Rate: >= 80% of past matches aligned">
-        <span class="gate-check-dot" id="gate-check-2-dot"></span>
-        <span class="gate-check-label">Win Rate</span>
-        <span class="gate-check-val" id="gate-check-2-val">—</span>
-      </div>
-      <div class="gate-check" id="gate-check-3" title="Risk/Reward Asymmetry Ratio: best / worst must be >= 3.0">
-        <span class="gate-check-dot" id="gate-check-3-dot"></span>
-        <span class="gate-check-label">R:R Ratio</span>
-        <span class="gate-check-val" id="gate-check-3-val">—</span>
-      </div>
-      <div class="gate-check" id="gate-check-4" title="Expected Move Magnitude: projected move must be >= 0.40%">
-        <span class="gate-check-dot" id="gate-check-4-dot"></span>
-        <span class="gate-check-label">Move</span>
-        <span class="gate-check-val" id="gate-check-4-val">—</span>
-      </div>
-      <div class="gate-check" id="gate-check-5" title="Execution Timing: order fires only at bar close (00:00)">
-        <span class="gate-check-dot" id="gate-check-5-dot"></span>
-        <span class="gate-check-label">Bar Sync</span>
-        <span class="gate-check-val" id="gate-check-5-val">—</span>
-      </div>
-    </div>
-  </div>
 
   <div class="err" id="err"></div>
 
@@ -4639,6 +4549,25 @@
     let lastLoadedLiveKey = null;
     let lastLoadedScalperKey = null;
 
+    // -------------------------------------------------------------
+    // Client-side prediction response cache (stale-while-revalidate).
+    // Keyed `${sym}:${tf}` -> { data, ts }. Lets an asset switch render
+    // instantly from the last-seen response while a background refresh
+    // fetches a fresh one. Mirrors the server's freshness windows so the
+    // cache is used the same way the backend decides staleness.
+    // -------------------------------------------------------------
+    const predictionCache = new Map();
+    const TF_MAX_AGE_MS = { "1m": 8000, "3m": 15000, "5m": 25000, "15m": 30000, "30m": 45000, "1h": 90000, "1d": 300000 };
+    function _cacheMaxAge(tf) { return TF_MAX_AGE_MS[tf] || 25000; }
+    function cachePrediction(sym, tf, data) {
+      predictionCache.set(sym + ':' + tf, { data, ts: Date.now() });
+    }
+    function getCachedPrediction(sym, tf) {
+      const entry = predictionCache.get(sym + ':' + tf);
+      if (!entry) return null;
+      return entry;
+    }
+
     let clientAlerts = [];
     let lastClosePrice = null;
 
@@ -4767,14 +4696,16 @@ function subscribeToTicks(symbol, timeframe) {
 
      function applyCachedTick(candle, symbol, timeframe, predictions) {
        if (!candle) return;
+       const TF_TO_MS = { "1m": 60000, "3m": 180000, "5m": 300000, "15m": 900000, "30m": 1800000, "1h": 3600000, "1d": 86400000 };
+       const bucketMs = TF_TO_MS[timeframe] || 60000;
        if (activeTab === 'scalper') {
          if (scalperChartEngine) {
-           updateLocalCandles(scalperCandles, candle);
+           updateLocalCandles(scalperCandles, candle, bucketMs);
            scalperChartEngine.updateLast(scalperCandles[scalperCandles.length - 1]);
          }
        } else {
          if (liveChartEngine) {
-           updateLocalCandles(liveCandles, candle);
+           updateLocalCandles(liveCandles, candle, bucketMs);
            liveChartEngine.updateLast(liveCandles[liveCandles.length - 1]);
            window.currentPrice = candle.close;
            updateIdText('s-cur', fmt(candle.close));
@@ -4846,7 +4777,8 @@ function handleTickUpdate(data) {
        // Cache ALL incoming ticks by symbol+timeframe for later use
        const cacheKey = data.symbol + ':' + data.timeframe;
        const TF_TO_MS = { "1m": 60000, "3m": 180000, "5m": 300000, "15m": 900000, "30m": 1800000, "1h": 3600000, "1d": 86400000 };
-       const step = (TF_TO_MS[data.timeframe] || 60000) / 1000;
+       const bucketMs = TF_TO_MS[data.timeframe] || 60000;
+       const step = bucketMs / 1000;
        const t = Math.floor(data.time / step) * step;
 
        const o = data.open;
@@ -4877,11 +4809,15 @@ function handleTickUpdate(data) {
 
        activeCandleOpenTime = t;
 
-       // Detect candle close (new candle timestamp > last candle)
+       // Detect candle close (new candle timestamp > last candle's bucket).
+       // Use bucketMs-aware comparison: a tick is only a new bar if it falls
+       // strictly outside the last rendered candle's bucket, preventing
+       // false closes caused by grid-alignment drift.
        let isClosed = false;
+       const tickTimeMs = t * 1000;
        if (activeTab === 'scalper') {
          const lastCandle = scalperCandles[scalperCandles.length - 1];
-         if (lastCandle && t > Math.floor(lastCandle.time / 1000)) {
+         if (lastCandle && tickTimeMs >= lastCandle.time + bucketMs) {
            const closeTime = Math.floor(lastCandle.time / 1000);
            if (window.lastScheduledClosedTimeScalper !== closeTime) {
              window.lastScheduledClosedTimeScalper = closeTime;
@@ -4891,7 +4827,7 @@ function handleTickUpdate(data) {
          }
        } else {
          const lastCandle = liveCandles[liveCandles.length - 1];
-         if (lastCandle && t > Math.floor(lastCandle.time / 1000)) {
+         if (lastCandle && tickTimeMs >= lastCandle.time + bucketMs) {
            const closeTime = Math.floor(lastCandle.time / 1000);
            if (window.lastScheduledClosedTime !== closeTime) {
              window.lastScheduledClosedTime = closeTime;
@@ -5179,8 +5115,14 @@ function handleTickUpdate(data) {
       });
     }
 
-    // Helper to keep local candles arrays in sync with updates
-    function updateLocalCandles(arr, candle) {
+    // Helper to keep local candles arrays in sync with updates.
+    // bucketMs: the timeframe bucket width in ms (e.g. 180000 for 3m).
+    // If provided, a tick candle whose time falls within the same bucket
+    // as the last rendered candle is aggregated into it — this prevents
+    // phantom candles caused by minor grid-alignment drift between the
+    // tick source (Math.floor-aligned) and the server candle timestamps
+    // (native / pandas-resampled grids, especially 3m).
+    function updateLocalCandles(arr, candle, bucketMs) {
       if (arr.length === 0) {
         arr.push(candle);
         return;
@@ -5191,8 +5133,13 @@ function handleTickUpdate(data) {
         // overwrite a newer candle that has already been rendered.
         return;
       }
-      if (last.time === candle.time) {
-        // Correctly aggregate period values: keep original open, update high/low/close/volume
+      const isSameBucket = bucketMs
+        ? (candle.time >= last.time && candle.time < last.time + bucketMs)
+        : (candle.time === last.time);
+      if (isSameBucket) {
+        // Same bar — aggregate into the existing candle (keep its original
+        // time & open so updateLast's exact-match still succeeds on the
+        // canvas side).
         last.high = Math.max(last.high, candle.high);
         last.low = Math.min(last.low, candle.low);
         last.close = candle.close;
@@ -5543,7 +5490,29 @@ function handleTickUpdate(data) {
       if ($('status')) $('status').textContent = 'Updating…';
       $('err').style.display = 'none';
       const chartContainer = $('chart');
-      if (isFirstLoad) {
+
+      // Render instantly from the client prediction cache if it's fresh —
+      // this makes an asset/timeframe switch paint immediately instead of
+      // waiting on a full server round-trip (which can block ~45s on a cold
+      // miss). The real fetch below then revalidates in the background.
+      const cachedEntry = getCachedPrediction(sym, tf);
+      const cacheFresh = cachedEntry && (Date.now() - cachedEntry.ts < _cacheMaxAge(tf));
+
+      // Ensure the chart engine exists before any render (cache or network).
+      initLiveChart();
+
+      if (isFirstLoad && cacheFresh) {
+        // We already have usable data for this view — skip the full-screen
+        // freeze and apply only a lightweight state. Treat the network fetch
+        // that follows as a background revalidation.
+        isFirstLoad = false;
+        isBackground = true;
+        try { applyLiveResponse(cachedEntry.data, sym, tf, /*isFirstLoadRender*/ true, /*doScroll*/ false); } catch (_) {}
+      }
+
+      // Reserve the heavy full-screen overlay for the genuine first boot,
+      // when there is genuinely nothing to show yet.
+      if (isFirstLoad && !cacheFresh) {
         if ($('live-chart-loading')) $('live-chart-loading').style.display = 'flex';
         // Failsafe: hide loading overlay after 15s even if API hangs
         setTimeout(() => {
@@ -5557,7 +5526,6 @@ function handleTickUpdate(data) {
         if (chartContainer) chartContainer.classList.add('scalper-chart-soft-loading');
       }
       try {
-        initLiveChart();
         const res = await fetch(`${API}/api/signal/${sym}/${tf}`);
         const d = await res.json();
         if (d.error) throw new Error(d.error);
@@ -5573,6 +5541,9 @@ function handleTickUpdate(data) {
         if ($('symbol').value !== sym || $('tf').value !== tf) return;
         lastLoadedLiveKey = sym + ":" + tf;
 
+        // Store the fresh response for instant future switches (SWR).
+        cachePrediction(sym, tf, d);
+
         if ((sym === 'BTC' || sym === 'GOLD') && wsLastClosedTime !== null && d.candles.length > 0) {
           const serverLastCandleTime = d.candles[d.candles.length - 1].time;
           if (serverLastCandleTime < wsLastClosedTime) {
@@ -5584,6 +5555,28 @@ function handleTickUpdate(data) {
           }
         }
 
+        applyLiveResponse(d, sym, tf, /*isFirstLoadRender*/ (mySeq === 1), /*doScroll*/ true);
+      } catch (err) {
+        // If the network fetch fails but we rendered from cache, keep the
+        // cached view instead of erroring out the whole panel.
+        if (cachedEntry) {
+          console.warn('[Kronos] live refresh failed, keeping cached view:', err);
+        } else if (mySeq === liveLoadSeq) {
+          $('err').textContent = 'Failed to load: ' + err.message;
+          $('err').style.display = 'block';
+        }
+      } finally {
+        liveLoadInflight = Math.max(0, liveLoadInflight - 1);
+        if ($('live-chart-loading')) $('live-chart-loading').style.display = 'none';
+        const cc = $('chart');
+        if (cc) cc.classList.remove('scalper-chart-soft-loading');
+        if (liveLoadInflight === 0) { if ($('status')) $('status').textContent = 'Live'; }
+      }
+    }
+
+    // Shared renderer for a /api/signal response. Extracted so both the
+    // instant-cache path and the network-refresh path paint identically.
+    function applyLiveResponse(d, sym, tf, isFirstLoadRender, doScroll) {
         // Convert from seconds to milliseconds
         const serverLiveCandles = d.candles.map(c => ({
           time: c.time * 1000,
@@ -5615,16 +5608,16 @@ function handleTickUpdate(data) {
           : 'none';
         const isNewPrediction = (window.lastPredKey !== predKey);
 
-        if (isFirstLoad || isNewCandle) {
+        if (isFirstLoadRender || isNewCandle) {
           window.lastLoadedCandleTime = serverCandleTime;
           liveCandles = serverLiveCandles;
           window.currentPrice = d.current;
           liveChartEngine.setData(liveCandles.concat(cleanPredicted));
           loadDrawings(liveChartEngine, 'live');
         }
-        if (isFirstLoad || isNewCandle) {
+        if (isFirstLoadRender || isNewCandle) {
           window.lastPredKey = predKey;
-          if (!isFirstLoad && liveCandles.length > 0) {
+          if (doScroll && !isFirstLoadRender && liveCandles.length > 0) {
             liveChartEngine.scrollToTime(liveCandles[liveCandles.length - 1].time);
           }
         }
@@ -5642,7 +5635,7 @@ function handleTickUpdate(data) {
         const isSameProj = projHashSeed === window.lastProjHash;
         window.lastProjHash = projHashSeed;
 
-        if (isFirstLoad || isNewCandle || (isNewPrediction && !isSameProj)) {
+        if (isFirstLoadRender || isNewCandle || (isNewPrediction && !isSameProj)) {
           // -------------------------------------------------------------
           // Simulating the Oracle Probability Cone & AI Prediction Lines
           // -------------------------------------------------------------
@@ -5750,8 +5743,8 @@ function handleTickUpdate(data) {
             $('echoes-worst').textContent = '—';
           }
 
-          liveChartEngine.setProjections(projLines, projBand, !isFirstLoad);
-          if (isFirstLoad) {
+          liveChartEngine.setProjections(projLines, projBand, !isFirstLoadRender);
+          if (isFirstLoadRender) {
             liveChartEngine.resetView();
           }
         }
@@ -5832,21 +5825,11 @@ function handleTickUpdate(data) {
         if ($('status')) $('status').textContent = 'Live';
         evaluateAntigravityAlerts(d, liveCandles);
         updateEntryLight(d, liveCandles);
-        // Subscribe to real-time ticks via Socket.IO (all symbols)
-        subscribeToTicks(sym, tf);
+        // (subscribeToTicks removed here — the symbol/tf change handler and
+        // the SocketIO reconnect already subscribe; calling it on every load
+        // was a redundant extra emit per refresh.)
         window.lastLiveSignalData = d;
         if (typeof updateFocusConfirmation === 'function') updateFocusConfirmation();
-      } catch (e) {
-        if (mySeq === liveLoadSeq) {
-          $('err').textContent = 'Error: ' + e.message + ' — is the market open and the server reachable?';
-          $('err').style.display = 'block';
-          if ($('status')) $('status').textContent = 'Error';
-        }
-      } finally {
-        liveLoadInflight = Math.max(0, liveLoadInflight - 1);
-        if ($('live-chart-loading')) $('live-chart-loading').style.display = 'none';
-        if (chartContainer) chartContainer.classList.remove('scalper-chart-soft-loading');
-      }
     }
 
     // -------------------------------------------------------------
@@ -6444,6 +6427,10 @@ This is informational only — you decide whether to take the trade.`;
 
     // Renders the top Signal Gate Panel: 5-parameter match status + Long/Short badge
     function updateGatePanel(s) {
+      // The top Signal Gate Panel strip was removed — its 5 pass/fail values
+      // are still rendered in the side Signal + Echoes detail cards. This
+      // function is kept as a guarded no-op so existing call sites don't break.
+      if (!$('gate-panel')) return;
       const badge = $('gate-direction-badge');
       const scoreText = $('gate-score-text');
       const panel = $('gate-panel');
@@ -7319,10 +7306,10 @@ This is informational only — you decide whether to take the trade.`;
     // -------------------------------------------------------------
     // Interactive Controls & Countdown Timers
     // -------------------------------------------------------------
-    ['symbol', 'tf'].forEach(id => $(id).addEventListener('change', () => {
-      wsLastClosedTime = null;
-      activeCandleOpenTime = null;
-      stopSimulatedTicks();
+    // Debounce rapid symbol/timeframe flips so each one doesn't fire its own
+    // (potentially slow) load + enqueue churn on the backend.
+    let _switchDebounceTimer = null;
+    function _performAssetSwitch() {
       // Re-subscribe Socket.IO to new symbol/tf
       const sym = $('symbol').value;
       const tf = $('tf').value;
@@ -7333,6 +7320,13 @@ This is informational only — you decide whether to take the trade.`;
       } else {
         loadScalper(true);
       }
+    }
+    ['symbol', 'tf'].forEach(id => $(id).addEventListener('change', () => {
+      wsLastClosedTime = null;
+      activeCandleOpenTime = null;
+      stopSimulatedTicks();
+      if (_switchDebounceTimer) clearTimeout(_switchDebounceTimer);
+      _switchDebounceTimer = setTimeout(_performAssetSwitch, 150);
     }));
 
     $('chart-type').addEventListener('change', () => {
@@ -7520,24 +7514,31 @@ function renderPredictionsTable(predicted, tfOverride) {
       localStorage.setItem('greeks_theme', theme);
       const themeToggle = $('global-theme-toggle');
       if (themeToggle) themeToggle.textContent = isDark ? '🌙' : '☀️';
+      _syncThemeIcons(isDark);
 
       if (liveChartEngine) liveChartEngine.setTheme(theme);
       if (scalperChartEngine) scalperChartEngine.setTheme(theme);
     }
     window.toggleTheme = toggleTheme;
 
+    function _syncThemeIcons(isDark) {
+      const sunIcon = $('topbar-theme-icon-sun');
+      const moonIcon = $('topbar-theme-icon-moon');
+      if (sunIcon) sunIcon.style.display = isDark ? 'none' : 'block';
+      if (moonIcon) moonIcon.style.display = isDark ? 'block' : 'none';
+    }
+
     function applySavedTheme() {
       const savedTheme = localStorage.getItem('greeks_theme') || 'light';
       const isDark = savedTheme === 'dark';
       if (isDark) {
         document.body.classList.add('dark-theme');
-        const themeToggle = $('global-theme-toggle');
-        if (themeToggle) themeToggle.textContent = '🌙';
       } else {
         document.body.classList.remove('dark-theme');
-        const themeToggle = $('global-theme-toggle');
-        if (themeToggle) themeToggle.textContent = '☀️';
       }
+      const themeToggle = $('global-theme-toggle');
+      if (themeToggle) themeToggle.textContent = isDark ? '🌙' : '☀️';
+      _syncThemeIcons(isDark);
     }
     function loadChartSettings(engine) {
       if (!engine) return;

@@ -283,12 +283,27 @@ def get_prediction_cached_or_request(symbol, tf, max_wait=None):
                 return res
             raise e
 
-    # 3. Production cache miss or stale: submit request to queue and poll
+    # 3. Production cache miss or stale.
+    # Stale-while-revalidate: always enqueue a background refresh, but never
+    # block the request handler for up to 45s waiting on ML inference. If we
+    # already have a (stale) prediction, return it immediately with
+    # stale=True; the dashboard polls /api/signal every 1s, so the freshly
+    # computed result lands within seconds. Only when there is genuinely no
+    # cache do we briefly poll for a first result.
     SQLiteCache.record_active(key)
     SQLiteCache.add_request(symbol, tf)
-    
+
+    # Stale cache present -> serve instantly, refresh in the background.
+    if cached:
+        res = cached[1].copy()
+        res["stale"] = True
+        return res
+
+    # True cold miss (no cache at all): poll briefly for the first result so
+    # the very first view of a brand-new symbol still resolves, but cap the
+    # wait far below the old 45s to avoid hanging the handler.
     if max_wait is None:
-        max_wait = 45.0
+        max_wait = 10.0
 
     start_time = time.time()
     while (time.time() - start_time) < max_wait:
@@ -298,13 +313,17 @@ def get_prediction_cached_or_request(symbol, tf, max_wait=None):
             # Verify the returned prediction is fresh (computed recently)
             if (time.time() - cached[0]) < 10.0:
                 return cached[1]
-                
+            # Got a stale entry while polling — serve it rather than timing out.
+            res = cached[1].copy()
+            res["stale"] = True
+            return res
+
     # 4. Timeout fallback: serve stale cache if available, else raise exception
     if cached:
         res = cached[1].copy()
         res["stale"] = True
         return res
-        
+
     raise TimeoutError(f"Prediction timeout for key: {key}")
 
 
