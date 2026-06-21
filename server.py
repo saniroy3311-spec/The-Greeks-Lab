@@ -288,7 +288,7 @@ def get_prediction_cached_or_request(symbol, tf, max_wait=None):
     SQLiteCache.add_request(symbol, tf)
     
     if max_wait is None:
-        max_wait = 6.0
+        max_wait = 30.0
 
     start_time = time.time()
     while (time.time() - start_time) < max_wait:
@@ -1014,7 +1014,7 @@ if __name__ == "__main__":
     import subprocess
     import sys
     print("[Kronos] Starting standalone predictor_worker process...")
-    worker_proc = subprocess.Popen([sys.executable, "predictor_worker.py"])
+    worker_proc = subprocess.Popen([sys.executable, "-u", "predictor_worker.py"])
     
     # Start Delta Exchange WebSocket client for BTC & GOLD real-time ticks
     delta_thread = threading.Thread(target=_delta_ws_thread, daemon=True)

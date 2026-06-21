@@ -4,6 +4,11 @@ import time
 import traceback
 import pandas as pd
 from datetime import timedelta, datetime
+import torch
+
+# Limit PyTorch to 1 thread for CPU execution on 1-core VPS to avoid thread-scheduling overhead
+torch.set_num_threads(1)
+torch.set_num_interop_threads(1)
 
 # Ensure project path is in sys.path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -44,9 +49,11 @@ def run_prediction(symbol_key, tf_key):
     y_timestamp = pd.Series(y_index)
 
     try:
+        # Use last 150 candles as context to speed up autoregressive model inference by 3x
+        context_len = min(150, len(x_df))
         pred_df = predictor.predict(
-            df=x_df.reset_index(drop=True),
-            x_timestamp=x_timestamp,
+            df=x_df.tail(context_len).reset_index(drop=True),
+            x_timestamp=x_timestamp.tail(context_len).reset_index(drop=True),
             y_timestamp=y_timestamp,
             pred_len=PRED_LEN,
             T=1.0, top_p=0.9, sample_count=1, verbose=False,
@@ -126,14 +133,14 @@ def get_max_age(tf_key, is_active):
             "1d": 86400,
         }
     else:
-        # Idle/inactive combos
+        # Idle/inactive combos: refresh very infrequently to save CPU resources
         mapping = {
-            "1m": 60,
-            "3m": 120,
-            "5m": 300,
-            "15m": 600,
-            "30m": 1200,
-            "1h": 3600,
+            "1m": 1800,
+            "3m": 1800,
+            "5m": 1800,
+            "15m": 3600,
+            "30m": 3600,
+            "1h": 7200,
             "1d": 86400,
         }
     return mapping.get(tf_key, 30 if is_active else 60)

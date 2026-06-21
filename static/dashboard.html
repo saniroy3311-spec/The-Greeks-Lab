@@ -4676,40 +4676,41 @@ function handleTickUpdate(data) {
              wsLastClosedTime = closeTime;
            }
          }
-}
+       }
 
-        if (activeTab === 'scalper') {
-          if (scalperChartEngine) {
-            updateLocalCandles(scalperCandles, candle);
-            scalperChartEngine.updateLast(scalperCandles[scalperCandles.length - 1]);
-            // Only recalculate indicators on bar close — not every tick
-            if (isClosed) {
-              updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
-            }
+       // Update chart
+       if (activeTab === 'scalper') {
+         if (scalperChartEngine) {
+           updateLocalCandles(scalperCandles, candle);
+           scalperChartEngine.updateLast(scalperCandles[scalperCandles.length - 1]);
+           // Only recalculate indicators on bar close — not every tick
+           if (isClosed) {
+             updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
+           }
 
-            if (currentTrade && currentTrade.active) {
-              let hit = false;
-              let result = "";
-              if (currentTrade.type === 'Long') {
-                if (l <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
-                else if (h >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
-              } else if (currentTrade.type === 'Short') {
-                if (h >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
-                else if (l <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
-              }
-              if (hit) {
-                document.querySelectorAll('#scalper-info-text').forEach(el => {
-                  el.innerHTML = `<strong>Trade update:</strong> ${currentTrade.type} position has hit ${result} at price ${c}. Syncing...`;
-                });
-                setTimeout(() => loadScalper(), 1000);
-              }
-            }
-            if (typeof updateShadedBoxes === 'function') updateShadedBoxes();
-            if (typeof loadEmaKronos === 'function') loadEmaKronos();
-          }
-          if (isClosed) {
-            window.closeCountScalper = (window.closeCountScalper || 0) + 1;
-            if (window.closeCountScalper % 3 === 0) {
+           if (currentTrade && currentTrade.active) {
+             let hit = false;
+             let result = "";
+             if (currentTrade.type === 'Long') {
+               if (l <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
+               else if (h >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+             } else if (currentTrade.type === 'Short') {
+               if (h >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
+               else if (l <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+             }
+             if (hit) {
+               document.querySelectorAll('#scalper-info-text').forEach(el => {
+                 el.innerHTML = `<strong>Trade update:</strong> ${currentTrade.type} position has hit ${result} at price ${c}. Syncing...`;
+               });
+               setTimeout(() => loadScalper(), 1000);
+             }
+           }
+           if (typeof updateShadedBoxes === 'function') updateShadedBoxes();
+           if (typeof loadEmaKronos === 'function') loadEmaKronos();
+         }
+         if (isClosed) {
+           window.closeCountScalper = (window.closeCountScalper || 0) + 1;
+if (window.closeCountScalper % 3 === 0) {
               setTimeout(() => {
                 loadScalper();
               }, 2000);
@@ -4742,14 +4743,14 @@ function handleTickUpdate(data) {
         }
       }
 
-      // Initialize scheduled closed time tracking
-    if (!window.lastScheduledClosedTime) window.lastScheduledClosedTime = 0;
-    if (!window.lastScheduledClosedTimeScalper) window.lastScheduledClosedTimeScalper = 0;
-    if (!window.closeCount) window.closeCount = 0;
-    if (!window.closeCountScalper) window.closeCountScalper = 0;
+     // Initialize scheduled closed time tracking
+     if (!window.lastScheduledClosedTime) window.lastScheduledClosedTime = 0;
+     if (!window.lastScheduledClosedTimeScalper) window.lastScheduledClosedTimeScalper = 0;
+     if (!window.closeCount) window.closeCount = 0;
+     if (!window.closeCountScalper) window.closeCountScalper = 0;
 
-    let liveActiveIndicators = ['ema9', 'ema15'];
-    let scalperActiveIndicators = ['ema9', 'ema15'];
+     let liveActiveIndicators = ['ema9', 'ema15'];
+     let scalperActiveIndicators = ['ema9', 'ema15'];
 
     const drawingsHistory = {
       live: { undoStack: [], redoStack: [], current: [] },
