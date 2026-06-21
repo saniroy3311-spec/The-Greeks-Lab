@@ -555,14 +555,14 @@
     #entry-light-live .entry-light-label.buy,
     #entry-light-scalper .entry-light-label.buy {
       background: rgba(16, 185, 129, 0.18);
-      color: #10b981;
+      color: var(--up);
       border-color: rgba(16, 185, 129, 0.35);
     }
 
     #entry-light-live .entry-light-label.sell,
     #entry-light-scalper .entry-light-label.sell {
       background: rgba(239, 83, 80, 0.18);
-      color: #ef5350;
+      color: var(--down);
       border-color: rgba(239, 83, 80, 0.35);
     }
 
@@ -703,7 +703,7 @@
     .reconnecting-banner .dot-pulse {
       width: 8px;
       height: 8px;
-      background: #fff;
+      background: var(--surface);
       border-radius: 50%;
       animation: dotPulse 1s ease-in-out infinite;
     }
@@ -784,22 +784,22 @@
       line-height: 1;
     }
     .entry-dot.pass {
-      background: #22c55e;
-      border-color: #22c55e;
+      background-color: var(--up);
+      border-color: var(--up);
       color: #fff;
     }
     .entry-dot.fail {
-      background: #ef4444;
-      border-color: #ef4444;
+      background-color: var(--down);
+      border-color: var(--down);
       color: #fff;
     }
     body.dark-theme .entry-dot.pass {
-      background: #22c55e;
-      border-color: #22c55e;
+      background-color: var(--up);
+      border-color: var(--up);
     }
     body.dark-theme .entry-dot.fail {
-      background: #ef4444;
-      border-color: #ef4444;
+      background-color: var(--down);
+      border-color: var(--down);
     }
 
     /* Always show entry-light-widget on desktop */
@@ -1399,19 +1399,19 @@
     }
 
     .confluence-value.confluence-yes {
-      color: #089981;
+      color: var(--up);
     }
 
     .confluence-value.confluence-no {
-      color: #f23645;
+      color: var(--down);
     }
 
     .confluence-value.trend-up {
-      color: #089981;
+      color: var(--up);
     }
 
     .confluence-value.trend-down {
-      color: #f23645;
+      color: var(--down);
     }
 
     /* Confluence Status Bar */
@@ -1524,8 +1524,8 @@
     #badge-pos-long.active,
     .badge-pos-long.active {
       color: #fff;
-      background: #10b981;
-      border-color: #10b981;
+      background-color: var(--up);
+      border-color: var(--up);
       box-shadow: 0 0 12px #10b981;
       animation: flash-pulse-green 1.5s infinite alternate;
     }
@@ -1533,8 +1533,8 @@
     #badge-pos-short.active,
     .badge-pos-short.active {
       color: #fff;
-      background: #ef4444;
-      border-color: #ef4444;
+      background-color: var(--down);
+      border-color: var(--down);
       box-shadow: 0 0 12px #ef4444;
       animation: flash-pulse-red 1.5s infinite alternate;
     }
@@ -1621,7 +1621,7 @@
 
     .pulsing-green {
       color: #fff !important;
-      background: #10b981;
+      background-color: var(--up);
       padding: 4px 10px;
       border-radius: 6px;
       font-weight: 700;
@@ -1632,7 +1632,7 @@
 
     .pulsing-red {
       color: #fff !important;
-      background: #ef4444;
+      background-color: var(--down);
       padding: 4px 10px;
       border-radius: 6px;
       font-weight: 700;
@@ -1736,12 +1736,12 @@
     }
 
     .setup-alert-content.long {
-      border-color: #10b981;
+      border-color: var(--up);
       box-shadow: 0 0 24px rgba(16, 185, 129, 0.4);
     }
 
     .setup-alert-content.short {
-      border-color: #ef4444;
+      border-color: var(--down);
       box-shadow: 0 0 24px rgba(239, 68, 68, 0.4);
     }
 
@@ -1761,11 +1761,11 @@
     }
 
     .setup-alert-content.long .setup-alert-title {
-      color: #10b981;
+      color: var(--up);
     }
 
     .setup-alert-content.short .setup-alert-title {
-      color: #ef4444;
+      color: var(--down);
     }
 
     .setup-alert-msg {
@@ -2230,7 +2230,7 @@
 
     input:checked+.slider:before {
       transform: translateX(18px);
-      background-color: #ffffff;
+      background-color: var(--surface);
     }
 
     .slider.round {
@@ -2916,17 +2916,17 @@
       }
 
       .mobile-forecast-btn.glowing-green {
-        background: #10b981 !important;
+        background-color: var(--up) !important;
         color: #fff !important;
-        border-color: #10b981 !important;
+        border-color: var(--up) !important;
         box-shadow: 0 0 12px rgba(16, 185, 129, 0.7) !important;
         animation: mobile-pulse-green 1.5s infinite alternate;
       }
 
       .mobile-forecast-btn.glowing-red {
-        background: #ef4444 !important;
+        background-color: var(--down) !important;
         color: #fff !important;
-        border-color: #ef4444 !important;
+        border-color: var(--down) !important;
         box-shadow: 0 0 12px rgba(239, 68, 68, 0.7) !important;
         animation: mobile-pulse-red 1.5s infinite alternate;
       }
@@ -3247,6 +3247,25 @@
         animation: flash-pulse-red 3s infinite alternate !important;
       }
     }
+  
+    /* Mobile Touch Target Standards (Apple 44px minimum) */
+    @media (max-width: 768px) {
+      button, 
+      .tf-btn, 
+      .top-btn, 
+      .top-btn-icon, 
+      .drawing-toolbar button,
+      .search-select,
+      .mobile-tf-pill,
+      .tab-btn {
+        min-height: 44px !important;
+        min-width: 44px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -4453,10 +4472,11 @@
     let currentTrade = null;
     let timer = null, countdown = 0, countTimer = null;
     let deltaSocket = null;
-    let wsLastClosedTime = null;
-    let activeCandleOpenTime = null;
+let wsLastClosedTime = null;
+     let activeCandleOpenTime = null;
+     let tickCache = {};
 
-    // ── Socket.IO Real-Time Tick Connection ──
+     // ── Socket.IO Real-Time Tick Connection ──
     let sioSocket = null;
     let sioCurrentRoom = null;
 
@@ -4499,16 +4519,51 @@
       });
     }
 
-    function subscribeToTicks(symbol, timeframe) {
-      if (!sioSocket) initSocketIO();
-      // Unsubscribe from previous room
-      if (sioCurrentRoom) {
-        sioSocket.emit('unsubscribe', sioCurrentRoom);
-      }
-      sioCurrentRoom = { symbol: symbol, timeframe: timeframe };
-      sioSocket.emit('subscribe', sioCurrentRoom);
-      console.log('[SocketIO] Subscribed to', symbol, timeframe);
-    }
+function subscribeToTicks(symbol, timeframe) {
+       if (!sioSocket) initSocketIO();
+       // Unsubscribe from previous room
+       if (sioCurrentRoom) {
+         sioSocket.emit('unsubscribe', sioCurrentRoom);
+       }
+       sioCurrentRoom = { symbol: symbol, timeframe: timeframe };
+       sioSocket.emit('subscribe', sioCurrentRoom);
+       console.log('[SocketIO] Subscribed to', symbol, timeframe);
+       
+       // Apply any cached tick for this symbol/timeframe immediately
+       const cachedKey = symbol + ':' + timeframe;
+       if (tickCache[cachedKey] && tickCache[cachedKey].candle) {
+         const cached = tickCache[cachedKey];
+         // Only apply if cache is recent (within last 5 seconds)
+         if (Date.now() - (cached.timestamp || 0) < 5000) {
+           if (symbol === $('symbol').value && timeframe === $('tf').value) {
+             applyCachedTick(cached.candle, symbol, timeframe, cached.predictions);
+           }
+         }
+       }
+     }
+
+     function applyCachedTick(candle, symbol, timeframe, predictions) {
+       if (!candle) return;
+       if (activeTab === 'scalper') {
+         if (scalperChartEngine) {
+           updateLocalCandles(scalperCandles, candle);
+           scalperChartEngine.updateLast(scalperCandles[scalperCandles.length - 1]);
+         }
+       } else {
+         if (liveChartEngine) {
+           updateLocalCandles(liveCandles, candle);
+           liveChartEngine.updateLast(liveCandles[liveCandles.length - 1]);
+           window.currentPrice = candle.close;
+           updateIdText('s-cur', fmt(candle.close));
+           // Apply cached predictions if available
+           if (predictions && predictions.length > 0) {
+             renderPredictionsTable(predictions, timeframe);
+           } else if (window.lastPredictions) {
+             renderPredictionsTable(window.lastPredictions, timeframe);
+           }
+         }
+       }
+     }
 
     let lastUpdateTimestamp = Date.now();
     const TF_TIMEOUT_FACTOR = {
@@ -4562,115 +4617,136 @@
       }
     });
 
-    function handleTickUpdate(data) {
-      lastUpdateTimestamp = Date.now();
-      const sym = $('symbol').value;
-      const tf = $('tf').value;
+function handleTickUpdate(data) {
+       lastUpdateTimestamp = Date.now();
+       
+       // Cache ALL incoming ticks by symbol+timeframe for later use
+       const cacheKey = data.symbol + ':' + data.timeframe;
+       const TF_TO_MS = { "1m": 60000, "3m": 180000, "5m": 300000, "15m": 900000, "30m": 1800000, "1h": 3600000, "1d": 86400000 };
+       const step = (TF_TO_MS[data.timeframe] || 60000) / 1000;
+       const t = Math.floor(data.time / step) * step;
 
-      // Only process ticks for the currently viewed symbol+timeframe
-      if (data.symbol !== sym || data.timeframe !== tf) {
-        return;
-      }
+       const o = data.open;
+       const h = data.high;
+       const l = data.low;
+       const c = data.close;
+       const v = data.volume || 0;
 
-      // Align tick time to timeframe boundary to prevent chart timeline mismatch
-      const TF_TO_MS = { "1m": 60000, "3m": 180000, "5m": 300000, "15m": 900000, "30m": 1800000, "1h": 3600000, "1d": 86400000 };
-      const step = (TF_TO_MS[tf] || 60000) / 1000;
-      const t = Math.floor(data.time / step) * step;
+       const candle = { time: t * 1000, open: o, high: h, low: l, close: c, volume: v };
 
-      const o = data.open;
-      const h = data.high;
-      const l = data.low;
-      const c = data.close;
-      const v = data.volume || 0;
+       // Store in cache with timestamp (deep copy to avoid reference issues)
+       tickCache[cacheKey] = {
+         candle: { ...candle },
+         predictions: data.predicted || null,
+         signalData: data.signal || null,
+         timestamp: Date.now()
+       };
 
-      const candle = { time: t * 1000, open: o, high: h, low: l, close: c, volume: v };
-      activeCandleOpenTime = t;
+       // Process for currently viewed symbol+timeframe
+       const sym = $('symbol').value;
+       const tf = $('tf').value;
 
-      // Detect candle close (new candle timestamp > last candle)
-      let isClosed = false;
-      if (activeTab === 'scalper') {
-        const lastCandle = scalperCandles[scalperCandles.length - 1];
-        if (lastCandle && t > Math.floor(lastCandle.time / 1000)) {
-          const closeTime = Math.floor(lastCandle.time / 1000);
-          if (window.lastScheduledClosedTimeScalper !== closeTime) {
-            window.lastScheduledClosedTimeScalper = closeTime;
-            isClosed = true;
-            wsLastClosedTime = closeTime;
-          }
-        }
-      } else {
-        const lastCandle = liveCandles[liveCandles.length - 1];
-        if (lastCandle && t > Math.floor(lastCandle.time / 1000)) {
-          const closeTime = Math.floor(lastCandle.time / 1000);
-          if (window.lastScheduledClosedTime !== closeTime) {
-            window.lastScheduledClosedTime = closeTime;
-            isClosed = true;
-            wsLastClosedTime = closeTime;
-          }
-        }
-      }
+       if (data.symbol !== sym || data.timeframe !== tf) {
+         // Tick is not for the active view - but we've cached it.
+         // Apply cached tick if user switches to this symbol/tf later.
+         return;
+       }
 
-      // Update chart
-      if (activeTab === 'scalper') {
-        if (scalperChartEngine) {
-          updateLocalCandles(scalperCandles, candle);
-          scalperChartEngine.updateLast(scalperCandles[scalperCandles.length - 1]);
-          // Only recalculate indicators on bar close — not every tick
-          if (isClosed) {
-            updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
-          }
+       activeCandleOpenTime = t;
 
-          if (currentTrade && currentTrade.active) {
-            let hit = false;
-            let result = "";
-            if (currentTrade.type === 'Long') {
-              if (l <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
-              else if (h >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
-            } else if (currentTrade.type === 'Short') {
-              if (h >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
-              else if (l <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+       // Detect candle close (new candle timestamp > last candle)
+       let isClosed = false;
+       if (activeTab === 'scalper') {
+         const lastCandle = scalperCandles[scalperCandles.length - 1];
+         if (lastCandle && t > Math.floor(lastCandle.time / 1000)) {
+           const closeTime = Math.floor(lastCandle.time / 1000);
+           if (window.lastScheduledClosedTimeScalper !== closeTime) {
+             window.lastScheduledClosedTimeScalper = closeTime;
+             isClosed = true;
+             wsLastClosedTime = closeTime;
+           }
+         }
+       } else {
+         const lastCandle = liveCandles[liveCandles.length - 1];
+         if (lastCandle && t > Math.floor(lastCandle.time / 1000)) {
+           const closeTime = Math.floor(lastCandle.time / 1000);
+           if (window.lastScheduledClosedTime !== closeTime) {
+             window.lastScheduledClosedTime = closeTime;
+             isClosed = true;
+             wsLastClosedTime = closeTime;
+           }
+         }
+}
+
+        if (activeTab === 'scalper') {
+          if (scalperChartEngine) {
+            updateLocalCandles(scalperCandles, candle);
+            scalperChartEngine.updateLast(scalperCandles[scalperCandles.length - 1]);
+            // Only recalculate indicators on bar close — not every tick
+            if (isClosed) {
+              updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
             }
-            if (hit) {
-              document.querySelectorAll('#scalper-info-text').forEach(el => {
-                el.innerHTML = `<strong>Trade update:</strong> ${currentTrade.type} position has hit ${result} at price ${c}. Syncing...`;
-              });
-              setTimeout(() => loadScalper(), 1000);
+
+            if (currentTrade && currentTrade.active) {
+              let hit = false;
+              let result = "";
+              if (currentTrade.type === 'Long') {
+                if (l <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
+                else if (h >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+              } else if (currentTrade.type === 'Short') {
+                if (h >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
+                else if (l <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+              }
+              if (hit) {
+                document.querySelectorAll('#scalper-info-text').forEach(el => {
+                  el.innerHTML = `<strong>Trade update:</strong> ${currentTrade.type} position has hit ${result} at price ${c}. Syncing...`;
+                });
+                setTimeout(() => loadScalper(), 1000);
+              }
+            }
+            if (typeof updateShadedBoxes === 'function') updateShadedBoxes();
+            if (typeof loadEmaKronos === 'function') loadEmaKronos();
+          }
+          if (isClosed) {
+            window.closeCountScalper = (window.closeCountScalper || 0) + 1;
+            if (window.closeCountScalper % 3 === 0) {
+              setTimeout(() => {
+                loadScalper();
+              }, 2000);
             }
           }
-          if (typeof updateShadedBoxes === 'function') updateShadedBoxes();
-          if (typeof loadEmaKronos === 'function') loadEmaKronos();
-        }
-        if (isClosed) {
-          setTimeout(() => {
-            loadScalper();
-          }, 2000);
-        }
-      } else {
-        if (liveChartEngine) {
-          updateLocalCandles(liveCandles, candle);
-          liveChartEngine.updateLast(liveCandles[liveCandles.length - 1]);
-          // Only recalculate indicators on bar close (not every tick) —
-          // avoids unnecessary series rebuilds on the TV chart.
-          if (isClosed) {
-            updateChartIndicators(liveChartEngine, liveCandles, liveActiveIndicators);
-          }
+        } else {
+          if (liveChartEngine) {
+            updateLocalCandles(liveCandles, candle);
+            liveChartEngine.updateLast(liveCandles[liveCandles.length - 1]);
+            // Only recalculate indicators on bar close (not every tick) —
+            // avoids unnecessary series rebuilds on the TV chart.
+            if (isClosed) {
+              updateChartIndicators(liveChartEngine, liveCandles, liveActiveIndicators);
+            }
 
-          window.currentPrice = c;
-          updateIdText('s-cur', fmt(c));
-          renderPredictionsTable(window.lastPredictions);
-          if (typeof checkAlerts === 'function') checkAlerts(candle);
-        }
-        if (isClosed) {
-          setTimeout(() => {
-            load();
-          }, 2000);
+            window.currentPrice = c;
+            updateIdText('s-cur', fmt(c));
+            const cachedPredictions = tickCache[cacheKey] && tickCache[cacheKey].predictions;
+            renderPredictionsTable(cachedPredictions || window.lastPredictions, tf);
+            if (typeof checkAlerts === 'function') checkAlerts(candle);
+          }
+          if (isClosed) {
+            window.closeCount = (window.closeCount || 0) + 1;
+            if (window.closeCount % 3 === 0) {
+              setTimeout(() => {
+                load();
+              }, 2000);
+            }
+          }
         }
       }
-    }
 
-    // Initialize scheduled closed time tracking
+      // Initialize scheduled closed time tracking
     if (!window.lastScheduledClosedTime) window.lastScheduledClosedTime = 0;
     if (!window.lastScheduledClosedTimeScalper) window.lastScheduledClosedTimeScalper = 0;
+    if (!window.closeCount) window.closeCount = 0;
+    if (!window.closeCountScalper) window.closeCountScalper = 0;
 
     let liveActiveIndicators = ['ema9', 'ema15'];
     let scalperActiveIndicators = ['ema9', 'ema15'];
@@ -7035,54 +7111,56 @@ This is informational only — you decide whether to take the trade.`;
     }
     window.setTimeframe = setTimeframe;
 
-    function formatCandleTime(timeSecs, tf) {
-      if (!timeSecs) return '';
-      const date = new Date(timeSecs * 1000);
-      if (tf === '1d') {
-        return date.toLocaleString('en-IN', {
-          timeZone: 'Asia/Kolkata',
-          day: 'numeric',
-          month: 'short'
-        });
-      } else {
-        return date.toLocaleString('en-IN', {
-          timeZone: 'Asia/Kolkata',
-          day: 'numeric',
-          month: 'short',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        });
-      }
-    }
+function formatCandleTime(timeMs, tf) {
+       if (!timeMs) return '';
+       // Handle both second and millisecond timestamps
+       const ts = timeMs > 10000000000 ? timeMs : timeMs * 1000;
+       const date = new Date(ts);
+       if (tf === '1d') {
+         return date.toLocaleString('en-IN', {
+           timeZone: 'Asia/Kolkata',
+           day: 'numeric',
+           month: 'short'
+         });
+       } else {
+         return date.toLocaleString('en-IN', {
+           timeZone: 'Asia/Kolkata',
+           day: 'numeric',
+           month: 'short',
+           hour: '2-digit',
+           minute: '2-digit',
+           hour12: false
+         });
+       }
+     }
 
-    function renderPredictionsTable(predicted) {
-      const bodies = document.querySelectorAll('#predictions-table-body, #predictions-table-body-scalper');
-      const accPredBadge = $('acc-pred-badge');
-      if (!predicted || predicted.length === 0) {
-        bodies.forEach(tbody => {
-          tbody.innerHTML = `
-        <tr>
-          <td colspan="3" style="text-align: center; color: var(--muted); padding: 12px 0;">No predictions available</td>
-        </tr>
-      `;
-        });
-        if (accPredBadge) accPredBadge.textContent = '—';
-        return;
-      }
-      if (accPredBadge) accPredBadge.textContent = predicted.length + ' candles';
+function renderPredictionsTable(predicted, tfOverride) {
+       const bodies = document.querySelectorAll('#predictions-table-body, #predictions-table-body-scalper');
+       const accPredBadge = $('acc-pred-badge');
+       if (!predicted || predicted.length === 0) {
+         bodies.forEach(tbody => {
+           tbody.innerHTML = `
+         <tr>
+           <td colspan="3" style="text-align: center; color: var(--muted); padding: 12px 0;">No predictions available</td>
+         </tr>
+       `;
+         });
+         if (accPredBadge) accPredBadge.textContent = '—';
+         return;
+       }
+       if (accPredBadge) accPredBadge.textContent = predicted.length + ' candles';
 
-      const baseline = window.currentPrice || (predicted.length > 0 ? predicted[0].open : 0);
-      const next5 = predicted.slice(0, 5);
-      const tf = $('tf') ? $('tf').value : '5m';
-      const rowsHtml = next5.map((c, idx) => {
-        const isUp = c.close >= c.open;
-        const arrow = isUp ? '↗' : '↘';
-        const diffPct = baseline ? ((c.close - baseline) / baseline) * 100 : 0;
-        const changeClass = diffPct >= 0 ? 'text-up' : 'text-down';
-        const changeText = arrow + ' ' + (diffPct >= 0 ? '+' : '') + diffPct.toFixed(2) + '%';
+       const baseline = window.currentPrice || (predicted.length > 0 ? predicted[0].open : 0);
+       const next5 = predicted.slice(0, 5);
+       const tf = tfOverride || ($('tf') ? $('tf').value : '5m');
+       const rowsHtml = next5.map((c, idx) => {
+         const isUp = c.close >= c.open;
+         const arrow = isUp ? '↗' : '↘';
+         const diffPct = baseline ? ((c.close - baseline) / baseline) * 100 : 0;
+         const changeClass = diffPct >= 0 ? 'text-up' : 'text-down';
+         const changeText = arrow + ' ' + (diffPct >= 0 ? '+' : '') + diffPct.toFixed(2) + '%';
 
-        const timeStr = formatCandleTime(c.time, tf);
+         const timeStr = formatCandleTime(c.time, tf);
 
         return `
       <tr style="border-bottom: 1px solid var(--border); font-size: 13px;">
