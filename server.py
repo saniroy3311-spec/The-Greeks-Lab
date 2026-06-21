@@ -288,7 +288,7 @@ def get_prediction_cached_or_request(symbol, tf, max_wait=None):
     SQLiteCache.add_request(symbol, tf)
     
     if max_wait is None:
-        max_wait = 30.0
+        max_wait = 45.0
 
     start_time = time.time()
     while (time.time() - start_time) < max_wait:
