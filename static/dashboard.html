@@ -6401,23 +6401,108 @@ SKIP REASONS: [${skips}]${entryStopProfit}`;
       updateFocusConfirmation();
     };
 
-    function formatFocusReport(scoreStr, blockingStr, confidenceText, winRateText, asymmetryText, moveText, timerText, p1Mark, p2Mark, p3Mark, p4Mark, p5Mark, notes) {
+    function formatFocusReport(cache, notes) {
+      const d = window.lastLiveSignalData || {};
       const sym = $('symbol').value;
       const tf = $('tf').value;
       const ts = liveCandles && liveCandles.length > 0 ? liveCandles[liveCandles.length - 1].time / 1000 : 0;
       const dateStr = ts ? new Date(ts * 1000).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : '—';
+      
+      const dirUpper = traderDirectionBias.toUpperCase();
+      let agree = 0;
+      let total = 0;
+
+      const emaTrend = d.trend || 'Flat';
+      const barsSince = d.barsSince || 0;
+      let emaMark = '⚪';
+      if (emaTrend !== 'Flat') {
+        total++;
+        if ((dirUpper === 'LONG' && emaTrend === 'Up') || (dirUpper === 'SHORT' && emaTrend === 'Down')) {
+          emaMark = '✅';
+          agree++;
+        } else {
+          emaMark = '❌';
+        }
+      } else {
+        emaMark = '⚠️';
+      }
+
+      let krMark = '⚪';
+      if (cache.krDir) {
+        total++;
+        if (cache.krDir === 'Flat') {
+          krMark = '⚠️';
+        } else if (cache.krDir.toUpperCase() === dirUpper) {
+          krMark = '✅';
+          agree++;
+        } else {
+          krMark = '❌';
+        }
+      }
+
+      let echoMark = '⚪';
+      if (cache.count > 0) {
+        total++;
+        if (dirUpper === 'LONG') {
+          if (cache.winRate >= 0.80) {
+            echoMark = '✅';
+            agree++;
+          } else if (cache.winRate <= 0.20) {
+            echoMark = '❌';
+          } else {
+            echoMark = '⚠️';
+          }
+        } else if (dirUpper === 'SHORT') {
+          if (cache.winRate <= 0.20) {
+            echoMark = '✅';
+            agree++;
+          } else if (cache.winRate >= 0.80) {
+            echoMark = '❌';
+          } else {
+            echoMark = '⚠️';
+          }
+        }
+      }
+
+      let clockMark = '⚪';
+      if (cache.clockState) {
+        total++;
+        if (cache.isQuiet) {
+          clockMark = '⚠️';
+        } else {
+          clockMark = '✅';
+          agree++;
+        }
+      }
+
+      let oracleMark = '⚪';
+      let oracleText = 'N/A';
+      if (cache.oracle) {
+        total++;
+        oracleText = cache.odds + '%';
+        if (cache.odds > 50) {
+          oracleMark = '✅';
+          agree++;
+        } else if (cache.odds < 50) {
+          oracleMark = '❌';
+        } else {
+          oracleMark = '⚠️';
+        }
+      }
+
       const notesBlock = notes.map(n => ' - ' + n).join('\n');
+      const moveText = `${cache.krMove >= 0 ? '+' : ''}${cache.krMove.toFixed(2)}%`;
+
       return `SETUP: [${traderDirectionBias}] on [${sym}/${tf}]
 CANDLE: [${dateStr}]
 
-${scoreStr}
-${blockingStr}
+CONFIRMATION SCORE: [${agree} / ${total} agree]
 
- 1. Confidence:         ${confidenceText}   [${p1Mark}]
- 2. Win Rate:           ${winRateText}   [${p2Mark}]
- 3. Asymmetry:          ${asymmetryText}   [${p3Mark}]
- 4. Expected Move:      ${moveText}   [${p4Mark}]
- 5. Bar-Close Sync:     ${timerText}   [${p5Mark}]
+ EMA Trend:        [${emaTrend}]  Bars since cross: [${barsSince}]   [${emaMark}]
+ Kronos AI:         [${cache.krDir}]  Conf: [${cache.krConf}]%  Move: [${moveText}]   [${krMark}]
+ Echoes:            Win rate [${Math.round(cache.winRate * 100)}%]  Asymmetry [${cache.asym.toFixed(2)}]  Sample [${cache.count}]   [${echoMark}]
+ Market Clock:       [${cache.clockState}]   [${clockMark}]
+ Oracle:             [${oracleText}]   [${oracleMark}]
 
 NOTES:
 ${notesBlock}
@@ -6751,30 +6836,7 @@ This is informational only — you decide whether to take the trade.`;
       // Update Copy Report
       const reportTextEl = $('focus-report-text');
       if (reportTextEl) {
-        const scoreReport = isCleared ? `GATE: 5/5 PASS — ${dirUpper} CLEARED` : `GATE: ${passCount}/5 PASS — REJECTED`;
-        const blockingReport = isCleared ? `Blocking: None` : `Blocking: ${blockers.join(', ')}`;
-        
-        const p1Mark = p1_pass ? '[PASS]' : '[FAIL]';
-        const p2Mark = p2_pass ? '[PASS]' : '[FAIL]';
-        const p3Mark = p3_pass ? '[PASS]' : '[FAIL]';
-        const p4Mark = p4_pass ? '[PASS]' : '[FAIL]';
-        const p5Mark = p5_pass ? '[PASS]' : '[FAIL]';
-
-        reportTextEl.textContent = formatFocusReport(
-          scoreReport,
-          blockingReport,
-          p1_val,
-          p2_val,
-          p3_val,
-          p4_val,
-          p5_val,
-          p1Mark,
-          p2Mark,
-          p3Mark,
-          p4Mark,
-          p5Mark,
-          notes
-        );
+        reportTextEl.textContent = formatFocusReport(cache, notes);
       }
     };
 
