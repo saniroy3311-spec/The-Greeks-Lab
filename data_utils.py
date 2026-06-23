@@ -109,6 +109,7 @@ def fetch_delta_exchange_candles(symbol_key, tf_key):
     
     df = df[["open", "high", "low", "close", "volume"]].copy()
     df = df.dropna()
+    df = df[(df["open"] > 0) & (df["high"] > 0) & (df["low"] > 0) & (df["close"] > 0)]
     df = df.tail(LOOKBACK)
     return df
 
@@ -163,6 +164,7 @@ def fetch_candles(symbol_key, tf_key):
 
     df = df[["open", "high", "low", "close", "volume"]].copy()
     df = df.dropna()
+    df = df[(df["open"] > 0) & (df["high"] > 0) & (df["low"] > 0) & (df["close"] > 0)]
     if len(df) == 0:
         raise RuntimeError(f"No valid data remaining after dropping NaNs for {ticker} {interval}")
     df = df.tail(LOOKBACK)

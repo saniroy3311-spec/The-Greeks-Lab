@@ -4325,7 +4325,7 @@ function wf(t, e) {
       for (; Y >= 0 && a[Y].isPrediction; )
         Y--;
       if (Y >= 0) {
-        const Z = a[Y].time + C.intervalMs - Date.now();
+        const Z = a[Y].time + C.intervalMs - (Date.now() + (window.serverTimeOffset || 0));
         if (Z > -C.intervalMs && Z <= C.intervalMs + 6e4) {
           let ot = D + 9 + 8;
           ot + 8 > y.bottom && (ot = D - 9 - 8), pc(
@@ -4524,13 +4524,42 @@ function wf(t, e) {
   const No = {
     setData(p) {
       const y = f, b = y.length, M = { ...C.view };
+      const oldIntervalMs = C.intervalMs;
       a = p.slice(), ls(), $e();
       const S = f.length;
       if (b === 0 || S === 0)
         ee();
       else {
-        const A = f[S - 1].time === y[b - 1].time, F = S - b;
-        A ? C.view = { start: M.start + F, end: M.end + F } : f[0].time === y[0].time ? C.view = M : ee();
+        const oldTimesSet = new Set(y.map(c => c.time));
+        let overlapCount = 0;
+        for (let i = 0; i < f.length; i++) {
+          if (oldTimesSet.has(f[i].time)) overlapCount++;
+        }
+        const isSameTimeline = overlapCount > 0 && (overlapCount / Math.max(b, S)) > 0.5;
+
+        if (isSameTimeline) {
+          const wasAtRightEdge = M.end >= b - 0.5;
+          if (wasAtRightEdge) {
+            const zoomRange = M.end - M.start;
+            const offsetFromEnd = M.end - b;
+            const newEnd = S + offsetFromEnd;
+            C.view = { start: newEnd - zoomRange, end: newEnd };
+          } else {
+            const getOldTimeFromIndex = (idx) => {
+              const i = y.length;
+              if (i === 0) return Math.round(idx * oldIntervalMs);
+              if (idx <= 0) return Math.round(y[0].time + idx * oldIntervalMs);
+              if (idx >= i - 1) return Math.round(y[i - 1].time + (idx - (i - 1)) * oldIntervalMs);
+              const o = Math.floor(idx);
+              return Math.round(y[o].time + (y[o + 1].time - y[o].time) * (idx - o));
+            };
+            const startTime = getOldTimeFromIndex(M.start);
+            const endTime = getOldTimeFromIndex(M.end);
+            C.view = { start: C.timeToIndex(startTime), end: C.timeToIndex(endTime) };
+          }
+        } else {
+          ee();
+        }
       }
       hn = !0, bo(), B();
     },

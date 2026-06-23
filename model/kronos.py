@@ -7,7 +7,12 @@ import sys
 from tqdm import trange
 
 sys.path.append("../")
-from model.module import *
+from model.module import (
+    TransformerBlock, BSQuantizer, HierarchicalEmbedding,
+    TemporalEmbedding, RMSNorm, DependencyAwareLayer, DualHead
+)
+import torch.nn as nn
+import torch.nn.functional as F
 
 
 class KronosTokenizer(nn.Module, PyTorchModelHubMixin):

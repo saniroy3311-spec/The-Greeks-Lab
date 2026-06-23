@@ -87,9 +87,7 @@
     .stat .v,
     .sig-dir,
     .sig-sub span,
-    .echoes-stat .val,
-    #countdown-overlay-live,
-    #countdown-overlay-scalper {
+    .echoes-stat .val {
       font-family: 'JetBrains Mono', monospace;
       font-feature-settings: "tnum", "kern";
     }
@@ -429,12 +427,14 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-right: 1px solid rgba(15, 23, 42, 0.12);
       padding: 6px 0;
       overflow-y: auto;
       scrollbar-width: none;
-      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.02);
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
       pointer-events: auto;
       transition: width 0.2s ease, opacity 0.2s ease, padding 0.2s ease, border-color 0.2s ease;
     }
@@ -444,7 +444,9 @@
     }
 
     body.dark-theme .drawing-toolbar {
-      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.2);
+      background: rgba(13, 20, 38, 0.45);
+      border-right-color: rgba(255, 255, 255, 0.08);
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.25);
     }
 
     /* Collapsed state: animate the toolbar's own width down to 0 so the chart
@@ -682,7 +684,7 @@
     /* Entry Light Widget - Desktop */
     /* ── Reconnecting Banner ── */
     .reconnecting-banner {
-      display: none;
+      display: none !important;
       position: fixed;
       top: 0;
       left: 0;
@@ -810,27 +812,26 @@
         display: flex;
       }
 
-      /* Desktop: Signal panel as side column (never floats over chart) */
+      /* Desktop: Signal panel floats over chart */
       .chart-stage {
-        display: flex;
-        flex-direction: row;
+        display: block;
+        position: relative;
       }
       #chart, #scalper-chart {
-        flex: 1;
-        min-width: 0;
+        width: 100%;
         height: 100%;
       }
       .chart-overlays-container {
-        position: relative;
-        top: auto;
-        bottom: auto;
-        left: auto;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        bottom: 20px;
         width: 365px;
         min-width: 365px;
         max-height: 100%;
         overflow: hidden;
-        border-left: 1px solid var(--border);
-        pointer-events: auto;
+        border: none;
+        pointer-events: none; /* Children should have pointer-events: auto */
         transform: none;
       }
       .chart-overlays-container.collapsed {
@@ -846,14 +847,7 @@
         pointer-events: auto;
       }
       .overlay-card {
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
-        box-shadow: none;
-        background: var(--surface);
-      }
-      body.dark-theme .overlay-card {
-        background: var(--surface);
+        margin-bottom: 8px;
       }
       .overlays-collapse-btn {
         right: auto;
@@ -966,7 +960,9 @@
       transition: max-height 0.3s ease;
     }
     .accordion-section.active .accordion-body {
-      max-height: 600px;
+      max-height: none;
+      display: flex;
+      flex: 1;
     }
 
     .chart-overlays-container.collapsed {
@@ -1040,15 +1036,19 @@
     }
 
     .overlay-card {
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 12px;
       padding: 10px 12px;
-      box-shadow: var(--card-shadow);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
     }
 
     body.dark-theme .overlay-card {
-      background: rgba(19, 26, 46, 0.95);
+      background: rgba(13, 20, 38, 0.45);
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
     }
 
     .overlay-card-header {
@@ -1210,17 +1210,20 @@
     }
 
     .beginner-signal-banner.buy {
-      background: linear-gradient(135deg, #26a69a, #059669) !important;
-      box-shadow: 0 4px 15px rgba(38, 166, 154, 0.3);
+      background: rgba(38, 166, 154, 0.7) !important;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 4px 15px rgba(38, 166, 154, 0.2);
     }
 
     .beginner-signal-banner.sell {
-      background: linear-gradient(135deg, #ef5350, #e11d48) !important;
-      box-shadow: 0 4px 15px rgba(239, 83, 80, 0.3);
+      background: rgba(239, 83, 80, 0.7) !important;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 4px 15px rgba(239, 83, 80, 0.2);
     }
 
     .beginner-signal-banner.skip {
-      background: linear-gradient(135deg, #64748b, #475569) !important;
+      background: rgba(100, 116, 139, 0.7) !important;
+      backdrop-filter: blur(4px);
       box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2);
     }
 
@@ -2368,21 +2371,6 @@
       display: none;
     }
 
-    #countdown-overlay-live,
-    #countdown-overlay-scalper {
-      position: absolute;
-      right: 4px;
-      z-index: 10;
-      background: #475569;
-      color: #ffffff;
-      padding: 1px 4px;
-      border-radius: 2px;
-      font-size: 9px;
-      font-weight: bold;
-      pointer-events: none;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-      display: none;
-    }
 
     /* Layout Sizing Calculation */
     .tab-content {
@@ -2588,20 +2576,23 @@
         left: 8px;
         right: 8px;
         height: 44px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.45);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        border-radius: 12px;
         z-index: 100;
         align-items: center;
         justify-content: space-between;
         padding: 0 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
         cursor: pointer;
       }
 
       body.dark-theme .mobile-hud-strip {
-        background: rgba(19, 26, 46, 0.95);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        background: rgba(13, 20, 38, 0.45);
+        border-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
       }
 
       .hud-item {
@@ -2642,15 +2633,22 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background: var(--surface);
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         border-top-left-radius: 16px;
         border-top-right-radius: 16px;
-        border-top: 1px solid var(--border);
-        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
+        border-top: 1px solid rgba(15, 23, 42, 0.12);
+        box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.1);
         z-index: 2000;
         max-height: 75vh;
         transform: translateY(100%);
         transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      body.dark-theme .mobile-bottom-sheet {
+        background: rgba(13, 20, 38, 0.5);
+        border-top-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.3);
       }
 
       .mobile-bottom-sheet.active {
@@ -2706,14 +2704,23 @@
         gap: 12px;
       }
 
-      .mobile-sheet-content-wrapper .overlay-card {
+      .mobile-sheet-content-wrapper .overlay-card,
+      .mobile-sheet-content-wrapper .gatekeeper-panel {
         width: 100% !important;
         position: static !important;
         box-shadow: none !important;
         opacity: 1 !important;
-        border: 1px solid var(--border) !important;
-        background: var(--surface) !important;
+        border: 1px solid rgba(15, 23, 42, 0.08) !important;
+        background: rgba(255, 255, 255, 0.25) !important;
         display: block !important;
+        border-radius: 10px !important;
+        margin-top: 0 !important;
+        padding: 12px !important;
+      }
+      body.dark-theme .mobile-sheet-content-wrapper .overlay-card,
+      body.dark-theme .mobile-sheet-content-wrapper .gatekeeper-panel {
+        background: rgba(0, 0, 0, 0.2) !important;
+        border-color: rgba(255, 255, 255, 0.05) !important;
       }
 
       .chart-overlays-container {
@@ -2728,8 +2735,10 @@
       left: 0;
       bottom: 0;
       width: 260px;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(15, 23, 42, 0.12);
       box-shadow: 4px 0 16px rgba(0, 0, 0, 0.04);
       z-index: 1000;
       display: flex;
@@ -2739,6 +2748,8 @@
     }
 
     body.dark-theme .sidebar-drawer {
+      background: rgba(13, 20, 38, 0.45);
+      border-right-color: rgba(255, 255, 255, 0.08);
       box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
     }
 
@@ -2840,8 +2851,10 @@
       flex-shrink: 0;
       width: 12px;
       height: 48px;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(15, 23, 42, 0.12);
       border-left: none;
       border-top-right-radius: 6px;
       border-bottom-right-radius: 6px;
@@ -2851,8 +2864,14 @@
       justify-content: center;
       color: var(--muted);
       font-size: 8px;
-      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
       transition: all 0.2s;
+    }
+
+    body.dark-theme .drawing-toolbar-toggle-btn {
+      background: rgba(13, 20, 38, 0.45);
+      border-color: rgba(255, 255, 255, 0.08);
+      border-left: none;
     }
 
     .drawing-toolbar-container.toolbar-collapsed .drawing-toolbar-toggle-btn {
@@ -2861,7 +2880,11 @@
 
     .drawing-toolbar-toggle-btn:hover {
       color: var(--text);
-      background: var(--bg);
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    body.dark-theme .drawing-toolbar-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
     }
 
     /* Strategy List and Logs Styles */
@@ -2904,32 +2927,43 @@
         width: calc(100% - 24px);
         margin: 8px auto;
         padding: 10px 16px;
-        border-radius: 8px;
+        border-radius: 12px;
         font-size: 13px;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        border: 1.5px solid var(--border);
-        background: var(--surface);
-        color: var(--text);
+        border: 1px solid rgba(100, 116, 139, 0.25) !important;
+        background: rgba(100, 116, 139, 0.7) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        color: #ffffff !important;
         cursor: pointer;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 8px 32px rgba(100, 116, 139, 0.15);
         transition: all 0.2s ease;
+      }
+      
+      body.dark-theme .mobile-forecast-btn {
+        background: rgba(71, 85, 105, 0.6) !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
       }
 
       .mobile-forecast-btn.glowing-green {
-        background-color: var(--up) !important;
+        background-color: rgba(38, 166, 154, 0.7) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         color: #fff !important;
-        border-color: var(--up) !important;
-        box-shadow: 0 0 12px rgba(38, 166, 154, 0.7) !important;
+        border-color: rgba(38, 166, 154, 0.5) !important;
+        box-shadow: 0 0 12px rgba(38, 166, 154, 0.5) !important;
         animation: mobile-pulse-green 1.5s infinite alternate;
       }
 
       .mobile-forecast-btn.glowing-red {
-        background-color: var(--down) !important;
+        background-color: rgba(239, 83, 80, 0.7) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         color: #fff !important;
-        border-color: var(--down) !important;
-        box-shadow: 0 0 12px rgba(239, 68, 68, 0.7) !important;
+        border-color: rgba(239, 83, 80, 0.5) !important;
+        box-shadow: 0 0 12px rgba(239, 83, 80, 0.5) !important;
         animation: mobile-pulse-red 1.5s infinite alternate;
       }
     }
@@ -3268,76 +3302,192 @@
       }
     }
 
-    /* ===== Asset Ticker Strip ===== */
-    .asset-ticker-strip {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      height: 36px;
-      flex-shrink: 0;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0 10px;
-      overflow-x: auto;
-      overflow-y: hidden;
-      scrollbar-width: none;
-    }
-    .asset-ticker-strip::-webkit-scrollbar { display: none; }
+      /* Glassmorphism Gatekeeper UI - Light Theme */
+      .gatekeeper-panel {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s ease;
+        pointer-events: auto;
+      }
+      body.dark-theme .gatekeeper-panel {
+        background: rgba(13, 20, 38, 0.2);
+        border-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      }
+      .gatekeeper-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        padding-bottom: 8px;
+        margin-bottom: 12px;
+      }
+      body.dark-theme .gatekeeper-header {
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+      }
+      .gatekeeper-title {
+        font-size: 13px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-primary);
+      }
+      .gatekeeper-toggle-btn {
+        background: transparent;
+        border: 1px solid rgba(15, 23, 42, 0.15);
+        color: var(--text-primary);
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      body.dark-theme .gatekeeper-toggle-btn {
+        border-color: rgba(255, 255, 255, 0.15);
+        color: #f1f5f9;
+      }
+      .gatekeeper-toggle-btn:hover {
+        background: rgba(15, 23, 42, 0.05);
+        color: var(--text-primary);
+      }
+      body.dark-theme .gatekeeper-toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: #ffffff;
+      }
+      .gatekeeper-grid {
+        display: flex;
+        flex-direction: column;
+        transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        overflow: hidden;
+      }
+      .gatekeeper-card {
+        background: rgba(255, 255, 255, 0.4);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: default;
+      }
+      body.dark-theme .gatekeeper-card {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.06);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+      }
+      .gatekeeper-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+      }
+      body.dark-theme .gatekeeper-card:hover {
+        box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+      }
+      .gatekeeper-card:last-child {
+        margin-bottom: 0;
+      }
+      .gatekeeper-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        background: #94a3b8;
+      }
+      .gatekeeper-card.pass::before { background: #10b981; }
+      .gatekeeper-card.fail::before { background: #ef4444; }
+      
+      .gatekeeper-card-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #334155;
+        text-transform: uppercase;
+      }
+      body.dark-theme .gatekeeper-card-title {
+        color: #f1f5f9;
+      }
+      .gatekeeper-card-val {
+        font-size: 12px;
+        font-weight: 700;
+        font-family: 'JetBrains Mono', monospace;
+        margin-right: 8px;
+        color: #475569;
+      }
+      body.dark-theme .gatekeeper-card-val {
+        color: #cbd5e1;
+      }
+      .gatekeeper-card-badge {
+        font-size: 9px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 800;
+        text-transform: uppercase;
+        background: rgba(15, 23, 42, 0.05);
+        color: #64748b;
+      }
+      body.dark-theme .gatekeeper-card-badge {
+        background: rgba(255, 255, 255, 0.05);
+        color: #94a3b8;
+      }
+      .gatekeeper-card.pass .gatekeeper-card-badge {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+      }
+      body.dark-theme .gatekeeper-card.pass .gatekeeper-card-badge {
+        background: rgba(16, 185, 129, 0.25);
+        color: #34d399;
+      }
+      .gatekeeper-card.fail .gatekeeper-card-badge {
+        background: rgba(239, 68, 68, 0.15);
+        color: #dc2626;
+      }
+      body.dark-theme .gatekeeper-card.fail .gatekeeper-card-badge {
+        background: rgba(239, 68, 68, 0.25);
+        color: #fca5a5;
+      }
 
-    .ticker-item {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 4px 9px;
-      border-radius: 4px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      flex-shrink: 0;
-      white-space: nowrap;
-      transition: background 0.15s ease, border-color 0.15s ease;
-    }
-    .ticker-item:hover {
-      background: var(--bg);
-    }
-    .ticker-item.active {
-      background: var(--bg);
-      border-color: var(--blue);
-    }
-    .ticker-name {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-    .ticker-price {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-    .ticker-change {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--muted);
-    }
-    .ticker-change.up { color: var(--up); }
-    .ticker-change.down { color: var(--down); }
-    .ticker-divider {
-      width: 1px;
-      height: 16px;
-      background: var(--border);
-      flex-shrink: 0;
-    }
+      /* Flashing Animations */
+      @keyframes flash-long-bg {
+        0%, 100% { background: rgba(13, 17, 28, 0.65); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+        50% { background: rgba(38, 166, 154, 0.2); box-shadow: 0 0 20px rgba(38, 166, 154, 0.5); }
+      }
+      @keyframes flash-short-bg {
+        0%, 100% { background: rgba(13, 17, 28, 0.65); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+        50% { background: rgba(239, 83, 80, 0.2); box-shadow: 0 0 20px rgba(239, 83, 80, 0.5); }
+      }
+      .gatekeeper-panel.flash-long {
+        animation: flash-long-bg 1.5s infinite alternate;
+        border-color: var(--up);
+      }
+      .gatekeeper-panel.flash-short {
+        animation: flash-short-bg 1.5s infinite alternate;
+        border-color: var(--down);
+      }
+      .gatekeeper-panel.flash-long .gatekeeper-title { color: var(--up); }
+      .gatekeeper-panel.flash-short .gatekeeper-title { color: var(--down); }
 
-    /* The 3rd top strip (Signal Gate Panel) was removed — its 5 pass/fail
-       checks are already rendered in the side Signal + Echoes detail cards.
-       Mobile ticker compaction rule is preserved below. */
-    @media (max-width: 768px) {
-      .asset-ticker-strip { height: 34px; padding: 0 8px; }
-      .ticker-name { display: none; }
-    }
-
-  </style>
+      .chart-overlays-container,
+      .chart-overlays-container .chart-overlays-inner,
+      .chart-overlays-container .accordion-section,
+      .chart-overlays-container .accordion-body {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+    </style>
 </head>
 
 <body>
@@ -3397,21 +3547,14 @@
         <select id="sidebar-chart-type" class="form-select"
           onchange="$('chart-type').value = this.value; $('chart-type').dispatchEvent(new Event('change'))">
           <option value="candles">Candles</option>
-          <option value="hollow">Hollow Candles</option>
-          <option value="heikin">Heikin Ashi</option>
-          <option value="renko">Renko</option>
-          <option value="volcandles">Volume Candles</option>
-          <option value="bars">Bars</option>
-          <option value="line">Line</option>
-          <option value="area">Area</option>
         </select>
       </div>
 
       <div class="view-mode-container">
         <span class="label">CHART VIEW MODE</span>
         <div class="btn-group">
-          <button id="btn-split" class="active" onclick="setChartViewMode('split')">Split</button>
-          <button id="btn-full" onclick="setChartViewMode('full')">Full</button>
+          <button id="btn-split" onclick="setChartViewMode('split')">Split</button>
+          <button id="btn-full" class="active" onclick="setChartViewMode('full')">Full</button>
           <button id="btn-compact" onclick="setChartViewMode('compact')">Compact</button>
         </div>
       </div>
@@ -3480,8 +3623,6 @@
         </button>
       </div>
     </div>
-  </div>
-  </div>
   </div>
 
 
@@ -3660,12 +3801,11 @@
       <select id="symbol" class="search-select">
         <option value="NIFTY">Nifty 50</option>
         <option value="BTC">Bitcoin (BTC)</option>
-        <option value="GOLD">Gold (XAUTUSD)</option>
       </select>
     </div>
     <div class="divider"></div>
     <button class="mobile-tf-pill" id="mobile-tf-pill" onclick="toggleSidebarDrawer(event)" title="Change timeframe">
-      <span id="mobile-tf-label">5m</span>
+      <span id="mobile-tf-label">3m</span>
       <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round" stroke-linejoin="round">
         <polyline points="6 9 12 15 18 9"></polyline>
@@ -3678,13 +3818,6 @@
     <div class="divider"></div>
     <select id="chart-type" class="search-select">
       <option value="candles">Candles</option>
-      <option value="hollow">Hollow Candles</option>
-      <option value="heikin">Heikin Ashi</option>
-      <option value="renko">Renko</option>
-      <option value="volcandles">Volume Candles</option>
-      <option value="bars">Bars</option>
-      <option value="line">Line</option>
-      <option value="area">Area</option>
     </select>
     <div class="divider"></div>
     <button class="top-btn" id="indicators-toggle-btn" onclick="toggleIndicatorsDropdown(event)">
@@ -3763,26 +3896,7 @@
     </div>
   </div>
 
-  <!-- Live Asset Ticker -->
-  <div class="asset-ticker-strip" id="asset-ticker-strip">
-    <div class="ticker-item" data-symbol="NIFTY" onclick="selectTickerSymbol('NIFTY')">
-      <span class="ticker-name">Nifty 50</span>
-      <span class="ticker-price tnum" id="ticker-price-NIFTY">—</span>
-      <span class="ticker-change tnum" id="ticker-change-NIFTY">—</span>
-    </div>
-    <div class="ticker-divider"></div>
-    <div class="ticker-item" data-symbol="BTC" onclick="selectTickerSymbol('BTC')">
-      <span class="ticker-name">Bitcoin</span>
-      <span class="ticker-price tnum" id="ticker-price-BTC">—</span>
-      <span class="ticker-change tnum" id="ticker-change-BTC">—</span>
-    </div>
-    <div class="ticker-divider"></div>
-    <div class="ticker-item" data-symbol="GOLD" onclick="selectTickerSymbol('GOLD')">
-      <span class="ticker-name">Gold</span>
-      <span class="ticker-price tnum" id="ticker-price-GOLD">—</span>
-      <span class="ticker-change tnum" id="ticker-change-GOLD">—</span>
-    </div>
-  </div>
+
 
 
   <div class="err" id="err"></div>
@@ -3927,169 +4041,155 @@
             </button>
 
             <div class="chart-overlays-inner accordion-root">
-              <!-- Accordion Section 1: KRONOS PREDICTION (always visible) -->
-              <div class="accordion-section active" id="acc-sig">
-                <div class="accordion-header" onclick="toggleAccordion(this, true)">
-                  <span class="accordion-title">KRONOS PREDICTION</span>
-                  <span class="accordion-badge" id="acc-dir-badge">—</span>
-                  <span class="accordion-arrow">▼</span>
-                </div>
-                <div class="accordion-body">
-                  <div class="overlay-card signal flat" id="sig" style="border: none; box-shadow: none;">
-                    <!-- Beginner Friendly Visual Banner -->
-                    <div class="beginner-signal-banner skip" id="beginner-signal-banner">
-                      <span class="beginner-signal-icon" id="beginner-signal-icon">⏸</span>
-                      <div class="beginner-signal-title" id="beginner-signal-action">WAIT / SKIP</div>
-                      <div class="beginner-signal-desc" id="beginner-signal-desc">Scanning market conditions. No clear
-                        direction detected yet.</div>
+              <!-- Unified KRONOS AI ENGINE Panel -->
+              <div class="accordion-section active" id="acc-a1">
+                <div class="accordion-body" style="padding-top: 0;">
+                  <div class="gatekeeper-panel" id="focus-a1-card" style="margin-top: 0;">
+                    <div class="gatekeeper-header">
+                      <div class="gatekeeper-title" id="gk-title">EXECUTION GATEKEEPER LOGIC</div>
                     </div>
 
-                    <!-- Beginner Friendly Confidence Meter -->
-                    <div class="confidence-meter-container">
-                      <div class="confidence-meter-header">
-                        <span>Signal Strength</span>
-                        <span id="beginner-signal-conf">0%</span>
-                      </div>
-                      <div class="confidence-meter-bar">
-                        <div class="confidence-meter-fill skip" id="beginner-signal-conf-bar" style="width: 0%;"></div>
-                      </div>
+                    <!-- Dummy banner to prevent JS error in updateBeginnerSignal -->
+                    <div id="beginner-signal-banner" style="display: none;">
+                      <span id="beginner-signal-icon"></span>
+                      <div id="beginner-signal-action"></div>
+                      <div id="beginner-signal-desc"></div>
                     </div>
 
-                    <div class="sig-header-row"
-                      style="display: none !important; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px;">
-                      <div>
-                        <div class="sig-label">KRONOS PREDICTION</div>
-                        <div class="sig-dir" id="dir">—</div>
-                        <div class="sig-sub" style="font-size: 10px; color: var(--muted); margin-top: 2px;">Confidence <span
-                            id="conf">—</span></div>
+                    <!-- A1 Strategy Verdict Banner -->
+                    <div class="beginner-signal-banner skip" id="focus-a1-verdict-banner" style="margin-bottom: 12px; margin-top: 0; background: var(--bg); border: 2px solid var(--border); border-radius: 6px;">
+                      <span class="beginner-signal-icon" id="focus-a1-verdict-icon">⏸</span>
+                      <div class="beginner-signal-title" id="focus-a1-verdict-action">WAIT / SKIP</div>
+                      <div class="beginner-signal-desc" id="focus-a1-verdict-desc">Evaluating Gatekeeper Rules.</div>
+                    </div>
+
+                    <div id="gk-metrics-wrapper" style="transition: all 0.3s ease; overflow: hidden; opacity: 1;">
+                      <!-- Signal Strength Container -->
+                      <div class="confidence-meter-container" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: none; margin-bottom: 12px; border-radius: 6px; padding: 6px 10px;">
+                        <div class="confidence-meter-header" style="display: flex; justify-content: space-between; align-items: center;">
+                          <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">SIGNAL STRENGTH</span>
+                          <span id="beginner-signal-conf" style="font-weight: 800; color: #0f172a;">0%</span>
+                        </div>
+                        <div class="confidence-meter-bar" style="height: 6px; margin-top: 6px; background: rgba(0, 0, 0, 0.05); border-radius: 4px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.2);">
+                          <div class="confidence-meter-fill skip" id="beginner-signal-conf-bar" style="height: 100%; width: 0%; border-radius: 4px; transition: width 0.3s ease;"></div>
+                        </div>
                       </div>
-                      <div style="text-align: right;">
-                        <div class="sig-label">ACTION</div>
-                        <div class="sig-action" id="act">—</div>
-                        <div class="sig-sub" id="bias" style="font-size: 10px; color: var(--muted); margin-top: 2px;">—
+
+                      <!-- 4 Metrics Grid -->
+                      <div class="sig-metrics-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                        <div class="sig-metric-box" style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 10px;">
+                          <div class="sig-metric-label" style="font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 700;">ENTRY</div>
+                          <div class="sig-metric-val tnum" id="s-cur" style="font-size: 14px; font-weight: 700; color: var(--text);">—</div>
+                        </div>
+                        <div class="sig-metric-box" style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 10px;">
+                          <div class="sig-metric-label" style="font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 700;">TARGET 1</div>
+                          <div class="sig-metric-val tnum" id="s-p5" style="font-size: 14px; font-weight: 700; color: var(--text);">—</div>
+                        </div>
+                        <div class="sig-metric-box" style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 10px;">
+                          <div class="sig-metric-label" style="font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 700;">FINAL</div>
+                          <div class="sig-metric-val tnum" id="s-pn" style="font-size: 14px; font-weight: 700; color: var(--text);">—</div>
+                        </div>
+                        <div class="sig-metric-box" style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 10px;">
+                          <div class="sig-metric-label" style="font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 700;">EST. P&L</div>
+                          <div class="sig-metric-val tnum" id="s-mv" style="font-size: 14px; font-weight: 700; color: var(--text);">—</div>
                         </div>
                       </div>
                     </div>
-                    <div class="sig-metrics-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                      <div class="sig-metric-box">
-                        <div class="sig-metric-label">Current</div>
-                        <div class="sig-metric-val tnum" id="s-cur">—</div>
+
+                    <div class="gatekeeper-grid" id="gk-grid" style="max-height: 1000px; opacity: 1;">
+                      <!-- 1. The Mechanic Check -->
+                      <div class="gatekeeper-card" id="gk-card-mechanic">
+                        <span class="gatekeeper-card-title">1. AI Confidence <span style="font-size: 9px; color: var(--muted); font-weight: normal; margin-left: 4px;">(≥ 80%)</span></span>
+                        <div style="display: flex; align-items: center; white-space: nowrap;">
+                          <span class="gatekeeper-card-val" id="gk-val-mechanic">—</span>
+                          <span class="gatekeeper-card-badge" id="gk-badge-mechanic">WAIT</span>
+                        </div>
                       </div>
-                      <div class="sig-metric-box">
-                        <div class="sig-metric-label">Predicted (5 bars)</div>
-                        <div class="sig-metric-val tnum" id="s-p5">—</div>
+
+                      <!-- 2. The Market History -->
+                      <div class="gatekeeper-card" id="gk-card-history">
+                        <span class="gatekeeper-card-title">2. Historical Edge <span style="font-size: 9px; color: var(--muted); font-weight: normal; margin-left: 4px;">(≥ 80%)</span></span>
+                        <div style="display: flex; align-items: center; white-space: nowrap;">
+                          <span class="gatekeeper-card-val" id="gk-val-history">—</span>
+                          <span class="gatekeeper-card-badge" id="gk-badge-history">WAIT</span>
+                        </div>
                       </div>
-                      <div class="sig-metric-box">
-                        <div class="sig-metric-label">Predicted (end)</div>
-                        <div class="sig-metric-val tnum" id="s-pn">—</div>
+
+                      <!-- 3. The 3-to-1 Payout -->
+                      <div class="gatekeeper-card" id="gk-card-payout">
+                        <span class="gatekeeper-card-title">3. Risk / Reward <span style="font-size: 9px; color: var(--muted); font-weight: normal; margin-left: 4px;">(≥ 3.0x)</span></span>
+                        <div style="display: flex; align-items: center; white-space: nowrap;">
+                          <span class="gatekeeper-card-val" id="gk-val-payout">—</span>
+                          <span class="gatekeeper-card-badge" id="gk-badge-payout">WAIT</span>
+                        </div>
                       </div>
-                      <div class="sig-metric-box">
-                        <div class="sig-metric-label">Expected move</div>
-                        <div class="sig-metric-val tnum" id="s-mv">—</div>
+
+                      <!-- 4. The Hidden Costs -->
+                      <div class="gatekeeper-card" id="gk-card-costs">
+                        <span class="gatekeeper-card-title">4. Expected Move <span style="font-size: 9px; color: var(--muted); font-weight: normal; margin-left: 4px;">(≥ 0.40%)</span></span>
+                        <div style="display: flex; align-items: center; white-space: nowrap;">
+                          <span class="gatekeeper-card-val" id="gk-val-costs">—</span>
+                          <span class="gatekeeper-card-badge" id="gk-badge-costs">WAIT</span>
+                        </div>
                       </div>
+
+                      <!-- 5. The Final Handshake -->
+                      <div class="gatekeeper-card" id="gk-card-handshake">
+                        <span class="gatekeeper-card-title">5. Candle Close <span style="font-size: 9px; color: var(--muted); font-weight: normal; margin-left: 4px;">(Closed)</span></span>
+                        <div style="display: flex; align-items: center; white-space: nowrap;">
+                          <span class="gatekeeper-card-val" id="gk-val-handshake">—</span>
+                          <span class="gatekeeper-card-badge" id="gk-badge-handshake">WAIT</span>
+                        </div>
+                      </div>
+
+                      <!-- Skip Reasons Removed -->
+
+                      <!-- Target Levels Box (shown when BUY or SELL) -->
+                      <div id="focus-a1-targets-container" style="display: none; margin-top: 10px; padding: 10px; background: rgba(38, 166, 154, 0.1); border-left: 3px solid var(--up); border-radius: 4px; grid-column: 1 / -1;">
+                        <div style="font-weight: 700; font-size: 11px; color: var(--up); text-transform: uppercase; margin-bottom: 8px;">📊 Proposed Target Levels</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center;">
+                          <div style="background: var(--bg); padding: 6px; border-radius: 4px; border: 1px solid var(--border);">
+                            <div style="font-size: 9px; color: var(--muted); text-transform: uppercase;">Entry</div>
+                            <div id="focus-a1-target-entry" class="tnum" style="font-size: 12px; font-weight: 700; color: var(--text-primary);">—</div>
+                          </div>
+                          <div style="background: var(--bg); padding: 6px; border-radius: 4px; border: 1px solid var(--border);">
+                            <div style="font-size: 9px; color: var(--muted); text-transform: uppercase;">Stop Loss</div>
+                            <div id="focus-a1-target-sl" class="tnum" style="font-size: 12px; font-weight: 700; color: var(--down);">—</div>
+                          </div>
+                          <div style="background: var(--bg); padding: 6px; border-radius: 4px; border: 1px solid var(--border);">
+                            <div style="font-size: 9px; color: var(--muted); text-transform: uppercase;">Take Profit</div>
+                            <div id="focus-a1-target-tp" class="tnum" style="font-size: 12px; font-weight: 700; color: var(--up);">—</div>
+                          </div>
+                        </div>
+                      </div>
+
+
+
+                      <!-- A1 Raw Agent Report inside Accordion -->
+                      <div class="overlay-card report-card" id="focus-a1-report-card" style="margin-top: 4px; border: 1px solid var(--border); background: rgba(0,0,0,0.02); padding: 8px; border-radius: 6px; grid-column: 1 / -1;">
+                        <div class="overlay-card-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 4px; margin-bottom: 6px; border-bottom: 1px solid var(--border);">
+                          <span class="card-title" style="font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase;">A1 AGENT REPORT</span>
+                          <button class="copy-report-btn" onclick="copyFocusA1Report()" style="background: var(--blue); border: none; color: white; cursor: pointer; font-size: 9px; padding: 2px 6px; border-radius: 3px; font-weight: 600;">Copy</button>
+                        </div>
+                        <pre id="focus-a1-report-text" style="font-family: 'JetBrains Mono', monospace; font-size: 9px; white-space: pre-wrap; color: var(--text-primary); padding: 4px; background: rgba(0,0,0,0.03); border-radius: 4px; max-height: 150px; overflow-y: auto; margin: 0; line-height: 1.3;"></pre>
+                      </div>
+
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Accordion Section 2: ECHOES CONFIRMATION -->
-              <div class="accordion-section" id="acc-echoes">
-                <div class="accordion-header" onclick="toggleAccordion(this, true)">
-                  <span class="accordion-title">ECHOES CONFIRMATION</span>
-                  <span class="accordion-badge" id="acc-echoes-badge">—</span>
-                  <span class="accordion-arrow">▼</span>
-                </div>
-                <div class="accordion-body">
-                  <div class="overlay-card echoes-card flat" id="echoes-card" style="border: none; box-shadow: none;">
-                    <div style="padding: 4px 0;">
-                      <div class="echoes-status" id="echoes-status">Scanning…</div>
-                    </div>
-                    <div class="echoes-stats-row">
-                      <div class="echoes-stat"><span class="lbl">Median</span> <span id="echoes-median" class="val">—</span>
-                      </div>
-                      <div class="echoes-stat"><span class="lbl">Best</span> <span id="echoes-best"
-                          class="val text-up">—</span></div>
-                      <div class="echoes-stat"><span class="lbl">Worst</span> <span id="echoes-worst"
-                          class="val text-down">—</span></div>
-                    </div>
-                    <div class="echoes-sparkline-container">
-                      <canvas id="echoes-sparkline" width="160" height="35"></canvas>
-                      <div class="sparkline-label">Query &<br>matches</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              <!-- Accordion Section 3: FUTURE FORECAST -->
-              <div class="accordion-section" id="acc-pred">
-                <div class="accordion-header" onclick="toggleAccordion(this, true)">
-                  <span class="accordion-title">FUTURE FORECAST</span>
-                  <span class="accordion-badge" id="acc-pred-badge">—</span>
-                  <span class="accordion-arrow">▼</span>
-                </div>
-                <div class="accordion-body">
-                  <div class="overlay-card predictions-card" id="predictions-card" style="border: none; box-shadow: none;">
-                    <div class="overlay-card-body" style="padding: 0; overflow-x: auto;">
-                      <table style="width: 100%; border-collapse: collapse; font-size: 12px; font-weight: 600;">
-                        <thead>
-                          <tr style="border-bottom: 1.5px solid var(--border); color: var(--muted); text-align: left;">
-                            <th
-                              style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
-                              Candle</th>
-                            <th
-                              style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-align: right; text-transform: uppercase; letter-spacing: 0.5px;">
-                              Target</th>
-                            <th
-                              style="padding: 6px 4px; font-weight: 700; font-size: 10px; text-align: right; text-transform: uppercase; letter-spacing: 0.5px;">
-                              Change</th>
-                          </tr>
-                        </thead>
-                        <tbody id="predictions-table-body" class="tnum predictions-table-body">
-                          <tr>
-                            <td colspan="3" style="text-align: center; color: var(--muted); padding: 12px 0;">No predictions
-                              available</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- Focus Confirmation Report Card -->
-              <div class="overlay-card confirmation-card" id="focus-confirmation-card" style="margin-top: 8px;">
-                <!-- Master Box -->
-                <div id="master-box" style="padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; text-align: center;">
-                  <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px;">Confirmation Gate</div>
-                  <div id="focus-report-score" style="font-size: 18px; font-weight: 700; color: var(--text-primary);">0/5 CONDITIONS MATCH</div>
-                  <div id="focus-report-blocking" style="font-size: 11px; color: var(--down); margin-top: 4px; font-family: 'JetBrains Mono', monospace; min-height: 15px; font-weight: 600;">Blocking: None</div>
-                </div>
 
-                <div id="focus-table-body" style="display: flex; flex-direction: column; gap: 8px;">
-                  <!-- Dynamic parameter cards will be inserted here -->
-                </div>
 
-                <div style="border-top: 1px solid var(--border); margin-top: 8px; padding-top: 8px;">
-                  <div style="font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 4px;">Notes</div>
-                  <div id="focus-report-notes" style="font-size: 10px; line-height: 1.4; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; white-space: pre-wrap;"></div>
-                </div>
-              </div>
 
-              <!-- Focus Raw Agent Report Card -->
-              <div class="overlay-card report-card" id="focus-report-card" style="margin-top: 8px;">
-                <div class="overlay-card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-bottom: 6px;">
-                  <span class="card-title">FOCUS AGENT REPORT</span>
-                  <button class="copy-report-btn" onclick="copyFocusReport()" style="background: var(--blue); border: none; color: white; cursor: pointer; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 600;">Copy</button>
-                </div>
-                <pre id="focus-report-text" style="font-family: 'JetBrains Mono', monospace; font-size: 10px; white-space: pre-wrap; color: var(--text-primary); padding: 6px; background: rgba(0,0,0,0.05); border-radius: 4px; max-height: 250px; overflow-y: auto; margin: 0; line-height: 1.35;"></pre>
-              </div>
+
+
             </div>
           </div>
 
           <!-- Live Chart Canvas -->
           <div id="chart" style="position: relative;">
-            <div id="countdown-overlay-live"
-              style="position: absolute; right: 4px; bottom: 24px; z-index: 10; background: #475569; color: #fff; padding: 1px 4px; border-radius: 2px; font-size: 9px; font-weight: bold; pointer-events: none; box-shadow: 0 1px 3px rgba(0,0,0,0.2); display: none;">
-            </div>
             <div class="chart-loading-overlay" id="live-chart-loading">
               <div class="spinner"></div>
               Updating Forecast...
@@ -4369,21 +4469,21 @@
                   </div>
                 </div>
                 <div class="sig-metrics-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                  <div class="sig-metric-box">
+                  <div class="sig-metric-box" style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 10px;">
                     <div class="sig-metric-label">Current</div>
-                    <div class="sig-metric-val tnum" id="scalper-s-cur">—</div>
+                    <div class="sig-metric-val tnum" id="scalper-s-cur" style="color: var(--text);">—</div>
                   </div>
-                  <div class="sig-metric-box">
+                  <div class="sig-metric-box" style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 10px;">
                     <div class="sig-metric-label">Predicted (5 bars)</div>
-                    <div class="sig-metric-val tnum" id="scalper-s-p5">—</div>
+                    <div class="sig-metric-val tnum" id="scalper-s-p5" style="color: var(--text);">—</div>
                   </div>
-                  <div class="sig-metric-box">
+                  <div class="sig-metric-box" style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 10px;">
                     <div class="sig-metric-label">Predicted (end)</div>
-                    <div class="sig-metric-val tnum" id="scalper-s-pn">—</div>
+                    <div class="sig-metric-val tnum" id="scalper-s-pn" style="color: var(--text);">—</div>
                   </div>
-                  <div class="sig-metric-box">
+                  <div class="sig-metric-box" style="background: var(--bg); border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 10px;">
                     <div class="sig-metric-label">Expected move</div>
-                    <div class="sig-metric-val tnum" id="scalper-s-mv">—</div>
+                    <div class="sig-metric-val tnum" id="scalper-s-mv" style="color: var(--text);">—</div>
                   </div>
                 </div>
               </div>
@@ -4446,9 +4546,6 @@
           <!-- Scalper Chart Canvas -->
           <div id="scalper-chart" style="width: 100%; height: 100%; position: relative;">
             <canvas id="scalper-trade-overlay" class="trade-overlay-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5;"></canvas>
-            <div id="countdown-overlay-scalper"
-              style="position: absolute; right: 4px; bottom: 24px; z-index: 10; background: #475569; color: #fff; padding: 1px 4px; border-radius: 2px; font-size: 9px; font-weight: bold; pointer-events: none; box-shadow: 0 1px 3px rgba(0,0,0,0.2); display: none;">
-            </div>
             <div class="chart-loading-overlay" id="scalper-chart-loading">
               <div class="spinner"></div>
               Updating Strategy...
@@ -4492,10 +4589,6 @@
         </table>
       </div>
     </div>
-  </div>
-  <div class="footer">
-    <span id="updated">Last update: —</span>
-    <span id="meta">Kronos-small · context 400</span>
   </div>
 
   <script type="module">
@@ -4558,6 +4651,90 @@ let wsLastClosedTime = null;
      let activeCandleOpenTime = null;
      let tickCache = {};
 
+     // ── Live IST Clock & Smooth Tick Easing State ──
+     window.lastServerUpdateTime = '—';
+     window.liveTargetClose = null;
+     window.liveCurrentClose = null;
+     window.scalperTargetClose = null;
+     window.scalperCurrentClose = null;
+
+     function getISTTimeString() {
+       const options = {
+         timeZone: 'Asia/Kolkata',
+         hour: '2-digit',
+         minute: '2-digit',
+         second: '2-digit',
+         hour12: false
+       };
+       try {
+         return new Intl.DateTimeFormat('en-US', options).format(new Date());
+       } catch (e) {
+         const now = new Date();
+         return now.toTimeString().split(' ')[0];
+       }
+     }
+
+     function updateLiveClock() {
+       const istTime = getISTTimeString();
+       const text = `Last update: ${window.lastServerUpdateTime} (IST: ${istTime})`;
+       const topbarEl = document.getElementById('updated-topbar');
+       const footerEl = document.getElementById('updated');
+       if (topbarEl) topbarEl.textContent = text;
+       if (footerEl) footerEl.textContent = text;
+     }
+
+     function animateSmoothTicks() {
+       let needsRenderLive = false;
+       let needsRenderScalper = false;
+
+       // Live Chart interpolation
+       if (window.liveTargetClose !== null && window.liveCurrentClose !== null) {
+         const diff = window.liveTargetClose - window.liveCurrentClose;
+         if (Math.abs(diff) > 0.001) {
+           window.liveCurrentClose += diff * 0.18; // smooth easing factor (18% of distance per frame)
+           needsRenderLive = true;
+         } else {
+           window.liveCurrentClose = window.liveTargetClose;
+         }
+         
+         if (liveCandles && liveCandles.length > 0) {
+           const last = liveCandles[liveCandles.length - 1];
+           last.close = window.liveCurrentClose;
+           last.high = Math.max(last.high, last.close);
+           last.low = Math.min(last.low, last.close);
+           if (liveChartEngine) {
+             liveChartEngine.updateLast(last);
+           }
+         }
+       }
+
+       // Scalper Chart interpolation
+       if (window.scalperTargetClose !== null && window.scalperCurrentClose !== null) {
+         const diff = window.scalperTargetClose - window.scalperCurrentClose;
+         if (Math.abs(diff) > 0.001) {
+           window.scalperCurrentClose += diff * 0.18;
+           needsRenderScalper = true;
+         } else {
+           window.scalperCurrentClose = window.scalperTargetClose;
+         }
+
+         if (scalperCandles && scalperCandles.length > 0) {
+           const last = scalperCandles[scalperCandles.length - 1];
+           last.close = window.scalperCurrentClose;
+           last.high = Math.max(last.high, last.close);
+           last.low = Math.min(last.low, last.close);
+           if (scalperChartEngine) {
+             scalperChartEngine.updateLast(last);
+           }
+         }
+       }
+
+       requestAnimationFrame(animateSmoothTicks);
+     }
+     
+     // Start the smooth animation loop immediately
+     requestAnimationFrame(animateSmoothTicks);
+
      // ── Socket.IO Real-Time Tick Connection ──
     let sioSocket = null;
     let sioCurrentRoom = null;
@@ -4601,54 +4778,10 @@ let wsLastClosedTime = null;
       });
     }
 
-// ── Live Asset Ticker (NIFTY / BTC / GOLD) ──
-const TICKER_SYMBOLS = ['NIFTY', 'BTC', 'GOLD'];
+// ── Live Asset Ticker (NIFTY / BTC) ──
+const TICKER_SYMBOLS = ['NIFTY', 'BTC'];
 const TICKER_TF = '3m';
-let tickerPollTimer = null;
 
-window.selectTickerSymbol = function(sym) {
-  const symEl = $('symbol');
-  if (!symEl || symEl.value === sym) { highlightActiveTicker(sym); return; }
-  symEl.value = sym;
-  symEl.dispatchEvent(new Event('change'));
-  highlightActiveTicker(sym);
-};
-
-function highlightActiveTicker(sym) {
-  document.querySelectorAll('#asset-ticker-strip .ticker-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.symbol === sym);
-  });
-}
-
-async function refreshAssetTicker() {
-  try {
-    const res = await fetch('/api/scan_all');
-    if (!res.ok) return;
-    const data = await res.json();
-    TICKER_SYMBOLS.forEach(sym => {
-      const r = data[sym + ':' + TICKER_TF];
-      const priceEl = $('ticker-price-' + sym);
-      const changeEl = $('ticker-change-' + sym);
-      if (!r || r.current == null) return;
-      if (priceEl) priceEl.textContent = fmt(r.current);
-      if (changeEl) {
-        const mv = typeof r.move_pct === 'number' ? r.move_pct : parseFloat(r.move_pct) || 0;
-        const sign = mv > 0 ? '+' : '';
-        changeEl.textContent = `${sign}${mv.toFixed(2)}%`;
-        changeEl.className = 'ticker-change tnum' + (mv > 0 ? ' up' : mv < 0 ? ' down' : '');
-      }
-    });
-  } catch (e) {
-    // Ticker is non-critical — fail silently and retry on next interval
-  }
-}
-
-function startAssetTicker() {
-  highlightActiveTicker($('symbol') ? $('symbol').value : 'NIFTY');
-  refreshAssetTicker();
-  if (tickerPollTimer) clearInterval(tickerPollTimer);
-  tickerPollTimer = setInterval(refreshAssetTicker, 5000);
-}
 
 function subscribeToTicks(symbol, timeframe) {
        if (!sioSocket) initSocketIO();
@@ -4678,12 +4811,33 @@ function subscribeToTicks(symbol, timeframe) {
        if (!candle) return;
        const TF_TO_MS = { "1m": 60000, "3m": 180000, "5m": 300000, "15m": 900000, "30m": 1800000, "1h": 3600000, "1d": 86400000 };
        const bucketMs = TF_TO_MS[timeframe] || 60000;
+       
        if (activeTab === 'scalper') {
-         if (scalperChartEngine) {
-           updateLocalCandles(scalperCandles, candle, bucketMs);
+          if (scalperLoadInflight > 0) return; // Prevent corrupting chart during symbol switch load
+          if (scalperChartEngine) {
+            const lastBefore = scalperCandles[scalperCandles.length - 1];
+            const wasEmpty = scalperCandles.length === 0;
+            updateLocalCandles(scalperCandles, candle);
+            const lastAfter = scalperCandles[scalperCandles.length - 1];
+            
+            if (wasEmpty) {
+              window.scalperCurrentClose = candle.close;
+              window.scalperTargetClose = candle.close;
+            } else if (lastBefore !== lastAfter) {
+              // New candle started!
+              window.scalperCurrentClose = candle.open;
+              window.scalperTargetClose = candle.close;
+            } else {
+              // Same candle updated
+              window.scalperTargetClose = candle.close;
+              if (window.scalperCurrentClose === null) {
+                window.scalperCurrentClose = lastBefore.close;
+              }
+            }
            scalperChartEngine.updateLast(scalperCandles[scalperCandles.length - 1]);
          }
        } else {
+         if (liveLoadInflight > 0) return;
          if (liveChartEngine) {
            updateLocalCandles(liveCandles, candle, bucketMs);
            liveChartEngine.updateLast(liveCandles[liveCandles.length - 1]);
@@ -4712,16 +4866,13 @@ function subscribeToTicks(symbol, timeframe) {
     function startWatchdog() {
       if (watchdogInterval) clearInterval(watchdogInterval);
       watchdogInterval = setInterval(() => {
-        const elapsed = Date.now() - lastUpdateTimestamp;
-        const timeoutMs = getWatchdogTimeout();
-        const isStale = elapsed > timeoutMs;
-        if (isStale && !isStaleData) {
+        // Socket.IO has native reconnection. We show the reconnecting banner
+        // if the socket is actually disconnected.
+        const isConnected = sioSocket && sioSocket.connected;
+        if (!isConnected && !isStaleData) {
           isStaleData = true;
           document.getElementById('reconnecting-banner').classList.add('active');
-          if (sioSocket && sioSocket.connected) {
-            sioSocket.close();
-          }
-        } else if (!isStale && isStaleData) {
+        } else if (isConnected && isStaleData) {
           isStaleData = false;
           document.getElementById('reconnecting-banner').classList.remove('active');
         }
@@ -4729,24 +4880,19 @@ function subscribeToTicks(symbol, timeframe) {
     }
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) {
-        const elapsed = Date.now() - lastUpdateTimestamp;
-        const timeoutMs = getWatchdogTimeout();
-        if (elapsed > timeoutMs) {
-          isStaleData = true;
-          document.getElementById('reconnecting-banner').classList.add('active');
-          if (sioSocket && sioSocket.connected) {
-            sioSocket.close();
-          }
-          if (activeTab === 'live-signal') { if (liveLoadInflight === 0) load(true); }
-          else { if (scalperLoadInflight === 0) loadScalper(true); }
+        // When tab is visible, ensure we are connected and refresh prediction data
+        if (sioSocket && !sioSocket.connected) {
+          sioSocket.connect();
+        }
+        lastUpdateTimestamp = Date.now();
+        if (isStaleData) {
+          isStaleData = false;
+          document.getElementById('reconnecting-banner').classList.remove('active');
+        }
+        if (activeTab === 'live-signal') {
+          if (liveLoadInflight === 0) load(true);
         } else {
-          lastUpdateTimestamp = Date.now();
-          if (isStaleData) {
-            isStaleData = false;
-            document.getElementById('reconnecting-banner').classList.remove('active');
-          }
-          if (activeTab === 'live-signal') { if (liveLoadInflight === 0) load(); }
-          else { if (scalperLoadInflight === 0) loadScalper(); }
+          if (scalperLoadInflight === 0) loadScalper(true);
         }
       }
     });
@@ -4759,6 +4905,8 @@ function handleTickUpdate(data) {
        const TF_TO_MS = { "1m": 60000, "3m": 180000, "5m": 300000, "15m": 900000, "30m": 1800000, "1h": 3600000, "1d": 86400000 };
        const bucketMs = TF_TO_MS[data.timeframe] || 60000;
        const step = bucketMs / 1000;
+       
+       // Server sends data.time in seconds.
        const t = Math.floor(data.time / step) * step;
 
        const o = data.open;
@@ -4766,6 +4914,9 @@ function handleTickUpdate(data) {
        const l = data.low;
        const c = data.close;
        const v = data.volume || 0;
+
+       // Prevent rendering zero-value ticks or incomplete payloads (like the initial subscribe ping)
+       if (o === undefined || c === undefined || o <= 0 || h <= 0 || l <= 0 || c <= 0) return;
 
        const candle = { time: t * 1000, open: o, high: h, low: l, close: c, volume: v };
 
@@ -4786,6 +4937,9 @@ function handleTickUpdate(data) {
          // Apply cached tick if user switches to this symbol/tf later.
          return;
        }
+
+       if (activeTab === 'live-signal' && liveLoadInflight > 0) return;
+       if (activeTab === 'scalper' && scalperLoadInflight > 0) return;
 
        activeCandleOpenTime = t;
 
@@ -4817,23 +4971,23 @@ function handleTickUpdate(data) {
          }
        }
 
-       // Update chart
-       if (activeTab === 'scalper') {
-         if (scalperChartEngine) {
-           updateLocalCandles(scalperCandles, candle);
-           scalperChartEngine.updateLast(scalperCandles[scalperCandles.length - 1]);
-           // Only recalculate indicators on bar close — not every tick
-           if (isClosed) {
-             updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
-           }
+        // Update chart
+        if (activeTab === 'scalper') {
+          if (scalperChartEngine) {
+            updateLocalCandles(scalperCandles, candle, bucketMs);
+            scalperChartEngine.updateLast(scalperCandles[scalperCandles.length - 1]);
+            // Only recalculate indicators on bar close — not every tick
+            if (isClosed) {
+              updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
+            }
 
-           if (currentTrade && currentTrade.active) {
-             let hit = false;
-             let result = "";
-             if (currentTrade.type === 'Long') {
-               if (l <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
-               else if (h >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
-} else if (currentTrade.type === 'Short') {
+            if (currentTrade && currentTrade.active) {
+              let hit = false;
+              let result = "";
+              if (currentTrade.type === 'Long') {
+                if (l <= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
+                else if (h >= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
+              } else if (currentTrade.type === 'Short') {
                 if (h >= currentTrade.slPrice) { hit = true; result = "SL Hit (Loss)"; }
                 else if (l <= currentTrade.tpPrice) { hit = true; result = "TP Hit (Profit)"; }
               }
@@ -4849,35 +5003,68 @@ function handleTickUpdate(data) {
           }
           if (isClosed) {
             window.closeCountScalper = (window.closeCountScalper || 0) + 1;
-            if (window.closeCountScalper % 3 === 0) {
-              setTimeout(() => {
-                loadScalper();
-              }, 2000);
-            }
+            setTimeout(() => {
+              loadScalper();
+            }, 1500);
           }
         } else {
           if (liveChartEngine) {
-            updateLocalCandles(liveCandles, candle);
-            liveChartEngine.updateLast(liveCandles[liveCandles.length - 1]);
-            // Only recalculate indicators on bar close (not every tick) —
-            // avoids unnecessary series rebuilds on the TV chart.
+            const lastBefore = liveCandles[liveCandles.length - 1];
+            const wasEmpty = liveCandles.length === 0;
+            updateLocalCandles(liveCandles, candle, bucketMs);
+            const lastAfter = liveCandles[liveCandles.length - 1];
+
+            const cachedPredictions = tickCache[cacheKey] && tickCache[cacheKey].predictions;
+            if (wasEmpty || lastBefore !== lastAfter) {
+               if (wasEmpty) {
+                 window.liveCurrentClose = candle.close;
+                 window.liveTargetClose = candle.close;
+               } else {
+                 window.liveCurrentClose = candle.open;
+                 window.liveTargetClose = candle.close;
+               }
+               // New candle formed or initialized. We must rebuild the entire array
+               // and push predictions after the real candles to maintain them.
+               const combined = liveCandles.slice();
+               if (cachedPredictions && cachedPredictions.length > 0) {
+                 cachedPredictions.forEach(p => {
+                    // Make sure future timestamps are strictly greater than the last real candle
+                    const pt = p.time * 1000;
+                    if (pt > combined[combined.length - 1].time) {
+                      combined.push({
+                        time: pt,
+                        open: p.open, high: p.high, low: p.low, close: p.close,
+                        volume: 0, isPrediction: true
+                      });
+                    }
+                 });
+               }
+               liveChartEngine.setData(combined);
+            } else {
+               // Same candle updated
+               window.liveTargetClose = candle.close;
+               if (window.liveCurrentClose === null) {
+                 window.liveCurrentClose = lastBefore.close;
+               }
+               // Just a price tick within the same bucket
+               liveChartEngine.updateLast(liveCandles[liveCandles.length - 1]);
+            }
+
+            // Only recalculate indicators on bar close (not every tick)
             if (isClosed) {
               updateChartIndicators(liveChartEngine, liveCandles, liveActiveIndicators);
             }
 
             window.currentPrice = c;
             updateIdText('s-cur', fmt(c));
-            const cachedPredictions = tickCache[cacheKey] && tickCache[cacheKey].predictions;
             renderPredictionsTable(cachedPredictions || window.lastPredictions, tf);
             if (typeof checkAlerts === 'function') checkAlerts(candle);
           }
           if (isClosed) {
             window.closeCount = (window.closeCount || 0) + 1;
-            if (window.closeCount % 3 === 0) {
-              setTimeout(() => {
-                load();
-              }, 2000);
-            }
+            setTimeout(() => {
+              load();
+            }, 1500);
           }
         }
       }
@@ -4902,7 +5089,11 @@ function handleTickUpdate(data) {
     const ALL_INDICATORS = [
       { id: 'volume', label: 'Volume', placement: 'pane' },
       { id: 'ema9', label: 'EMA 5', placement: 'overlay' },
-      { id: 'ema15', label: 'EMA 10', placement: 'overlay' },
+      { id: 'ema15', label: 'EMA 10 (Legacy)', placement: 'overlay' },
+      { id: 'ema8', label: 'EMA 8', placement: 'overlay' },
+      { id: 'ema10', label: 'EMA 10', placement: 'overlay' },
+      { id: 'ema20', label: 'EMA 20', placement: 'overlay' },
+      { id: 'pivots', label: 'Pivot Points', placement: 'overlay' },
       { id: 'vwap', label: 'VWAP', placement: 'overlay' },
       { id: 'stochastic', label: 'Stochastic Oscillator', placement: 'pane' },
       { id: 'obv', label: 'On-Balance Volume', placement: 'pane' },
@@ -5028,24 +5219,106 @@ function handleTickUpdate(data) {
       return Array.from(checkedInputs).map(input => input.getAttribute('data-indicator'));
     }
 
+    function computePivots(candles) {
+      if (!candles || candles.length === 0) return null;
+      const pVals = new Array(candles.length).fill(null);
+      const r1Vals = new Array(candles.length).fill(null);
+      const s1Vals = new Array(candles.length).fill(null);
+      const r2Vals = new Array(candles.length).fill(null);
+      const s2Vals = new Array(candles.length).fill(null);
+      const r3Vals = new Array(candles.length).fill(null);
+      const s3Vals = new Array(candles.length).fill(null);
+      const r4Vals = new Array(candles.length).fill(null);
+      const s4Vals = new Array(candles.length).fill(null);
+      const r5Vals = new Array(candles.length).fill(null);
+      const s5Vals = new Array(candles.length).fill(null);
+
+      let currentDay = new Date(candles[0].time).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' });
+      let dayHigh = candles[0].high;
+      let dayLow = candles[0].low;
+      let dayClose = candles[0].close;
+      let prevH = null, prevL = null, prevC = null;
+
+      for (let i = 0; i < candles.length; i++) {
+        const c = candles[i];
+        const dStr = new Date(c.time).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' });
+        
+        if (dStr !== currentDay) {
+          prevH = dayHigh; prevL = dayLow; prevC = dayClose;
+          currentDay = dStr;
+          dayHigh = c.high; dayLow = c.low; dayClose = c.close;
+        } else {
+          dayHigh = Math.max(dayHigh, c.high);
+          dayLow = Math.min(dayLow, c.low);
+          dayClose = c.close;
+        }
+        
+        if (prevH !== null) {
+          const P = (prevH + prevL + prevC) / 3;
+          const HL = prevH - prevL;
+          pVals[i] = P;
+          r1Vals[i] = (2 * P) - prevL;
+          s1Vals[i] = (2 * P) - prevH;
+          r2Vals[i] = P + HL;
+          s2Vals[i] = P - HL;
+          r3Vals[i] = P + 2 * HL;
+          s3Vals[i] = P - 2 * HL;
+          r4Vals[i] = P + 3 * HL;
+          s4Vals[i] = P - 3 * HL;
+          r5Vals[i] = P + 4 * HL;
+          s5Vals[i] = P - 4 * HL;
+        }
+      }
+      
+      return [
+        { name: 'P', values: pVals, color: '#fb8c00', style: 'line' },
+        { name: 'R1', values: r1Vals, color: '#e53935', style: 'line' },
+        { name: 'S1', values: s1Vals, color: '#43a047', style: 'line' },
+        { name: 'R2', values: r2Vals, color: '#e53935', style: 'line' },
+        { name: 'S2', values: s2Vals, color: '#43a047', style: 'line' },
+        { name: 'R3', values: r3Vals, color: '#e53935', style: 'line' },
+        { name: 'S3', values: s3Vals, color: '#43a047', style: 'line' },
+        { name: 'R4', values: r4Vals, color: '#e53935', style: 'line' },
+        { name: 'S4', values: s4Vals, color: '#43a047', style: 'line' },
+        { name: 'R5', values: r5Vals, color: '#e53935', style: 'line' },
+        { name: 'S5', values: s5Vals, color: '#43a047', style: 'line' }
+      ];
+    }
+
     function updateChartIndicators(engine, candles, togglesContainerId) {
       if (!engine || candles.length === 0) return;
       const activeIds = getActiveIndicators(togglesContainerId);
       const renderDataList = [];
 
       activeIds.forEach(id => {
+        if (id === 'pivots') {
+          const outputs = computePivots(candles);
+          if (outputs) {
+             renderDataList.push({
+               instanceId: id,
+               label: 'Pivot Points',
+               placement: 'overlay',
+               outputs: outputs,
+               range: 'price'
+             });
+          }
+          return;
+        }
+
         let defId = id;
         let params = {};
         let label = '';
 
         if (id === 'ema9') {
-          defId = 'ema';
-          params = { period: 5 };
-          label = 'EMA 5';
+          defId = 'ema'; params = { period: 5 }; label = 'EMA 5';
         } else if (id === 'ema15') {
-          defId = 'ema';
-          params = { period: 10 };
-          label = 'EMA 10';
+          defId = 'ema'; params = { period: 10 }; label = 'EMA 10 (Legacy)';
+        } else if (id === 'ema8') {
+          defId = 'ema'; params = { period: 8 }; label = 'EMA 8';
+        } else if (id === 'ema10') {
+          defId = 'ema'; params = { period: 10 }; label = 'EMA 10';
+        } else if (id === 'ema20') {
+          defId = 'ema'; params = { period: 20 }; label = 'EMA 20';
         } else {
           const def = getIndicator(id);
           if (!def) return;
@@ -5060,11 +5333,11 @@ function handleTickUpdate(data) {
           try {
             const outputs = def.compute(candles, params);
             if (outputs && outputs.length > 0) {
-              if (id === 'ema9') {
-                outputs[0].color = '#FF00FF'; // Fuchsia
-              } else if (id === 'ema15') {
-                outputs[0].color = '#222222'; // Dark Charcoal
-              }
+              if (id === 'ema9') outputs[0].color = '#FF00FF'; // Fuchsia
+              else if (id === 'ema15') outputs[0].color = '#222222'; // Dark Charcoal
+              else if (id === 'ema8') outputs[0].color = '#2962FF'; // Blue
+              else if (id === 'ema10') outputs[0].color = '#FF6D00'; // Orange
+              else if (id === 'ema20') outputs[0].color = '#00C853'; // Green
             }
             renderDataList.push({
               instanceId: id,
@@ -5506,12 +5779,14 @@ function handleTickUpdate(data) {
         if (chartContainer) chartContainer.classList.add('scalper-chart-soft-loading');
       }
       try {
-        const res = await fetch(`${API}/api/signal/${sym}/${tf}`);
+        const res = await fetch(`${API}/api/a1/${sym}/${tf}`);
         const d = await res.json();
         if (d.error) throw new Error(d.error);
         if (!d.candles || !d.predicted) {
           throw new Error(d.detail || d.message || 'Invalid response format from server');
         }
+
+        lastUpdateTimestamp = Date.now();
 
         // Discard this response if a newer request has been issued since this
         // one started, or if the symbol/timeframe changed mid-flight — without
@@ -5519,23 +5794,24 @@ function handleTickUpdate(data) {
         // data already on screen.
         if (mySeq !== liveLoadSeq) return;
         if ($('symbol').value !== sym || $('tf').value !== tf) return;
+        
+        const isContextSwitch = (lastLoadedLiveKey !== sym + ":" + tf);
         lastLoadedLiveKey = sym + ":" + tf;
 
         // Store the fresh response for instant future switches (SWR).
         cachePrediction(sym, tf, d);
 
-        if ((sym === 'BTC' || sym === 'GOLD') && wsLastClosedTime !== null && d.candles.length > 0) {
+        if (wsLastClosedTime !== null && d.candles.length > 0) {
           const serverLastCandleTime = d.candles[d.candles.length - 1].time;
           if (serverLastCandleTime < wsLastClosedTime) {
             setTimeout(() => {
-              const currentSym = $('symbol').value;
-              if (activeTab === 'live-signal' && (currentSym === 'BTC' || currentSym === 'GOLD')) load();
+              if (activeTab === 'live-signal') load(false, true);
             }, 1500);
             return;
           }
         }
 
-        applyLiveResponse(d, sym, tf, /*isFirstLoadRender*/ (mySeq === 1), /*doScroll*/ true);
+        applyLiveResponse(d, sym, tf, /*isFirstLoadRender*/ (mySeq === 1 || isContextSwitch), /*doScroll*/ true);
       } catch (err) {
         // If the network fetch fails but we rendered from cache, keep the
         // cached view instead of erroring out the whole panel.
@@ -5594,6 +5870,10 @@ function handleTickUpdate(data) {
           window.currentPrice = d.current;
           liveChartEngine.setData(liveCandles.concat(cleanPredicted));
           loadDrawings(liveChartEngine, 'live');
+          
+          // Reset smooth tick targets to initial values
+          window.liveCurrentClose = d.current;
+          window.liveTargetClose = d.current;
         }
         if (isFirstLoadRender || isNewCandle) {
           window.lastPredKey = predKey;
@@ -5687,13 +5967,15 @@ function handleTickUpdate(data) {
               statusKlass = 'bearish';
             }
 
-            echoesCard.className = `overlay-card echoes-card ${statusKlass}`;
-            $('echoes-status').textContent = statusText;
+            if (echoesCard) {
+              echoesCard.className = `overlay-card echoes-card ${statusKlass}`;
+              $('echoes-status').textContent = statusText;
+              if ($('acc-echoes-badge')) $('acc-echoes-badge').textContent = statusText;
+              $('echoes-median').textContent = `${echoScan.stats.medianEndPct >= 0 ? '+' : ''}${echoScan.stats.medianEndPct.toFixed(2)}%`;
+              $('echoes-best').textContent = `+${echoScan.stats.bestEndPct.toFixed(2)}%`;
+              $('echoes-worst').textContent = `${echoScan.stats.worstEndPct.toFixed(2)}%`;
+            }
             if ($('mobile-hud-echoes')) $('mobile-hud-echoes').textContent = statusText;
-            if ($('acc-echoes-badge')) $('acc-echoes-badge').textContent = statusText;
-            $('echoes-median').textContent = `${echoScan.stats.medianEndPct >= 0 ? '+' : ''}${echoScan.stats.medianEndPct.toFixed(2)}%`;
-            $('echoes-best').textContent = `+${echoScan.stats.bestEndPct.toFixed(2)}%`;
-            $('echoes-worst').textContent = `${echoScan.stats.worstEndPct.toFixed(2)}%`;
 
             // Draw Echo sparklines
             drawEchoesSparkline(echoScan);
@@ -5716,11 +5998,13 @@ function handleTickUpdate(data) {
               });
             });
           } else {
-            echoesCard.className = `overlay-card echoes-card neutral`;
-            $('echoes-status').textContent = 'No past match';
-            $('echoes-median').textContent = '—';
-            $('echoes-best').textContent = '—';
-            $('echoes-worst').textContent = '—';
+            if (echoesCard) {
+              echoesCard.className = `overlay-card echoes-card neutral`;
+              $('echoes-status').textContent = 'No past match';
+              $('echoes-median').textContent = '—';
+              $('echoes-best').textContent = '—';
+              $('echoes-worst').textContent = '—';
+            }
           }
 
           liveChartEngine.setProjections(projLines, projBand, !isFirstLoadRender);
@@ -5735,7 +6019,7 @@ function handleTickUpdate(data) {
         if ($('mobile-hud-price')) $('mobile-hud-price').textContent = fmt(d.current);
 
         const klass = d.direction === 'Long' ? 'up' : d.direction === 'Short' ? 'down' : 'flat';
-        $('sig').className = 'overlay-card signal ' + klass;
+        if ($('sig')) $('sig').className = 'overlay-card signal ' + klass;
         updateIdText('dir', d.direction);
         updateIdText('conf', d.confidence + '%');
         updateIdText('act', d.action);
@@ -5798,10 +6082,9 @@ function handleTickUpdate(data) {
         renderAlertsTable();
         updateChartAlerts();
 
-        const timeText = 'Last update: ' + d.updated;
-        if ($('updated')) $('updated').textContent = timeText;
-        if ($('updated-topbar')) $('updated-topbar').textContent = timeText;
-        $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · horizon ${d.pred_len}`;
+        window.lastServerUpdateTime = d.updated || '—';
+        updateLiveClock();
+        if ($('meta')) $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · horizon ${d.pred_len}`;
         if ($('status')) $('status').textContent = 'Live';
         evaluateAntigravityAlerts(d, liveCandles);
         updateEntryLight(d, liveCandles);
@@ -5809,6 +6092,7 @@ function handleTickUpdate(data) {
         // the SocketIO reconnect already subscribe; calling it on every load
         // was a redundant extra emit per refresh.)
         window.lastLiveSignalData = d;
+        if (typeof updateFocusA1ConfluenceUI === 'function') updateFocusA1ConfluenceUI(d);
         if (typeof updateFocusConfirmation === 'function') updateFocusConfirmation();
     }
 
@@ -6231,6 +6515,19 @@ function handleTickUpdate(data) {
       }
     };
 
+    window.copyFocusA1Report = function() {
+      const el = $('focus-a1-report-text');
+      if (el && el.textContent) {
+        copyTextToClipboard(el.textContent);
+        const btn = document.querySelector('#focus-a1-report-card .copy-report-btn');
+        if (btn) {
+          const original = btn.textContent;
+          btn.textContent = 'Copied!';
+          setTimeout(() => { btn.textContent = original; }, 1500);
+        }
+      }
+    };
+
     window.copyFocusReport = function() {
       const el = $('focus-report-text');
       if (el && el.textContent) {
@@ -6356,6 +6653,168 @@ SKIP REASONS: [${skips}]${entryStopProfit}`;
       }
     }
 
+    function updateFocusA1ConfluenceUI(d) {
+      const g = d.gates || {};
+      const krDir = d.direction || d.kronos_direction || 'Flat';
+      const prefix = krDir === 'Short' ? 'short_' : 'long_';
+
+      // 1. Mechanic Check (AI)
+      const conf = d.kronos_confidence || 0;
+      const isConfPass = conf >= 80;
+      if ($('gk-val-mechanic')) $('gk-val-mechanic').textContent = `${conf}%`;
+      if ($('gk-badge-mechanic')) {
+        $('gk-badge-mechanic').textContent = isConfPass ? 'PASS' : 'FAIL';
+        $('gk-card-mechanic').className = 'gatekeeper-card ' + (isConfPass ? 'pass' : 'fail');
+      }
+
+      // 2. Market History (Echoes)
+      const winRate = d.echo_win_rate !== undefined ? d.echo_win_rate : 0;
+      const count = d.echo_count || 0;
+      const upCount = d.echo_up_count || 0;
+      const isHistPass = (krDir === 'Long' && winRate >= 80) || (krDir === 'Short' && winRate <= 20);
+      if ($('gk-val-history')) {
+        $('gk-val-history').textContent = count > 0 ? `${upCount} / ${count} (${winRate}%)` : `${winRate}%`;
+      }
+      if ($('gk-badge-history')) {
+        $('gk-badge-history').textContent = isHistPass ? 'PASS' : 'FAIL';
+        $('gk-card-history').className = 'gatekeeper-card ' + (isHistPass ? 'pass' : 'fail');
+      }
+
+      // 3. 3-to-1 Payout (Risk/Reward)
+      const asym = krDir === 'Short' ? (d.echo_asymmetry_short || 0) : (d.echo_asymmetry_long || 0);
+      const isPayoutPass = asym >= 3.0;
+      if ($('gk-val-payout')) $('gk-val-payout').textContent = `${asym.toFixed(2)}x`;
+      if ($('gk-badge-payout')) {
+        $('gk-badge-payout').textContent = isPayoutPass ? 'PASS' : 'FAIL';
+        $('gk-card-payout').className = 'gatekeeper-card ' + (isPayoutPass ? 'pass' : 'fail');
+      }
+
+      // 4. Hidden Costs (Move Size)
+      const movePct = Math.abs(d.kronos_move_pct || 0);
+      const isCostPass = movePct >= 0.40;
+      if ($('gk-val-costs')) $('gk-val-costs').textContent = `${movePct.toFixed(2)}%`;
+      if ($('gk-badge-costs')) {
+        $('gk-badge-costs').textContent = isCostPass ? 'PASS' : 'FAIL';
+        $('gk-card-costs').className = 'gatekeeper-card ' + (isCostPass ? 'pass' : 'fail');
+      }
+
+      // 5. Final Handshake (Bar Sync)
+      const isHandshakePass = g[prefix + 'g3_' + (krDir === 'Short' ? 'red' : 'green') + '_candle'] || d.decision !== 'SKIP';
+      if ($('gk-val-handshake')) $('gk-val-handshake').textContent = isHandshakePass ? 'CLOSED' : 'OPEN';
+      if ($('gk-badge-handshake')) {
+        $('gk-badge-handshake').textContent = isHandshakePass ? 'PASS' : 'FAIL';
+        $('gk-card-handshake').className = 'gatekeeper-card ' + (isHandshakePass ? 'pass' : 'fail');
+      }
+
+      const gkPanel = $('focus-a1-card');
+      if (gkPanel) {
+        gkPanel.classList.remove('flash-long', 'flash-short');
+        if (d.decision === 'BUY') {
+          gkPanel.classList.add('flash-long');
+        } else if (d.decision === 'SELL') {
+          gkPanel.classList.add('flash-short');
+        }
+      }
+
+      const finalBadge = $('acc-a1-badge');
+      if (finalBadge) {
+        finalBadge.textContent = d.decision;
+        finalBadge.className = 'accordion-badge ' + (d.decision === 'BUY' ? 'long' : d.decision === 'SELL' ? 'short' : 'flat');
+      }
+
+      const banner = $('focus-a1-verdict-banner');
+      const iconEl = $('focus-a1-verdict-icon');
+      const actionEl = $('focus-a1-verdict-action');
+      const descEl = $('focus-a1-verdict-desc');
+
+      if (banner) {
+        banner.className = 'beginner-signal-banner';
+        if (d.decision === 'BUY') {
+          banner.classList.add('buy');
+          if (iconEl) iconEl.textContent = '▲';
+          if (actionEl) actionEl.textContent = 'A1 BUY / LONG';
+          if (descEl) descEl.textContent = 'All 6 gates are fully satisfied. Algorithmic BUY signal active.';
+        } else if (d.decision === 'SELL') {
+          banner.classList.add('sell');
+          if (iconEl) iconEl.textContent = '▼';
+          if (actionEl) actionEl.textContent = 'A1 SELL / SHORT';
+          if (descEl) descEl.textContent = 'All 6 gates are fully satisfied. Algorithmic SELL signal active.';
+        } else {
+          banner.classList.add('skip');
+          if (iconEl) iconEl.textContent = '⏸';
+          if (actionEl) actionEl.textContent = 'WAIT / SKIP';
+          if (descEl) {
+            const firstReason = d.skip_reasons && d.skip_reasons.length > 0 ? d.skip_reasons[0] : 'Confluence gates not met.';
+            descEl.textContent = `Standby: ${firstReason}`;
+          }
+        }
+      }
+
+      const skipContainer = $('focus-a1-skip-reasons-container');
+      const skipList = $('focus-a1-skip-reasons-list');
+      if (skipContainer && skipList) {
+        if (d.decision === 'SKIP' && d.skip_reasons && d.skip_reasons.length > 0) {
+          skipContainer.style.display = 'block';
+          skipList.innerHTML = d.skip_reasons.map(r => `<li style="margin-bottom: 2px;">${r}</li>`).join('');
+        } else {
+          skipContainer.style.display = 'none';
+        }
+      }
+
+      const targetContainer = $('focus-a1-targets-container');
+      if (targetContainer) {
+        if (d.decision === 'BUY' || d.decision === 'SELL') {
+          targetContainer.style.display = 'block';
+          const entry = d.current;
+          const lastCandle = d.candles[d.candles.length - 1];
+          const risk = d.decision === 'BUY' ? (entry - lastCandle.low) : (lastCandle.high - entry);
+          const sl = d.decision === 'BUY' ? lastCandle.low : lastCandle.high;
+          const tp = d.decision === 'BUY' ? (entry + 2 * risk) : (entry - 2 * risk);
+
+          if ($('focus-a1-target-entry')) $('focus-a1-target-entry').textContent = entry.toFixed(2);
+          if ($('focus-a1-target-sl')) $('focus-a1-target-sl').textContent = sl.toFixed(2);
+          if ($('focus-a1-target-tp')) $('focus-a1-target-tp').textContent = tp.toFixed(2);
+        } else {
+          targetContainer.style.display = 'none';
+        }
+      }
+
+      const reportTextEl = $('focus-a1-report-text');
+      if (reportTextEl) {
+        reportTextEl.textContent = formatA1Report(d);
+      }
+    }
+
+    // Add toggle function to window scope
+    window.toggleGatekeeper = function() {
+      const grid = $('gk-grid');
+      const metrics = $('gk-metrics-wrapper');
+      const btn = $('gk-toggle');
+      if (!grid || !btn) return;
+      
+      if (grid.style.maxHeight === '0px') {
+        grid.style.maxHeight = '1000px';
+        grid.style.opacity = '1';
+        grid.style.marginTop = '10px';
+        if (metrics) {
+          metrics.style.maxHeight = '500px';
+          metrics.style.opacity = '1';
+          metrics.style.marginBottom = '12px';
+        }
+        btn.textContent = 'Hide';
+      } else {
+        grid.style.maxHeight = '0px';
+        grid.style.opacity = '0';
+        grid.style.marginTop = '0px';
+        if (metrics) {
+          metrics.style.maxHeight = '0px';
+          metrics.style.opacity = '0';
+          metrics.style.marginBottom = '0px';
+        }
+        btn.textContent = 'Show';
+      }
+    };
+    
     let traderDirectionBias = 'Long';
     window.setTraderDirection = function(dir) {
       traderDirectionBias = dir;
@@ -6394,79 +6853,79 @@ SKIP REASONS: [${skips}]${entryStopProfit}`;
 
       const emaTrend = d.trend || 'Flat';
       const barsSince = d.barsSince || 0;
-      let emaMark = '[N/A]';
+      let emaMark = '⚪';
       if (emaTrend !== 'Flat') {
         total++;
         if ((dirUpper === 'LONG' && emaTrend === 'Up') || (dirUpper === 'SHORT' && emaTrend === 'Down')) {
-          emaMark = '[PASS]';
+          emaMark = '✅';
           agree++;
         } else {
-          emaMark = '[FAIL]';
+          emaMark = '❌';
         }
       } else {
-        emaMark = '[WARN]';
+        emaMark = '⚠️';
       }
 
-      let krMark = '[N/A]';
+      let krMark = '⚪';
       if (cache.krDir) {
         total++;
         if (cache.krDir === 'Flat') {
-          krMark = '[WARN]';
+          krMark = '⚠️';
         } else if (cache.krDir.toUpperCase() === dirUpper) {
-          krMark = '[PASS]';
+          krMark = '✅';
           agree++;
         } else {
-          krMark = '[FAIL]';
+          krMark = '❌';
         }
       }
 
-      let echoMark = '[N/A]';
+      let echoMark = '⚪';
       if (cache.count > 0) {
         total++;
         if (dirUpper === 'LONG') {
           if (cache.winRate >= 0.80) {
-            echoMark = '[PASS]';
+            echoMark = '✅';
             agree++;
           } else if (cache.winRate <= 0.20) {
-            echoMark = '[FAIL]';
+            echoMark = '❌';
           } else {
-            echoMark = '[WARN]';
+            echoMark = '⚠️';
           }
         } else if (dirUpper === 'SHORT') {
           if (cache.winRate <= 0.20) {
-            echoMark = '[PASS]';
+            echoMark = '✅';
             agree++;
           } else if (cache.winRate >= 0.80) {
-            echoMark = '[FAIL]';
+            echoMark = '❌';
           } else {
-            echoMark = '[WARN]';
+            echoMark = '⚠️';
           }
         }
       }
 
-      let clockMark = '[N/A]';
+      let clockMark = '⚪';
       if (cache.clockState) {
         total++;
         if (cache.isQuiet) {
-          clockMark = '[WARN]';
+          clockMark = '⚠️';
         } else {
-          clockMark = '[PASS]';
+          clockMark = '✅';
           agree++;
         }
       }
 
-      let oracleMark = '[N/A]';
+      let oracleMark = '⚪';
       let oracleText = 'N/A';
       if (cache.oracle) {
         total++;
         oracleText = cache.odds + '%';
         if (cache.odds > 50) {
-          oracleMark = '[PASS]';
+          oracleMark = '✅';
           agree++;
         } else if (cache.odds < 50) {
-          oracleMark = '[FAIL]';
+          oracleMark = '❌';
         } else {
-          oracleMark = '[WARN]';
+          oracleMark = '⚠️';
         }
       }
 
@@ -6605,7 +7064,7 @@ This is informational only — you decide whether to take the trade.`;
 
       // Timer & parameter 5 check
       const intervalMs = getIntervalMs();
-      const remain = intervalMs - (Date.now() % intervalMs);
+      const remain = intervalMs - (((Date.now() + (window.serverTimeOffset || 0))) % intervalMs);
       const totalSec = Math.max(0, Math.floor(remain / 1000));
       const mins = Math.floor(totalSec / 60);
       const secs = totalSec % 60;
@@ -6772,33 +7231,8 @@ This is informational only — you decide whether to take the trade.`;
         `;
       }
 
-      // Update Beginner Signal Banner Swap on 5/5 PASS
-      const banner = $('beginner-signal-banner');
-      const iconEl = $('beginner-signal-icon');
-      const actionEl = $('beginner-signal-action');
-      const descEl = $('beginner-signal-desc');
-      const confEl = $('beginner-signal-conf');
-      const confBar = $('beginner-signal-conf-bar');
-
-      if (isCleared) {
-        const bannerClass = dirUpper === 'LONG' ? 'buy' : 'sell';
-        const moveText = `${cache.krMove >= 0 ? '+' : ''}${cache.krMove.toFixed(2)}%`;
-        const firedAt = new Date().toTimeString().split(' ')[0];
-
-        if (banner) banner.className = `beginner-signal-banner ${bannerClass}`;
-        if (iconEl) iconEl.textContent = dirUpper === 'LONG' ? 'L' : 'S';
-        if (actionEl) actionEl.textContent = `${dirUpper} — CLEARED`;
-        if (descEl) {
-          descEl.innerHTML = `Confidence: ${cache.krConf}% | Win Rate: ${Math.round(cache.winRate * 100)}% | R:R: ${cache.asym.toFixed(1)} | Move: ${moveText}<br>Fired: ${firedAt}`;
-        }
-        if (confEl) confEl.textContent = cache.krConf + '%';
-        if (confBar) {
-          confBar.className = `confidence-meter-fill ${bannerClass}`;
-          confBar.style.width = cache.krConf + '%';
-        }
-      } else {
-        updateBeginnerSignal(d, '');
-      }
+      // Keep beginner friendly Kronos banner updated strictly based on Kronos prediction
+      updateBeginnerSignal(d, '');
 
       // Update Notes
       const notes = [];
@@ -6908,6 +7342,7 @@ This is informational only — you decide whether to take the trade.`;
         const res = await fetch(`${API}/api/a1/${sym}/${tf}`);
         const d = await res.json();
         if (d.error) throw new Error(d.error);
+        lastUpdateTimestamp = Date.now();
 
         if (mySeq !== scalperLoadSeq) return;
         if ($('symbol').value !== sym || $('tf').value !== tf) return;
@@ -6966,6 +7401,12 @@ This is informational only — you decide whether to take the trade.`;
           if (isFirstLoad) {
             scalperChartEngine.resetView();
           }
+          
+          // Reset smooth tick targets to initial values
+          if (scalperCandles.length > 0) {
+            window.scalperCurrentClose = scalperCandles[scalperCandles.length - 1].close;
+            window.scalperTargetClose = scalperCandles[scalperCandles.length - 1].close;
+          }
           if (!isFirstLoad && scalperCandles.length > 0) {
             scalperChartEngine.scrollToTime(scalperCandles[scalperCandles.length - 1].time);
           }
@@ -6979,7 +7420,7 @@ This is informational only — you decide whether to take the trade.`;
 
         // Update KRONOS PREDICTION card on Scalper tab
         const scalperKlass = d.direction === 'Long' ? 'up' : d.direction === 'Short' ? 'down' : 'flat';
-        $('scalper-sig').className = 'overlay-card signal ' + scalperKlass;
+        if ($('scalper-sig')) $('scalper-sig').className = 'overlay-card signal ' + scalperKlass;
         updateIdText('scalper-dir', d.direction);
         updateIdText('scalper-conf', d.confidence + '%');
         updateIdText('scalper-act', d.action);
@@ -7224,10 +7665,9 @@ This is informational only — you decide whether to take the trade.`;
         // Subscribe to real-time ticks via Socket.IO (all symbols)
         subscribeToTicks(sym, tf);
         loadEmaKronos();
-        const timeText = 'Last update: ' + d.updated;
-        if ($('updated')) $('updated').textContent = timeText;
-        if ($('updated-topbar')) $('updated-topbar').textContent = timeText;
-        $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · EMA 5/10`;
+        window.lastServerUpdateTime = d.updated || '—';
+        updateLiveClock();
+        if ($('meta')) $('meta').textContent = `Kronos-small · ${d.symbol} ${d.timeframe} · EMA 5/10`;
         if ($('status')) $('status').textContent = 'Live';
         evaluateAntigravityAlerts(d, scalperCandles);
         updateEntryLight(d, scalperCandles);
@@ -7280,6 +7720,10 @@ This is informational only — you decide whether to take the trade.`;
       // Initialize Socket.IO for real-time ticks
       initSocketIO();
       startWatchdog();
+      
+      // Start live clock ticking every second
+      setInterval(updateLiveClock, 1000);
+      updateLiveClock();
       const pollSecs = 1; // Poll predictions every 1s
       countdown = pollSecs;
       countTimer = setInterval(() => {
@@ -7287,9 +7731,72 @@ This is informational only — you decide whether to take the trade.`;
         if (countdown <= 0) countdown = pollSecs;
       }, 1000);
       timer = setInterval(() => {
-        // Guard: if liveLoadInflight has been stuck > 30s, force-reset it
-        // so polling can resume after a hung fetch.
+        const intervalMs = getIntervalMs();
+        const serverNow = Date.now() + (window.serverTimeOffset || 0);
+
         if (activeTab === 'live-signal') {
+          // ── Clock-sync boundary failsafe ──────────────────────────────────
+          // If the wall clock says this candle has expired but no WebSocket
+          // tick arrived yet (sparse trading on 3m), push a phantom candle
+          // so the chart immediately starts the new bar and the countdown
+          // resets to 03:00 instead of sitting frozen at 00:00.
+          if (liveCandles && liveCandles.length > 0) {
+            const sym = $('symbol').value;
+            // Disable phantom candles for Indian indices outside market hours
+            let isMarketClosed = false;
+            if (sym === 'NIFTY' || sym === 'BANKNIFTY') {
+                const serverDate = new Date(serverNow);
+                const istDate = new Date(serverDate.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+                const hhmm = istDate.getHours() * 100 + istDate.getMinutes();
+                if (hhmm >= 1530 || hhmm < 915 || istDate.getDay() === 0 || istDate.getDay() === 6) {
+                    isMarketClosed = true;
+                }
+            }
+            if (!isMarketClosed) {
+              const lastCandle = liveCandles[liveCandles.length - 1];
+              if (serverNow >= lastCandle.time + intervalMs) {
+                const expectedCloseTime = Math.floor(lastCandle.time / 1000);
+                if (window.lastScheduledClosedTime !== expectedCloseTime) {
+                console.log('[Clock Sync Failsafe] Forcing candle boundary close at', new Date(lastCandle.time + intervalMs));
+                window.lastScheduledClosedTime = expectedCloseTime;
+                wsLastClosedTime = expectedCloseTime;
+                
+                const phantomCandle = {
+                  time: lastCandle.time + intervalMs,
+                  open: lastCandle.close,
+                  high: lastCandle.close,
+                  low: lastCandle.close,
+                  close: lastCandle.close,
+                  volume: 0
+                };
+                updateLocalCandles(liveCandles, phantomCandle, intervalMs);
+                
+                const cleanPredicted = (window.lastPredictions || []).map(p => ({
+                  time: p.time * 1000,
+                  open: p.open,
+                  high: p.high,
+                  low: p.low,
+                  close: p.close,
+                  volume: 0,
+                  isPrediction: true
+                })).filter(p => p.time > (liveCandles.length > 0 ? liveCandles[liveCandles.length - 1].time : 0));
+                
+                if (liveChartEngine) {
+                  liveChartEngine.setData(liveCandles.concat(cleanPredicted));
+                  updateChartIndicators(liveChartEngine, liveCandles, liveActiveIndicators);
+                }
+                
+                // Kick a background refresh after a short delay so the new
+                // prediction lands without blocking the UI thread.
+                if (liveLoadInflight === 0) {
+                  setTimeout(() => { if (liveLoadInflight === 0) load(false, true); }, 800);
+                }
+              }
+            }
+            } // end isMarketClosed check
+          }
+
+          // Guard: reset hung in-flight counter so future polls can proceed.
           if (liveLoadInflight > 0) {
             const elapsed = Date.now() - (window._liveLoadStartedAt || Date.now());
             if (elapsed > 30000) {
@@ -7297,19 +7804,64 @@ This is informational only — you decide whether to take the trade.`;
               liveLoadInflight = 0;
               if ($('live-chart-loading')) $('live-chart-loading').style.display = 'none';
             }
-            return;
           }
-          load(false, true);
+          // Real-time tick updates come via Socket.IO — no per-second server
+          // fetch needed here.
+
         } else {
+          // ── Clock-sync boundary failsafe for scalper ──────────────────────
+          if (scalperCandles && scalperCandles.length > 0) {
+            const lastCandle = scalperCandles[scalperCandles.length - 1];
+            if (serverNow >= lastCandle.time + intervalMs) {
+              const expectedCloseTime = Math.floor(lastCandle.time / 1000);
+              if (window.lastScheduledClosedTimeScalper !== expectedCloseTime) {
+                console.log('[Clock Sync Failsafe Scalper] Forcing candle boundary close at', new Date(lastCandle.time + intervalMs));
+                window.lastScheduledClosedTimeScalper = expectedCloseTime;
+                wsLastClosedTime = expectedCloseTime;
+                
+                const phantomCandle = {
+                  time: lastCandle.time + intervalMs,
+                  open: lastCandle.close,
+                  high: lastCandle.close,
+                  low: lastCandle.close,
+                  close: lastCandle.close,
+                  volume: 0
+                };
+                updateLocalCandles(scalperCandles, phantomCandle, intervalMs);
+                
+                const scalperPredictions = (emaKronosApiData && emaKronosApiData.predicted) || [];
+                const cleanPredicted = scalperPredictions.map(p => ({
+                  time: p.time * 1000,
+                  open: p.open,
+                  high: p.high,
+                  low: p.low,
+                  close: p.close,
+                  volume: 0,
+                  isPrediction: true
+                })).filter(p => p.time > (scalperCandles.length > 0 ? scalperCandles[scalperCandles.length - 1].time : 0));
+                
+                if (scalperChartEngine) {
+                  scalperChartEngine.setData(scalperCandles.concat(cleanPredicted));
+                  updateChartIndicators(scalperChartEngine, scalperCandles, scalperActiveIndicators);
+                }
+                
+                if (scalperLoadInflight === 0) {
+                  setTimeout(() => { if (scalperLoadInflight === 0) loadScalper(false, true); }, 800);
+                }
+              }
+            }
+          }
+
+          // Guard: reset hung in-flight counter.
           if (scalperLoadInflight > 0) {
             const elapsed = Date.now() - (window._scalperLoadStartedAt || Date.now());
             if (elapsed > 30000) {
               console.warn('[Kronos] scalperLoadInflight stuck — resetting');
               scalperLoadInflight = 0;
             }
-            return;
           }
-          loadScalper(false, true);
+          // Real-time tick updates come via Socket.IO — no per-second server
+          // fetch needed here.
         }
       }, pollSecs * 1000);
     }
@@ -7323,23 +7875,6 @@ This is informational only — you decide whether to take the trade.`;
     function startCandleCountdown() {
       if (window._countdownTimer) clearInterval(window._countdownTimer);
       window._countdownTimer = setInterval(() => {
-        const intervalMs = getIntervalMs();
-        const remain = intervalMs - (Date.now() % intervalMs);
-        const totalSec = Math.ceil(remain / 1000);
-        const mins = Math.floor(totalSec / 60);
-        const secs = totalSec % 60;
-        const label = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-        const liveEl = document.getElementById('countdown-overlay-live');
-        const scalperEl = document.getElementById('countdown-overlay-scalper');
-        if (activeTab === 'live-signal' && liveEl) {
-          liveEl.textContent = label;
-          liveEl.style.display = 'block';
-          if (scalperEl) scalperEl.style.display = 'none';
-        } else if (activeTab === 'scalper' && scalperEl) {
-          scalperEl.textContent = label;
-          scalperEl.style.display = 'block';
-          if (liveEl) liveEl.style.display = 'none';
-        }
         if (activeTab === 'live-signal' && typeof updateFocusConfirmation === 'function') {
           updateFocusConfirmation();
         }
@@ -7361,9 +7896,19 @@ This is informational only — you decide whether to take the trade.`;
     // (potentially slow) load + enqueue churn on the backend.
     let _switchDebounceTimer = null;
     function _performAssetSwitch() {
-      // Re-subscribe Socket.IO to new symbol/tf
       const sym = $('symbol').value;
       const tf = $('tf').value;
+      
+      // Prevent old data from mixing with new websocket ticks if the load fails or is delayed
+      liveCandles = [];
+      scalperCandles = [];
+      if (liveChartEngine) liveChartEngine.setData([]);
+      if (scalperChartEngine) scalperChartEngine.setData([]);
+      window.lastLoadedCandleTime = 0;
+      window.lastScheduledClosedTime = 0;
+      window.lastScheduledClosedTimeScalper = 0;
+
+      // Re-subscribe Socket.IO to new symbol/tf
       subscribeToTicks(sym, tf);
       if (typeof highlightActiveTicker === 'function') highlightActiveTicker(sym);
       if (activeTab === 'live-signal') {
@@ -7394,10 +7939,11 @@ This is informational only — you decide whether to take the trade.`;
     window.addEventListener('resize', () => {
       if (typeof setChartViewMode === 'function') {
         setChartViewMode(currentViewMode);
+      } else {
+        if (liveChartEngine) liveChartEngine.resize();
+        if (scalperChartEngine) scalperChartEngine.resize();
+        if (typeof resizeTradeOverlay === 'function') resizeTradeOverlay();
       }
-      if (liveChartEngine) liveChartEngine.resize();
-      if (scalperChartEngine) scalperChartEngine.resize();
-      resizeTradeOverlay();
     });
 
     // ── Orientation change handler for mobile ──
@@ -7716,8 +8262,8 @@ function renderPredictionsTable(predicted, tfOverride) {
 
       if (!banner) return;
 
-      // Use final gate decision as the source of truth for the banner verdict
-      const finalDecision = (d.decision || d.action || 'SKIP').toUpperCase();
+      // Use A1 strategy decision for both Forecast (prefix = '') and Scalper (prefix = 'scalper-') tabs
+      const finalDecision = (d.decision || 'SKIP').toUpperCase();
       const direction = d.direction || 'Flat';
       const confidence = d.confidence || 0;
       const trend = d.trend || '—';
@@ -7738,7 +8284,6 @@ function renderPredictionsTable(predicted, tfOverride) {
       const trendLine = `<strong style="color: ${trendColor};">Trend:</strong> ${trend}`;
 
       const aiColor = finalDecision === 'BUY' ? '#a7f3d0' : finalDecision === 'SELL' ? '#fca5a5' : '#e2e8f0';
-      const kronosDir = direction === 'Long' ? 'UP' : direction === 'Short' ? 'DOWN' : 'FLAT';
       const aiLine = `<strong style="color: ${aiColor};">AI Forecast:</strong> ${direction} (${confidence}% conf, ${kronosMove >= 0 ? '+' : ''}${kronosMove.toFixed(2)}%)`;
 
       // Echoes: always phrase percentage in same direction as conclusion
@@ -7759,22 +8304,37 @@ function renderPredictionsTable(predicted, tfOverride) {
         }
       }
 
-      // Determine banner verdict — must match the final gate decision
+      // Determine banner verdict
       if (finalDecision === 'BUY') {
         banner.classList.add('buy');
         if (confBar) confBar.classList.add('buy');
         if (iconEl) iconEl.textContent = '▲';
-        if (actionEl) actionEl.textContent = 'BUY / LONG';
+        if (actionEl) actionEl.textContent = prefix === 'scalper-' ? 'BUY / LONG' : 'KRONOS LONG';
       } else if (finalDecision === 'SELL') {
         banner.classList.add('sell');
         if (confBar) confBar.classList.add('sell');
         if (iconEl) iconEl.textContent = '▼';
-        if (actionEl) actionEl.textContent = 'SELL / SHORT';
+        if (actionEl) actionEl.textContent = prefix === 'scalper-' ? 'SELL / SHORT' : 'KRONOS SHORT';
       } else {
         banner.classList.add('skip');
         if (confBar) confBar.classList.add('skip');
         if (iconEl) iconEl.textContent = '⏸';
-        if (actionEl) actionEl.textContent = 'WAIT / SKIP';
+        if (actionEl) actionEl.textContent = prefix === 'scalper-' ? 'WAIT / SKIP' : 'KRONOS FLAT';
+      }
+
+      // Add dynamic border glow to the gatekeeper panel
+      const panel = $(prefix + 'a1-card') || $('focus-a1-card');
+      if (panel) {
+        if (finalDecision === 'BUY') {
+          panel.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.4)';
+          panel.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+        } else if (finalDecision === 'SELL') {
+          panel.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.4)';
+          panel.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+        } else {
+          panel.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.05)';
+          panel.style.borderColor = 'rgba(15, 23, 42, 0.1)';
+        }
       }
 
       // Build description from parts, skipping any that are empty
@@ -7903,7 +8463,7 @@ function renderPredictionsTable(predicted, tfOverride) {
     window.resetActiveChartView = resetActiveChartView;
 
     // Chart View Mode Switching
-    let currentViewMode = 'split';
+    let currentViewMode = 'full';
     function setChartViewMode(mode) {
       currentViewMode = mode;
       ['btn-split', 'btn-full', 'btn-compact'].forEach(id => {
@@ -7952,9 +8512,9 @@ function renderPredictionsTable(predicted, tfOverride) {
         }
       }
 
-      if (typeof window.dispatchEvent === 'function') {
-        window.dispatchEvent(new Event('resize'));
-      }
+      if (liveChartEngine) liveChartEngine.resize();
+      if (scalperChartEngine) scalperChartEngine.resize();
+      if (typeof resizeTradeOverlay === 'function') resizeTradeOverlay();
     }
     window.setChartViewMode = setChartViewMode;
 
@@ -8555,23 +9115,13 @@ function renderPredictionsTable(predicted, tfOverride) {
       const content = $('mobile-sheet-content');
       if (sheet && content) {
         if (activeTab === 'live-signal') {
-          const sigEl = $('sig');
-          const echoesEl = $('echoes-card');
-          const predictionsEl = $('predictions-card');
-          const sigHtml = sigEl ? stripIds(sigEl.cloneNode(true)).outerHTML : '';
-          const echoesHtml = echoesEl ? stripIds(echoesEl.cloneNode(true)).outerHTML : '';
-          const predictionsHtml = predictionsEl ? stripIds(predictionsEl.cloneNode(true)).outerHTML : '';
+          const gkCard = $('focus-a1-card');
+          const gkHtml = gkCard ? stripIds(gkCard.cloneNode(true)).outerHTML : '';
           content.innerHTML = `
         <div class="mobile-sheet-content-wrapper">
-          ${sigHtml}
-          ${echoesHtml}
-          ${predictionsHtml}
+          ${gkHtml}
         </div>
       `;
-          const mobileCanvas = content.querySelector('canvas');
-          if (mobileCanvas && window.lastEchoScan) {
-            drawEchoesSparklineOnCanvas(mobileCanvas, window.lastEchoScan);
-          }
         } else {
           const sigEl = $('scalper-sig');
           const echoesEl = $('scalper-echoes-card');
@@ -8694,24 +9244,35 @@ function renderPredictionsTable(predicted, tfOverride) {
       scalperActiveIndicators = ['ema9', 'ema15'];
     }
 
+    window.serverTimeOffset = 0;
+    async function syncClock() {
+      const start = Date.now();
+      try {
+        const res = await fetch('/api/time');
+        const data = await res.json();
+        const end = Date.now();
+        const rtt = end - start;
+        const serverTime = data.server_time + (rtt / 2);
+        window.serverTimeOffset = serverTime - end;
+        console.log('[Clock Sync] Server time offset:', window.serverTimeOffset, 'ms');
+      } catch (e) {
+        console.error('[Clock Sync] Failed to sync clock:', e);
+      }
+    }
+    syncClock();
+    setInterval(syncClock, 300000); // Re-sync every 5 minutes
+
     loadAlerts();
     loadToolbarSettings();
+    const initTf = $('tf').value;
+    if ($('mobile-tf-label')) $('mobile-tf-label').textContent = initTf;
+    setChartViewMode('full');
     load(true);
     schedule();
-    startAssetTicker();
+
   </script>
 
-  <!-- Entry Light Widget -->
-  <div class="entry-light-widget" id="entry-light-widget">
-    <div class="entry-label wait" id="entry-light-label">WAIT</div>
-    <div class="entry-light-dots">
-      <div class="entry-dot" id="entry-dot-1" title="Signal Direction">1</div>
-      <div class="entry-dot" id="entry-dot-2" title="Confidence ≥80">2</div>
-      <div class="entry-dot" id="entry-dot-3" title="Expected Move ≥0.50%">3</div>
-      <div class="entry-dot" id="entry-dot-4" title="Echoes Confirmation">4</div>
-      <div class="entry-dot" id="entry-dot-5" title="Asymmetry ≥3.0">5</div>
-    </div>
-  </div>
+  <!-- Entry Light Widget moved to Gatekeeper Panel -->
 
   <!-- Mobile HUD Strip -->
   <div class="mobile-hud-strip" onclick="openMobileSheet()">
@@ -8753,6 +9314,7 @@ function renderPredictionsTable(predicted, tfOverride) {
       <!-- Cloned content is placed here dynamically -->
     </div>
   </div>
+
 </body>
 
 

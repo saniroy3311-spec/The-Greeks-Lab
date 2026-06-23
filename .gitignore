@@ -19,3 +19,6 @@ persistent_cache.json
 scratch/
 .opencode/
 
+
+.venv/
+predictions.db

@@ -1,6 +1,9 @@
-# eventlet monkey patching MUST be the first thing imported and executed!
-import eventlet
-eventlet.monkey_patch()
+# Eventlet is disabled to ensure Windows compatibility with native SSL and threads
+# import eventlet
+# eventlet.monkey_patch()
+
+import gevent.monkey
+gevent.monkey.patch_all()
 
 import os
 import sys
@@ -40,8 +43,8 @@ mimetypes.add_type('application/javascript', '.js')
 app = Flask(__name__)
 CORS(app)
 
-# SocketIO configured for eventlet async mode
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet", ping_timeout=30, ping_interval=15)
+# SocketIO configured for gevent async mode
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent", ping_timeout=30, ping_interval=15)
 
 # Active Room Subscriber Tracking (to optimize socket emits)
 _room_lock = threading.Lock()
@@ -59,8 +62,26 @@ def is_room_active(room):
 def get_max_age(tf_key, is_active):
     """Dynamic max age based on timeframe to save resources and CPU (Phase 1.2)."""
     if is_active:
-        return {"1m": 8, "3m": 15, "5m": 25}.get(tf_key, 30)
-    return 60
+        mapping = {
+            "1m": 8,
+            "3m": 15,
+            "5m": 25,
+            "15m": 60,
+            "30m": 120,
+            "1h": 300,
+            "1d": 86400,
+        }
+    else:
+        mapping = {
+            "1m": 1800,
+            "3m": 1800,
+            "5m": 1800,
+            "15m": 3600,
+            "30m": 3600,
+            "1h": 7200,
+            "1d": 86400,
+        }
+    return mapping.get(tf_key, 30 if is_active else 60)
 
 
 # ----------------------------------------------------------------------------
@@ -303,7 +324,7 @@ def get_prediction_cached_or_request(symbol, tf, max_wait=None):
     # the very first view of a brand-new symbol still resolves, but cap the
     # wait far below the old 45s to avoid hanging the handler.
     if max_wait is None:
-        max_wait = 10.0
+        max_wait = 25.0
 
     start_time = time.time()
     while (time.time() - start_time) < max_wait:
@@ -347,7 +368,7 @@ def candl_assets(path):
 @app.route("/api/scan_all")
 def api_scan_all():
     now = time.time()
-    symbols = ["NIFTY", "BANKNIFTY", "BTC", "GOLD"]
+    symbols = ["NIFTY", "BANKNIFTY", "BTC"]
     timeframes = ["1m", "3m", "5m", "15m", "30m"]
     
     # Record active client interest for all combos
@@ -441,9 +462,8 @@ def api_scalper(symbol, tf):
         df['isExpanding'] = df['emaGap_abs'] > df['emaGap_abs_prev']
         df['upTrend'] = (df['ema9'] > df['ema15']) & df['isExpanding'] & (df['emaGap_abs'] > df['threshold'])
         df['downTrend'] = (df['ema9'] < df['ema15']) & df['isExpanding'] & (df['emaGap_abs'] > df['threshold'])
-        
-        df['longTrigger'] = df['upTrend'] & (~df['upTrend'].shift(1).fillna(False))
-        df['shortTrigger'] = df['downTrend'] & (~df['downTrend'].shift(1).fillna(False))
+        df['longTrigger'] = df['upTrend'] & (~df['upTrend'].shift(1, fill_value=False))
+        df['shortTrigger'] = df['downTrend'] & (~df['downTrend'].shift(1, fill_value=False))
 
         # Build markers for Candl Canvas Chart
         markers = []
@@ -661,6 +681,11 @@ def api_ema_kronos(symbol, tf):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/time")
+def api_time():
+    return jsonify({"server_time": int(time.time() * 1000)})
+
+
 @app.route("/api/a1/<symbol>/<tf>")
 def api_a1(symbol, tf):
     """A1 Standalone System — 6-Gate confluence of EMA, Kronos AI, and Echoes."""
@@ -862,7 +887,13 @@ def _emit_tick(symbol, tf, candle_data, source="delta_ws"):
             "symbol": symbol,
             "price": candle_data["close"],
             "time": candle_data["time"],
-            "source": source
+            "source": source,
+            "timeframe": tf,
+            "open": candle_data["open"],
+            "high": candle_data["high"],
+            "low": candle_data["low"],
+            "close": candle_data["close"],
+            "volume": candle_data.get("volume", 0)
         }
     if is_room_active(room):
         socketio.emit('tick', tick_payload, room=room)
@@ -875,6 +906,7 @@ def _delta_ws_thread():
         "BTCUSD": "BTC",
         "XAUTUSD": "GOLD"
     }
+    _active_3m_candles = {}  # symbol -> candle_dict
     
     def on_message(ws_conn, message):
         try:
@@ -903,7 +935,7 @@ def _delta_ws_thread():
             
             # Normalize timestamp to seconds
             if raw_time > 1000000000000000:
-                t = raw_time // 1000000000
+                t = raw_time // 1000000
             elif raw_time > 100000000000:
                 t = raw_time // 1000
             else:
@@ -915,9 +947,13 @@ def _delta_ws_thread():
             c = float(msg.get("close") or msg.get("c", 0))
             v = float(msg.get("volume") or msg.get("v", 0))
             
+            if o <= 0 or h <= 0 or l <= 0 or c <= 0:
+                return
+            
             candle = {"time": int(t), "open": o, "high": h, "low": l, "close": c, "volume": v}
             _emit_tick(kronos_symbol, matched_tf, candle, source="delta_ws")
             
+
         except Exception as e:
             print(f"[Delta WS] Error processing message: {e}")
     
@@ -1019,7 +1055,7 @@ def _yfinance_poll_thread():
                     _emit_tick(kronos_sym, tf, candle, source="yfinance")
                 
             except Exception as e:
-                pass
+                print(f"[YFinance Poll Error] {kronos_sym}: {e}")
         
         time.sleep(POLL_INTERVAL)
 
@@ -1042,9 +1078,8 @@ if __name__ == "__main__":
     # Start yfinance rapid-poll thread for NIFTY & BANKNIFTY
     yf_thread = threading.Thread(target=_yfinance_poll_thread, daemon=True)
     yf_thread.start()
-    
     try:
-        socketio.run(app, host="0.0.0.0", port=PORT)
+        socketio.run(app, host="0.0.0.0", port=PORT, allow_unsafe_werkzeug=True)
     finally:
         print("[Kronos] Stopping predictor_worker process...")
         worker_proc.terminate()

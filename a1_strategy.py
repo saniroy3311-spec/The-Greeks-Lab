@@ -227,11 +227,7 @@ class A1Strategy:
         gates['short_g5_kronos_move'] = bool(move_pct <= self.min_move_short)
         gates['short_g6_echoes'] = bool(short_echo_ok)
 
-        # --- Candle body direction conflicts with EMA direction (Skip 8) ---
-        if trend == "Up" and is_red:
-            skip_reasons.append("Candle body (RED) conflicts with EMA trend (Up)")
-        if trend == "Down" and is_green:
-            skip_reasons.append("Candle body (GREEN) conflicts with EMA trend (Down)")
+
 
         # --- Decision ---
         long_gates_all = all([
