@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GREEKS · LABS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   THEME TOKENS
+   ══════════════════════════════════════════ */
+:root {
+  --bg:        #06101C;
+  --surface:   #0A1828;
+  --border:    #132030;
+  --text:      #B8D8EE;
+  --muted:     #3A6070;
+  --accent:    #1D9E75;
+  --up:        #1D9E75;
+  --down:      #E84B4B;
+  --warn:      #E8A93A;
+  --pred:      #5B8FFF;
+  --sma7:      #4A9FD5;
+  --sma21:     #CC44CC;
+  --fcst:      #FF9800;
+  --sig-blue:  #1D9E75;
+  --sig-orange:#E8A93A;
+}
+body.light {
+  --bg:        #F0F5FC;
+  --surface:   #FFFFFF;
+  --border:    #D0DFF0;
+  --text:      #0A3060;
+  --muted:     #6B8FAA;
+  --accent:    #1565C0;
+  --up:        #0D7A5E;
+  --down:      #C0392B;
+  --warn:      #E65100;
+  --pred:      #1565C0;
+  --sma7:      #1565C0;
+  --sma21:     #AA00FF;
+  --fcst:      #E65100;
+  --sig-blue:  #1565C0;
+  --sig-orange:#E65100;
+}
+
+/* ══════════════════════════════════════════
+   RESET
+   ══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg); color: var(--text); font-size: 13px;
+}
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ══════════════════════════════════════════
+   TOPBAR
+   ══════════════════════════════════════════ */
+#topbar {
+  height: 44px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 10px; gap: 5px;
+  flex-shrink: 0; user-select: none;
+  position: relative; z-index: 20;
+  overflow-x: auto; overflow-y: hidden;
+}
+#topbar::-webkit-scrollbar { height: 0; }
+
+/* Logo */
+#logo {
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .09em; white-space: nowrap;
+  color: var(--text); flex-shrink: 0;
+}
+#logo b { color: var(--accent); }
+
+/* Separator */
+.sep {
+  width: 1px; background: var(--border);
+  height: 18px; flex-shrink: 0; margin: 0 1px;
+}
+
+/* Badges */
+.badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  padding: 2px 7px; letter-spacing: .07em;
+  white-space: nowrap; flex-shrink: 0;
+  border-radius: 2px;
+}
+.badge-ver   { background: var(--border); color: var(--muted); }
+.badge-live  { background: transparent; color: var(--up); border: 1px solid var(--up); }
+.badge-paper { background: var(--border); color: var(--text); }
+.badge-perp  {
+  background: rgba(91,143,255,.12); color: var(--pred);
+  border: 1px solid rgba(91,143,255,.25); font-size: 8px;
+}
+.badge-wait  { background: var(--warn); color: #000; }
+
+/* Small label + value stacked */
+.tb-group { display: flex; flex-direction: column; flex-shrink: 0; gap: 0; }
+.tb-lbl   { font-size: 7px; font-weight: 600; color: var(--muted); letter-spacing: .09em; line-height: 1.2; }
+.tb-val   { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; color: var(--text); line-height: 1.3; }
+
+/* Price */
+#tb-price {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px; font-weight: 700;
+  color: var(--text); white-space: nowrap; flex-shrink: 0;
+}
+#tb-chg {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  min-width: 55px; flex-shrink: 0;
+}
+.up { color: var(--up); }
+.dn { color: var(--down); }
+
+/* Symbol select */
+#sym-sel {
+  background: var(--bg); color: var(--text);
+  border: 1px solid var(--border);
+  padding: 3px 6px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px; font-weight: 700;
+  cursor: pointer; outline: none; flex-shrink: 0;
+}
+
+/* SMA Legend */
+#sma-legend {
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; font-weight: 600; white-space: nowrap;
+}
+.sma-item { display: flex; align-items: center; gap: 3px; }
+.sma-line { width: 16px; height: 2px; border-radius: 1px; flex-shrink: 0; }
+.sma-line-7  { background: var(--sma7); }
+.sma-line-21 { background: var(--sma21); }
+.sma-line-fc { background: var(--fcst); }
+.sma-item span { color: var(--muted); }
+
+/* Timeframe buttons */
+.tf-group { display: flex; gap: 1px; flex-shrink: 0; }
+.tf {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; font-weight: 600;
+  background: transparent; border: none;
+  color: var(--muted);
+  padding: 4px 8px; cursor: pointer;
+  transition: all .12s; letter-spacing: .04em;
+  white-space: nowrap; border-radius: 2px;
+}
+.tf:hover { color: var(--text); background: var(--border); }
+.tf.on    { background: var(--accent); color: #fff; }
+
+/* Clock */
+#clock {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; font-weight: 600;
+  color: var(--text); margin-left: auto;
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* Theme toggle */
+.theme-grp { display: flex; gap: 1px; flex-shrink: 0; margin-left: 6px; }
+.th-btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted); padding: 3px 8px; cursor: pointer;
+  letter-spacing: .06em; transition: all .12s; border-radius: 2px;
+}
+.th-btn:hover { color: var(--text); }
+.th-btn.on {
+  background: var(--accent); color: #fff;
+  border-color: var(--accent);
+}
+
+/* ══════════════════════════════════════════
+   MAIN LAYOUT
+   ══════════════════════════════════════════ */
+#main {
+  display: flex;
+  height: calc(100vh - 44px);
+  width: 100%; overflow: hidden;
+}
+
+/* ══════════════════════════════════════════
+   LEFT PANEL
+   ══════════════════════════════════════════ */
+#lp {
+  width: 340px; flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  display: flex; flex-direction: column;
+  overflow-y: auto; overflow-x: hidden;
+}
+
+/* LP header */
+.lp-hdr {
+  padding: 7px 11px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  justify-content: space-between; flex-shrink: 0;
+}
+.lp-hdr-title { font-size: 8px; font-weight: 700; letter-spacing: .1em; color: var(--muted); }
+.pretrade-badge {
+  font-size: 7px; font-weight: 700;
+  background: var(--border); color: var(--muted);
+  padding: 2px 6px; letter-spacing: .06em; border-radius: 1px;
+}
+
+/* Verdict banner */
+#v-box {
+  margin: 7px 8px;
+  padding: 10px 11px;
+  border-left: 3px solid var(--warn);
+  background: rgba(232,169,58,.08);
+  flex-shrink: 0;
+}
+#v-box.buy  { border-left-color: var(--up);   background: rgba(29,158,117,.08); }
+#v-box.sell { border-left-color: var(--down);  background: rgba(232,75,75,.08); }
+
+#v-title {
+  font-size: 13px; font-weight: 700;
+  letter-spacing: .02em; margin-bottom: 4px;
+  color: var(--warn);
+}
+#v-title.buy  { color: var(--up); }
+#v-title.sell { color: var(--down); }
+#v-reason { font-size: 9px; color: var(--muted); line-height: 1.6; }
+
+/* LP sections */
+.lp-sec {
+  padding: 7px 11px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sec-row {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 5px;
+}
+.sec-lbl { font-size: 8px; font-weight: 700; letter-spacing: .1em; color: var(--muted); }
+.sec-val { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; }
+
+/* ── Signal strength — segmented blocks ── */
+.sig-blocks { display: flex; gap: 2px; width: 100%; }
+.sig-block {
+  flex: 1; height: 4px; border-radius: 1px;
+  background: var(--border); transition: background .3s;
+}
+.sig-block.lit-blue   { background: var(--sig-blue); }
+.sig-block.lit-orange { background: var(--sig-orange); }
+
+/* ── 5-Candle Forecast ── */
+.fc-header-row {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 6px;
+}
+.fc-row {
+  display: flex; gap: 4px;
+  overflow-x: auto; padding-bottom: 2px;
+}
+.fc-row::-webkit-scrollbar { height: 0; }
+.fc-card {
+  flex-shrink: 0; width: 58px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 5px 3px;
+  text-align: center;
+  display: flex; flex-direction: column;
+  align-items: center;
+  transition: border-color .2s;
+}
+.fc-card:hover { border-color: var(--muted); }
+.fc-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 7px; color: var(--muted);
+  margin-bottom: 2px; letter-spacing: .04em;
+}
+.fc-candle-wrap {
+  width: 100%; display: flex;
+  justify-content: center; align-items: center;
+  height: 48px; margin: 2px 0;
+}
+.fc-price {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 7.5px; font-weight: 700;
+  line-height: 1; margin-top: 2px;
+}
+.fc-conf {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 7.5px; font-weight: 600;
+  margin-top: 2px; color: var(--muted);
+}
+
+/* ── Gates ── */
+.gate {
+  display: flex; align-items: stretch;
+  border-bottom: 1px solid var(--border);
+  min-height: 50px;
+}
+.gate-n {
+  width: 24px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: var(--muted);
+  border-right: 1px solid var(--border);
+}
+.gate.pass .gate-n { border-left: 2px solid var(--up); }
+.gate.fail .gate-n { border-left: 2px solid var(--down); }
+.gate-body {
+  flex: 1; padding: 5px 9px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.gate-name { font-size: 8px; font-weight: 700; letter-spacing: .09em; color: var(--muted); }
+.gate-thr  { font-family: 'IBM Plex Mono', monospace; font-size: 7px; color: var(--muted); margin-top: 1px; }
+.gate-gbar { width: 100%; height: 2px; background: var(--border); margin-top: 5px; }
+.gate-gfill { height: 100%; transition: width .4s; }
+.gate-gfill.pass { background: var(--up); }
+.gate-gfill.fail { background: var(--down); }
+.gate-right {
+  display: flex; flex-direction: column;
+  align-items: flex-end; justify-content: center;
+  padding: 5px 9px; gap: 3px; min-width: 88px;
+}
+.gate-val   { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 700; }
+.gate-badge { font-size: 7px; font-weight: 700; padding: 2px 5px; letter-spacing: .07em; border-radius: 1px; }
+.gate-badge.pass { background: rgba(29,158,117,.12); color: var(--up); }
+.gate-badge.fail { background: rgba(232,75,75,.10);  color: var(--down); }
+
+/* ── Score / Verdict box (bottom) ── */
+#score-box {
+  margin: 7px 8px 10px;
+  padding: 10px 11px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#score-box.buy  { border-color: var(--up);   background: rgba(29,158,117,.06); }
+#score-box.sell { border-color: var(--down);  background: rgba(232,75,75,.06); }
+#score-box.skip { border-color: var(--warn);  background: rgba(232,169,58,.06); }
+#score-box.fail { border-color: var(--down);  background: rgba(232,75,75,.06); }
+
+.score-top { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+#score-n   { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 700; }
+#score-n.buy  { color: var(--up); }
+#score-n.sell { color: var(--down); }
+#score-n.skip { color: var(--warn); }
+#score-n.fail { color: var(--down); }
+#score-lbl { font-size: 10px; font-weight: 700; letter-spacing: .02em; }
+#score-why { font-size: 9px; color: var(--muted); line-height: 1.55; }
+
+/* ══════════════════════════════════════════
+   CHART AREA
+   ══════════════════════════════════════════ */
+#chart-area {
+  flex: 1; min-width: 0; height: 100%;
+  display: flex; overflow: hidden;
+}
+
+#rp {
+  flex: 1; min-width: 0; height: 100%;
+  background: var(--bg); position: relative; overflow: hidden;
+}
+
+#rcon {
+  display: none;
+  position: absolute; top: 0; left: 0; right: 0;
+  background: var(--warn); color: #000;
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; font-weight: 700;
+  padding: 3px; z-index: 100; letter-spacing: .07em;
+}
+#rcon.on { display: block; }
+
+#err {
+  display: none;
+  position: absolute; top: 6px; left: 6px; right: 6px;
+  background: rgba(232,75,75,.1); color: var(--down);
+  font-size: 10px; padding: 6px 8px; z-index: 50;
+  border: 1px solid var(--down);
+}
+
+#chart-loading {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg); z-index: 10;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--muted); letter-spacing: .1em;
+}
+#chart-loading.gone { display: none; }
+
+/* ══════════════════════════════════════════
+   DRAWING TOOLBAR
+   ══════════════════════════════════════════ */
+#dtb {
+  width: 40px; flex-shrink: 0;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  align-items: center; padding: 6px 0; gap: 2px;
+  overflow-y: auto; overflow-x: hidden; z-index: 15;
+}
+.dtb-sep { width: 24px; height: 1px; background: var(--border); margin: 4px 0; flex-shrink: 0; }
+.dtb-btn {
+  width: 30px; height: 30px;
+  background: transparent; border: 1px solid transparent;
+  color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; transition: all .12s; flex-shrink: 0;
+  position: relative;
+}
+.dtb-btn:hover  { background: var(--bg); border-color: var(--border); color: var(--text); }
+.dtb-btn.on     { background: rgba(29,158,117,.15); border-color: var(--accent); color: var(--accent); }
+.dtb-btn svg    { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+/* tooltip */
+.dtb-btn::after {
+  content: attr(data-tip);
+  position: absolute; right: calc(100% + 6px); top: 50%; transform: translateY(-50%);
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+  white-space: nowrap; padding: 3px 7px;
+  pointer-events: none; opacity: 0;
+  transition: opacity .12s; z-index: 999; letter-spacing: .04em;
+}
+.dtb-btn:hover::after { opacity: 1; }
+
+/* ══════════════════════════════════════════
+   MOBILE  ≤ 768px
+   ══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  html, body { overflow: auto; font-size: 12px; }
+
+  /* TOPBAR — 2 rows */
+  #topbar {
+    height: auto; flex-wrap: wrap;
+    padding: 6px 8px; gap: 4px; row-gap: 4px;
+  }
+  #logo     { font-size: 10px; }
+  #tb-price { font-size: 14px; }
+  #clock    { font-size: 10px; margin-left: 0; }
+  .tf       { font-size: 9px; padding: 3px 6px; }
+  .tb-group { display: none; }     /* LATENCY/FEED/WINDOW labels hidden */
+  .theme-grp { margin-left: auto; }
+  .th-btn   { font-size: 8px; padding: 2px 6px; }
+  #sma-legend { display: none; }   /* SMA legend hidden on mobile */
+
+  /* MAIN — vertical stack */
+  #main { flex-direction: column; height: auto; overflow: visible; }
+
+  /* LEFT PANEL — full width */
+  #lp {
+    width: 100% !important;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    overflow: visible; max-height: none;
+  }
+
+  #v-box  { margin: 5px 8px; padding: 8px 10px; }
+  #v-title { font-size: 12px; }
+  #v-reason { font-size: 9px; }
+
+  .lp-sec { padding: 6px 10px; }
+  .sec-val { font-size: 12px; }
+
+  .fc-row  { gap: 3px; }
+  .fc-card { width: 56px; padding: 4px 2px; }
+  .fc-candle-wrap { height: 42px; }
+  .fc-price { font-size: 7px; }
+  .fc-lbl   { font-size: 7px; }
+  .fc-conf  { font-size: 7px; }
+
+  .gate     { min-height: 44px; }
+  .gate-n   { width: 22px; font-size: 8px; }
+  .gate-name { font-size: 8px; }
+  .gate-thr  { font-size: 7px; }
+  .gate-val  { font-size: 10px; }
+  .gate-badge { font-size: 7px; padding: 2px 4px; }
+  .gate-body  { padding: 4px 8px; }
+  .gate-right { padding: 4px 8px; min-width: 72px; }
+
+  #score-box { margin: 5px 8px 10px; padding: 9px; }
+  #score-n   { font-size: 19px; }
+  #score-lbl { font-size: 9px; }
+  #score-why { font-size: 9px; }
+
+  /* CHART AREA — tall, fills screen */
+  #chart-area {
+    flex-direction: row;
+    height: 72vw;
+    min-height: 340px;
+    max-height: 540px;   /* generous on taller phones */
+    width: 100%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  /* Drawing toolbar — slim */
+  #dtb {
+    width: 34px; padding: 4px 0;
+    gap: 1px; overflow-y: auto;
+  }
+  .dtb-btn { width: 26px; height: 26px; font-size: 11px; }
+  .dtb-btn svg { width: 12px; height: 12px; }
+  .dtb-btn::after { display: none; } /* no tooltip hover on mobile */
+}
+
+/* Extra-small phones ≤ 400px */
+@media (max-width: 400px) {
+  #topbar   { padding: 5px 7px; gap: 3px; }
+  #logo     { font-size: 9px; }
+  .badge    { font-size: 8px; padding: 2px 5px; }
+  #tb-price { font-size: 12px; }
+  .fc-card  { width: 46px; }
+  .gate-val { font-size: 9px; }
+  #score-n  { font-size: 17px; }
+  #chart-area {
+    height: 76vw; min-height: 280px; max-height: 420px;
+  }
+}
+</style>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     TOPBAR
+     ══════════════════════════════════════════ -->
+<div id="topbar">
+
+  <div id="logo">GREEKS · <b>LABS</b></div>
+  <div class="sep"></div>
+  <span class="badge badge-ver">v4.2.0</span>
+  <span class="badge badge-live" id="status-badge">● LIVE</span>
+  <span class="badge badge-paper">PAPER</span>
+  <div class="sep"></div>
+
+  <div class="tb-group">
+    <span class="tb-lbl">LATENCY</span>
+    <span class="tb-val" id="latency-lbl">—ms</span>
+  </div>
+  <div class="sep"></div>
+  <div class="tb-group">
+    <span class="tb-lbl">FEED</span>
+    <span class="tb-val" id="feed-lbl">Binance</span>
+  </div>
+  <div class="sep"></div>
+  <div class="tb-group">
+    <span class="tb-lbl">WINDOW</span>
+    <span class="tb-val" id="window-lbl">1m</span>
+  </div>
+  <div class="sep"></div>
+
+  <select id="sym-sel">
+    <option value="BTC">BTC/USDT</option>
+    <option value="NIFTY">NIFTY</option>
+  </select>
+  <div class="sep"></div>
+  <span id="tb-price">—</span>
+  <span id="tb-chg"></span>
+  <span class="badge badge-perp">PERP</span>
+  <div class="sep"></div>
+
+  <!-- SMA / FCST legend with coloured lines -->
+  <div id="sma-legend">
+    <div class="sma-item">
+      <div class="sma-line sma-line-7"></div>
+      <span>SMA7</span>
+    </div>
+    <div class="sma-item">
+      <div class="sma-line sma-line-21"></div>
+      <span>SMA21</span>
+    </div>
+    <div class="sma-item">
+      <div class="sma-line sma-line-fc"></div>
+      <span>FCST</span>
+    </div>
+  </div>
+  <div class="sep"></div>
+
+  <!-- Timeframes: 1m 3m 5m 15m 1H 4H -->
+  <div class="tf-group">
+    <button class="tf on" data-tf="1m">1m</button>
+    <button class="tf"    data-tf="3m">3m</button>
+    <button class="tf"    data-tf="5m">5m</button>
+    <button class="tf"    data-tf="15m">15m</button>
+    <button class="tf"    data-tf="1H">1H</button>
+    <button class="tf"    data-tf="4H">4H</button>
+  </div>
+
+  <div id="clock">—</div>
+
+  <div class="theme-grp">
+    <button class="th-btn" id="btn-light" onclick="setThm('light')">○ LIGHT</button>
+    <button class="th-btn on" id="btn-dark" onclick="setThm('dark')">● DARK</button>
+  </div>
+
+</div><!-- #topbar -->
+
+
+<!-- ══════════════════════════════════════════
+     MAIN
+     ══════════════════════════════════════════ -->
+<div id="main">
+
+  <!-- LEFT PANEL -->
+  <div id="lp">
+
+    <div class="lp-hdr">
+      <span class="lp-hdr-title">■ EXECUTION GATEKEEPER LOGIC</span>
+      <span class="pretrade-badge">PRE-TRADE</span>
+    </div>
+
+    <!-- Verdict banner -->
+    <div id="v-box">
+      <div id="v-title">⏸ WAIT / SKIP</div>
+      <div id="v-reason">Connecting to backend…</div>
+    </div>
+
+    <!-- Signal strength -->
+    <div class="lp-sec">
+      <div class="sec-row">
+        <span class="sec-lbl">■ SIGNAL STRENGTH</span>
+        <span class="sec-val" id="sig-pct">—</span>
+      </div>
+      <!-- 10 segmented blocks -->
+      <div class="sig-blocks" id="sig-blocks">
+        <div class="sig-block" id="sb0"></div>
+        <div class="sig-block" id="sb1"></div>
+        <div class="sig-block" id="sb2"></div>
+        <div class="sig-block" id="sb3"></div>
+        <div class="sig-block" id="sb4"></div>
+        <div class="sig-block" id="sb5"></div>
+        <div class="sig-block" id="sb6"></div>
+        <div class="sig-block" id="sb7"></div>
+        <div class="sig-block" id="sb8"></div>
+        <div class="sig-block" id="sb9"></div>
+      </div>
+    </div>
+
+    <!-- 5-Candle Forecast -->
+    <div class="lp-sec">
+      <div class="fc-header-row">
+        <span class="sec-lbl">■ 5-CANDLE FORECAST</span>
+        <span class="sec-lbl" id="fc-window" style="letter-spacing:.05em">—</span>
+      </div>
+      <div class="fc-row" id="fc-cards"></div>
+    </div>
+
+    <!-- Gates -->
+    <div id="gates"></div>
+
+    <!-- Score / Verdict bottom -->
+    <div id="score-box" class="skip">
+      <div class="score-top">
+        <span id="score-n" class="skip">0/5</span>
+        <span id="score-lbl">VERDICT — SKIP EXECUTION</span>
+      </div>
+      <div id="score-why">Loading analysis…</div>
+    </div>
+
+  </div><!-- #lp -->
+
+  <!-- CHART AREA -->
+  <div id="chart-area">
+
+    <div id="rp">
+      <div id="rcon">⚡ RECONNECTING TO LIVE FEED…</div>
+      <div id="err"></div>
+      <div id="chart-loading">LOADING MARKET DATA…</div>
+    </div>
+
+    <!-- DRAWING TOOLBAR — right edge -->
+    <div id="dtb">
+
+      <button class="dtb-btn on" data-tool="null" data-tip="CURSOR" onclick="setTool(this,'null')">
+        <svg viewBox="0 0 24 24"><path d="M5 3l14 9-7 1-4 7z"/></svg>
+      </button>
+      <div class="dtb-sep"></div>
+
+      <button class="dtb-btn" data-tool="trendline" data-tip="TREND LINE" onclick="setTool(this,'trendline')">
+        <svg viewBox="0 0 24 24"><line x1="4" y1="20" x2="20" y2="4"/><circle cx="4" cy="20" r="1.5" fill="currentColor"/><circle cx="20" cy="4" r="1.5" fill="currentColor"/></svg>
+      </button>
+      <button class="dtb-btn" data-tool="ray" data-tip="RAY" onclick="setTool(this,'ray')">
+        <svg viewBox="0 0 24 24"><line x1="4" y1="20" x2="22" y2="4"/><circle cx="4" cy="20" r="1.5" fill="currentColor"/></svg>
+      </button>
+      <button class="dtb-btn" data-tool="xline" data-tip="EXT LINE" onclick="setTool(this,'xline')">
+        <svg viewBox="0 0 24 24"><line x1="2" y1="18" x2="22" y2="6"/></svg>
+      </button>
+      <div class="dtb-sep"></div>
+
+      <button class="dtb-btn" data-tool="hline" data-tip="H LINE" onclick="setTool(this,'hline')">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="17" y1="8" x2="21" y2="12"/><line x1="17" y1="16" x2="21" y2="12"/></svg>
+      </button>
+      <button class="dtb-btn" data-tool="hray" data-tip="H RAY" onclick="setTool(this,'hray')">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><circle cx="3" cy="12" r="1.5" fill="currentColor"/></svg>
+      </button>
+      <button class="dtb-btn" data-tool="vline" data-tip="V LINE" onclick="setTool(this,'vline')">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><line x1="8" y1="7" x2="12" y2="3"/><line x1="16" y1="7" x2="12" y2="3"/></svg>
+      </button>
+      <div class="dtb-sep"></div>
+
+      <button class="dtb-btn" data-tool="channel" data-tip="CHANNEL" onclick="setTool(this,'channel')">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="18" x2="21" y2="8"/><line x1="3" y1="14" x2="21" y2="4"/></svg>
+      </button>
+      <button class="dtb-btn" data-tool="rect" data-tip="RECTANGLE" onclick="setTool(this,'rect')">
+        <svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="1"/></svg>
+      </button>
+      <button class="dtb-btn" data-tool="ellipse" data-tip="ELLIPSE" onclick="setTool(this,'ellipse')">
+        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="9" ry="6"/></svg>
+      </button>
+      <button class="dtb-btn" data-tool="triangle" data-tip="TRIANGLE" onclick="setTool(this,'triangle')">
+        <svg viewBox="0 0 24 24"><polygon points="12,4 21,20 3,20"/></svg>
+      </button>
+      <div class="dtb-sep"></div>
+
+      <button class="dtb-btn" data-tool="fib" data-tip="FIB RETRACE" onclick="setTool(this,'fib')">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="5" x2="21" y2="5"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="3" y1="14" x2="21" y2="14"/><line x1="3" y1="19" x2="21" y2="19"/><text x="3" y="9" font-size="5" fill="currentColor" stroke="none">0.382</text></svg>
+      </button>
+      <button class="dtb-btn" data-tool="fibext" data-tip="FIB EXT" onclick="setTool(this,'fibext')">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="4" x2="21" y2="4"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="3" y1="21" x2="21" y2="21"/></svg>
+      </button>
+      <button class="dtb-btn" data-tool="pitchfork" data-tip="PITCHFORK" onclick="setTool(this,'pitchfork')">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="9" x2="12" y2="12"/><line x1="20" y1="9" x2="12" y2="12"/></svg>
+      </button>
+      <div class="dtb-sep"></div>
+
+      <button class="dtb-btn" data-tool="arrow" data-tip="ARROW" onclick="setTool(this,'arrow')">
+        <svg viewBox="0 0 24 24"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="9,5 19,5 19,15"/></svg>
+      </button>
+      <button class="dtb-btn" data-tool="brush" data-tip="BRUSH" onclick="setTool(this,'brush')">
+        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+      </button>
+      <button class="dtb-btn" data-tool="note" data-tip="NOTE" onclick="setTool(this,'note')">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+      </button>
+      <div class="dtb-sep"></div>
+
+      <button class="dtb-btn" data-tool="pricerange" data-tip="PRICE RANGE" onclick="setTool(this,'pricerange')">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="4" x2="12" y2="20"/><line x1="6" y1="4" x2="18" y2="4"/><line x1="6" y1="20" x2="18" y2="20"/></svg>
+      </button>
+      <button class="dtb-btn" data-tool="daterange" data-tip="DATE RANGE" onclick="setTool(this,'daterange')">
+        <svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="4" y2="18"/><line x1="20" y1="6" x2="20" y2="18"/></svg>
+      </button>
+      <div class="dtb-sep"></div>
+
+      <button class="dtb-btn" data-tip="CLEAR ALL" onclick="clearDrawings()" style="color:var(--down)">
+        <svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H6L5,6"/><path d="M10,11v6"/><path d="M14,11v6"/><path d="M9,6V4h6v2"/></svg>
+      </button>
+
+    </div><!-- #dtb -->
+  </div><!-- #chart-area -->
+
+</div><!-- #main -->
+
+<script type="importmap">
+{
+  "imports": {
+    "react/jsx-runtime": "https://esm.sh/react@18/jsx-runtime",
+    "react": "https://esm.sh/react@18"
+  }
+}
+</script>
+<script type="module">
+import { createChartEngine } from '/static/candl-charts.js';
+
+/* ── Timeframe maps (expanded: 1m 3m 5m 15m 1H 4H) ── */
+const TF_MS  = { '1m':60000,'3m':180000,'5m':300000,'15m':900000,'1H':3600000,'4H':14400000 };
+const TF_MIN = { '1m':1,'3m':3,'5m':5,'15m':15,'1H':60,'4H':240 };
+
+let sym = 'BTC', tf = '1m', theme = 'dark';
+let chart = null, candles = [], lastData = null;
+let sio = null, sioRoom = null;
+let loadSeq = 0, loadInflight = 0;
+
+const $ = id => document.getElementById(id);
+
+/* ── Number helpers ── */
+function fmt(v, d = 2) {
+  if (v == null || !isFinite(v)) return '—';
+  return v.toLocaleString('en-US', { minimumFractionDigits:d, maximumFractionDigits:d });
+}
+function fmtPct(v, d = 2) {
+  if (v == null || !isFinite(v)) return '—';
+  return (v >= 0 ? '+' : '') + v.toFixed(d) + '%';
+}
+function priceDec() { return sym === 'BTC' ? 1 : 2; }
+
+/* ── IST clock ── */
+function tickClock() {
+  $('clock').textContent = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kolkata',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+  }).format(new Date());
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+/* ── Theme ── */
+window.setThm = function(t) {
+  theme = t;
+  document.body.className = t === 'light' ? 'light' : '';
+  $('btn-dark').className  = 'th-btn' + (t === 'dark'  ? ' on' : '');
+  $('btn-light').className = 'th-btn' + (t === 'light' ? ' on' : '');
+  if (chart) chart.setTheme(t);
+};
+
+/* ── Drawing toolbar ── */
+window.setTool = function(btn, toolId) {
+  document.querySelectorAll('.dtb-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  if (chart) chart.setActiveTool(toolId === 'null' ? null : toolId);
+};
+window.clearDrawings = function() {
+  if (chart) chart.clearDrawings();
+  document.querySelectorAll('.dtb-btn').forEach(b => b.classList.remove('on'));
+  document.querySelector('[data-tool="null"]').classList.add('on');
+  if (chart) chart.setActiveTool(null);
+};
+
+/* ── Chart engine init ── */
+function initChart() {
+  if (chart) { chart.destroy(); chart = null; }
+  chart = createChartEngine($('rp'), {
+    theme,
+    pricePrecision: priceDec(),
+    chartType: 'candles',
+    timeZone: 'Asia/Kolkata',    /* IST — fixes candle time labels */
+  });
+}
+
+/* ── Compute SMA helper ── */
+function computeSMA(arr, period) {
+  const out = [];
+  for (let i = period - 1; i < arr.length; i++) {
+    let s = 0;
+    for (let j = i - period + 1; j <= i; j++) s += arr[j].close;
+    out.push({ time: arr[i].time, value: s / period });
+  }
+  return out;
+}
+
+/* ── Topbar price ── */
+function setPrice(close, open) {
+  $('tb-price').textContent = fmt(close, priceDec());
+  if (open && open > 0) {
+    const pct = (close - open) / open * 100;
+    const el = $('tb-chg');
+    el.textContent = fmtPct(pct);
+    el.className = pct >= 0 ? 'up' : 'dn';
+  }
+}
+
+/* ── Signal strength — segmented blocks ── */
+function renderSigBlocks(conf) {
+  const pct    = Math.min(Math.max(conf, 0), 100);
+  const filled = Math.round(pct / 10);   /* out of 10 */
+  const thresh = 7;                      /* blocks 0-6 = blue, 7-9 = orange */
+  for (let i = 0; i < 10; i++) {
+    const el = $('sb' + i);
+    if (i < filled) {
+      el.className = 'sig-block ' + (i < thresh ? 'lit-blue' : 'lit-orange');
+    } else {
+      el.className = 'sig-block';
+    }
+  }
+}
+
+/* ── Forecast time label — smart (e.g. +5m, +1H) ── */
+function fcLabel(idx, tfMin) {
+  const mins = (idx + 1) * tfMin;
+  if (mins >= 60 && mins % 60 === 0) return '+' + (mins / 60) + 'H';
+  if (mins >= 60) return '+' + (mins / 60).toFixed(1) + 'H';
+  return '+' + mins + 'm';
+}
+
+/* ── Candle SVG for forecast cards ── */
+function makeCandleSVG(o, h, l, c, color, pMin, pMax) {
+  const H = 48, W = 24, pad = 3;
+  const range = (pMax - pMin) || 1;
+  const toY   = v => pad + (1 - (v - pMin) / range) * (H - pad * 2);
+  const oY = toY(o), cY = toY(c), hY = toY(h), lY = toY(l);
+  const bodyTop = Math.min(oY, cY);
+  const bodyH   = Math.max(Math.abs(cY - oY), 2);
+  const wickX   = W / 2;
+  const isBull  = c >= o;
+  const triY    = H - 1, triSz = 3;
+  const tri = isBull
+    ? `<polygon points="${wickX},${triY-triSz} ${wickX-triSz},${triY+triSz} ${wickX+triSz},${triY+triSz}" fill="${color}"/>`
+    : `<polygon points="${wickX},${triY+triSz} ${wickX-triSz},${triY-triSz} ${wickX+triSz},${triY-triSz}" fill="${color}"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
+    <line x1="${wickX}" y1="${hY}" x2="${wickX}" y2="${lY}" stroke="${color}" stroke-width="1.2"/>
+    <rect x="${wickX-4}" y="${bodyTop}" width="8" height="${bodyH}" fill="${color}" rx="0.5"/>
+    ${tri}
+  </svg>`;
+}
+
+/* ══════════════════════════════════════════
+   GATEKEEPER PANEL RENDERER
+   ══════════════════════════════════════════ */
+function renderGK(d) {
+  const dir     = d.kronos_direction      || 'Flat';
+  const conf    = d.kronos_confidence     || 0;
+  const movePct = d.kronos_move_pct       || 0;
+  const dec     = d.decision              || 'SKIP';
+  const skips   = d.skip_reasons          || [];
+  const wr      = d.echo_win_rate         ?? 0;
+  const ec      = d.echo_count            ?? 0;
+  const eup     = d.echo_up_count         ?? 0;
+  const asymL   = d.echo_asymmetry_long   ?? 0;
+  const asymS   = d.echo_asymmetry_short  ?? 0;
+  const preds   = d.predicted             || [];
+  const cur     = d.current               || 0;
+  const tfMin   = TF_MIN[tf]              || 1;
+
+  /* ── Verdict banner ── */
+  const vBox = $('v-box'), vTitle = $('v-title'), vReason = $('v-reason');
+  if (dec === 'BUY') {
+    vBox.className = 'buy'; vTitle.className = 'buy';
+    vTitle.textContent = '▲ LONG — EXECUTE';
+    vReason.textContent = `Kronos ${dir} · Conf ${conf}% · Move ${fmtPct(movePct)} · All gates cleared.`;
+  } else if (dec === 'SELL') {
+    vBox.className = 'sell'; vTitle.className = 'sell';
+    vTitle.textContent = '▼ SHORT — EXECUTE';
+    vReason.textContent = `Kronos ${dir} · Conf ${conf}% · Move ${fmtPct(movePct)} · All gates cleared.`;
+  } else {
+    vBox.className = ''; vTitle.className = '';
+    vTitle.textContent = '⏸ WAIT / SKIP';
+    vReason.textContent = skips.length > 0
+      ? 'Standby — ' + skips[0]
+      : `Standby — Greeks Labs confidence ${conf} < 80 threshold. All 5 gates must clear before routing.`;
+  }
+
+  /* ── Signal blocks & pct ── */
+  $('sig-pct').textContent = conf + '%';
+  renderSigBlocks(conf);
+
+  /* ── Feed / latency from backend ── */
+  const feedName = d.feed || d.exchange || (sym === 'BTC' ? 'Binance' : 'NSE');
+  $('feed-lbl').textContent    = feedName;
+  $('window-lbl').textContent  = tf;
+  if (d.latency != null) $('latency-lbl').textContent = d.latency + 'ms';
+
+  /* ── Forecast cards ── */
+  const fc = $('fc-cards'); fc.innerHTML = '';
+  const n  = Math.min(preds.length, 5);
+  const totalMins = n * tfMin;
+  $('fc-window').textContent = n > 0
+    ? `Next ${totalMins >= 60 && totalMins % 60 === 0
+        ? totalMins/60 + 'H'
+        : totalMins + 'm'} · LSTM`
+    : '—';
+
+  /* Shared price range for y-scale consistency */
+  const allP = [cur, ...preds.slice(0,n).flatMap(p => [
+    p.open||cur, p.high||Math.max(p.open||cur, p.close),
+    p.low||Math.min(p.open||cur, p.close), p.close
+  ])].filter(Boolean);
+  const pMin = Math.min(...allP), pMax = Math.max(...allP);
+
+  for (let i = 0; i < n; i++) {
+    const p = preds[i];
+    const prevClose = i === 0 ? cur : (preds[i-1].close || cur);
+    const o = p.open  || prevClose;
+    const h = p.high  || Math.max(o, p.close) * 1.0005;
+    const l = p.low   || Math.min(o, p.close) * 0.9995;
+    const c = p.close;
+
+    const isBull = c >= o;
+    const col    = isBull ? 'var(--up)' : 'var(--down)';
+    const colHex = isBull ? (theme === 'light' ? '#0D7A5E' : '#1D9E75')
+                           : (theme === 'light' ? '#C0392B' : '#E84B4B');
+
+    /* Confidence: use backend value if present, else declining estimate */
+    const confVal = p.confidence != null
+      ? Math.round(p.confidence <= 1 ? p.confidence * 100 : p.confidence)
+      : Math.max(50, Math.round(conf - i * 3));
+
+    const card = document.createElement('div');
+    card.className = 'fc-card';
+    card.innerHTML =
+      `<div class="fc-lbl">${fcLabel(i, tfMin)}</div>` +
+      `<div class="fc-candle-wrap">${makeCandleSVG(o,h,l,c, colHex, pMin, pMax)}</div>` +
+      `<div class="fc-price" style="color:${col}">${fmt(c, 0)}</div>` +
+      `<div class="fc-conf">${confVal}%</div>`;
+    fc.appendChild(card);
+  }
+
+  /* ── Gate definitions ── */
+  const isLong  = dir === 'Long';
+  const isShort = dir === 'Short';
+  const lastC   = candles.length > 0 ? candles[candles.length-1] : null;
+  const isGreen = lastC && lastC.close > lastC.open;
+  const isRed   = lastC && lastC.close < lastC.open;
+
+  const gateDefs = [
+    { name: 'AI CONFIDENCE',
+      thr:  '≥ 80%',
+      val:  conf + '%',
+      barPct: Math.min(conf, 100),
+      pass: conf >= 80 },
+    { name: 'HISTORICAL EDGE',
+      thr:  isShort ? '≤ 20% · 1/5' : '≥ 80% · 1/5',
+      val:  `${Math.round(wr*100)}% (${eup}/${ec})`,
+      barPct: Math.min(wr * 100, 100),
+      pass: isShort ? wr <= 0.20 : wr >= 0.80 },
+    { name: 'RISK / REWARD',
+      thr:  '≥ 3.0x',
+      val:  (isShort ? asymS : asymL).toFixed(2) + 'x',
+      barPct: Math.min((isShort ? asymS : asymL) / 5 * 100, 100),
+      pass: (isShort ? asymS : asymL) >= 3.0 },
+    { name: 'EXPECTED MOVE',
+      thr:  '≥ 0.40%',
+      val:  Math.abs(movePct).toFixed(2) + '%',
+      barPct: Math.min(Math.abs(movePct) / 1.0 * 100, 100),
+      pass: Math.abs(movePct) >= 0.40 },
+    { name: 'CANDLE CLOSE',
+      thr:  'closed',
+      val:  isLong  ? (isGreen ? 'green' : 'open')
+            : isShort ? (isRed   ? 'red'   : 'open') : '—',
+      barPct: 0,
+      pass: isLong ? !!isGreen : isShort ? !!isRed : false },
+  ];
+
+  const gEl = $('gates'); gEl.innerHTML = '';
+  let passCount = 0;
+  gateDefs.forEach((g, i) => {
+    if (g.pass) passCount++;
+    const cls = g.pass ? 'pass' : 'fail';
+    const row = document.createElement('div');
+    row.className = `gate ${cls}`;
+    row.innerHTML =
+      `<div class="gate-n">${i + 1}</div>` +
+      `<div class="gate-body">` +
+        `<div class="gate-name">${g.name}</div>` +
+        `<div class="gate-thr">${g.thr}</div>` +
+        `<div class="gate-gbar"><div class="gate-gfill ${cls}" style="width:${g.barPct}%"></div></div>` +
+      `</div>` +
+      `<div class="gate-right">` +
+        `<span class="gate-val" style="color:var(--${g.pass?'up':'down'})">${g.val}</span>` +
+        `<span class="gate-badge ${cls}">${g.pass ? 'PASS' : 'FAIL'}</span>` +
+      `</div>`;
+    gEl.appendChild(row);
+  });
+
+  /* ── Score / Verdict box ── */
+  const sb = $('score-box'), sn = $('score-n'), sl = $('score-lbl'), sw = $('score-why');
+  let scls;
+  if      (dec === 'BUY')  scls = 'buy';
+  else if (dec === 'SELL') scls = 'sell';
+  else if (passCount === 0) scls = 'fail';
+  else                      scls = 'skip';
+  sb.className = scls; sn.className = scls;
+  sn.textContent = passCount + '/5';
+  if (dec === 'BUY') {
+    sl.textContent = 'VERDICT — LONG EXECUTION';
+    sw.textContent = `All ${passCount} gates cleared. Greeks Labs aligned Long at ${conf}% confidence.`;
+  } else if (dec === 'SELL') {
+    sl.textContent = 'VERDICT — SHORT EXECUTION';
+    sw.textContent = `All ${passCount} gates cleared. Greeks Labs aligned Short at ${conf}% confidence.`;
+  } else {
+    sl.textContent = 'VERDICT — SKIP EXECUTION';
+    sw.textContent = skips.length > 0
+      ? 'Insufficient confluence. ' + skips.slice(0, 2).join('. ') + '.'
+      : 'Insufficient confluence. Entry blocked until gates pass.';
+  }
+}
+
+/* ══════════════════════════════════════════
+   MAIN DATA LOAD
+   ══════════════════════════════════════════ */
+async function load(isFirst = false, isBg = false) {
+  const mySym = sym, myTf = tf, mySeq = ++loadSeq;
+  loadInflight++;
+  if (isFirst && !chart) initChart();
+  if (isFirst) $('chart-loading').classList.remove('gone');
+  $('err').style.display = 'none';
+  $('window-lbl').textContent = myTf;
+
+  try {
+    const res = await fetch(`/api/a1/${mySym}/${myTf}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const d = await res.json();
+    if (d.error) throw new Error(d.error);
+    if (!d.candles || !d.predicted) throw new Error('Invalid response from server');
+    if (mySeq !== loadSeq || sym !== mySym || tf !== myTf) return;
+
+    lastData = d;
+
+    /* ── Map candles — keep timestamps in ms ── */
+    candles = d.candles.map(c => ({
+      time:   c.time * 1000,     /* server sends UNIX seconds → ms */
+      open:   c.open,
+      high:   c.high,
+      low:    c.low,
+      close:  c.close,
+      volume: c.volume || 0
+    }));
+
+    const preds = d.predicted
+      .map(p => ({
+        time:  p.time * 1000,
+        open:  p.open, high: p.high, low: p.low, close: p.close,
+        volume: 0, isPrediction: true
+      }))
+      .filter(p => candles.length === 0 || p.time > candles[candles.length-1].time);
+
+    if (!chart) initChart();
+    chart.setData([...candles, ...preds]);
+
+    /* ── Try to push SMA overlays into chart engine ── */
+    try {
+      if (typeof chart.setOverlays === 'function') {
+        chart.setOverlays([
+          { type:'sma', period:7,  color:'var(--sma7)',  lineWidth:1.5 },
+          { type:'sma', period:21, color:'var(--sma21)', lineWidth:1.5 },
+        ]);
+      } else if (typeof chart.addSeries === 'function') {
+        const sma7  = computeSMA(candles, 7);
+        const sma21 = computeSMA(candles, 21);
+        chart.addSeries({ type:'line', data:sma7,  color:'#4A9FD5', lineWidth:1.5, id:'sma7' });
+        chart.addSeries({ type:'line', data:sma21, color:'#CC44CC', lineWidth:1.5, id:'sma21' });
+      }
+    } catch (_) { /* engine doesn't expose overlay API — no-op */ }
+
+    if (d.current && candles.length > 0) setPrice(d.current, candles[0].open);
+
+    /* ── Update feed label from backend ── */
+    const feedName = d.feed || d.exchange || (sym === 'BTC' ? 'Binance' : 'NSE');
+    $('feed-lbl').textContent = feedName;
+    if (d.latency != null) $('latency-lbl').textContent = d.latency + 'ms';
+
+    renderGK(d);
+    subscribe();
+
+  } catch(e) {
+    if (mySeq === loadSeq) {
+      const el = $('err');
+      el.textContent = 'Error: ' + e.message;
+      el.style.display = 'block';
+    }
+  } finally {
+    loadInflight = Math.max(0, loadInflight - 1);
+    $('chart-loading').classList.add('gone');
+  }
+}
+
+/* ══════════════════════════════════════════
+   SOCKET.IO
+   ══════════════════════════════════════════ */
+function initSIO() {
+  if (sio) return;
+  sio = io(location.origin, {
+    transports: ['websocket', 'polling'],
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    reconnectionAttempts: Infinity
+  });
+  sio.on('connect', () => {
+    $('status-badge').textContent = '● LIVE';
+    $('status-badge').className   = 'badge badge-live';
+    $('rcon').classList.remove('on');
+    if (sioRoom) sio.emit('subscribe', sioRoom);
+  });
+  sio.on('disconnect', () => {
+    $('status-badge').textContent = 'WAIT';
+    $('status-badge').className   = 'badge badge-wait';
+    $('rcon').classList.add('on');
+  });
+  sio.on('tick', onTick);
+}
+
+function subscribe() {
+  if (!sio) initSIO();
+  if (sioRoom) sio.emit('unsubscribe', sioRoom);
+  sioRoom = { symbol: sym, timeframe: tf };
+  sio.emit('subscribe', sioRoom);
+}
+
+/* ── Tick handler ── */
+function onTick(d) {
+  if (d.symbol !== sym || d.timeframe !== tf) return;
+  if (!chart || loadInflight > 0) return;
+
+  const bMs = TF_MS[tf] || 60000;
+  const t   = Math.floor(d.time / (bMs / 1000)) * (bMs / 1000);
+  if (!d.open || !d.close || d.close <= 0) return;
+
+  const c = {
+    time:   t * 1000,
+    open:   d.open, high: d.high, low: d.low, close: d.close,
+    volume: d.volume || 0
+  };
+
+  let closed = false;
+  if (candles.length > 0) {
+    const last = candles[candles.length - 1];
+    if (c.time >= last.time + bMs) closed = true;
+  }
+
+  if      (candles.length === 0)                              candles.push(c);
+  else if (c.time === candles[candles.length-1].time)         candles[candles.length-1] = c;
+  else if (c.time >  candles[candles.length-1].time)          candles.push(c);
+
+  chart.updateLast(candles[candles.length-1]);
+  setPrice(c.close, candles[0] ? candles[0].open : c.open);
+
+  /* Live latency from tick */
+  if (d.server_ts) {
+    const lat = Date.now() - d.server_ts;
+    if (lat > 0 && lat < 9999) $('latency-lbl').textContent = lat + 'ms';
+  }
+
+  /* Live GK update using cached data */
+  if (lastData) {
+    renderGK({
+      ...lastData,
+      candles: candles.map(x => ({
+        time:x.time/1000, open:x.open, high:x.high, low:x.low, close:x.close, volume:x.volume
+      }))
+    });
+  }
+
+  if (closed) setTimeout(() => load(false, true), 1500);
+}
+
+/* ══════════════════════════════════════════
+   CONTROLS
+   ══════════════════════════════════════════ */
+$('sym-sel').addEventListener('change', function() { sym = this.value; load(true); });
+
+document.querySelectorAll('.tf').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tf').forEach(b => b.classList.remove('on'));
+    this.classList.add('on');
+    tf = this.dataset.tf;
+    load(true);
+  });
+});
+
+window.addEventListener('resize', () => { if (chart) chart.resize(); });
+
+window.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    if (sio && !sio.connected) sio.connect();
+    if (loadInflight === 0) load(false, true);
+  }
+});
+
+/* ── Boot ── */
+initChart();
+initSIO();
+load(true);
+</script>
+</body>
+</html>
