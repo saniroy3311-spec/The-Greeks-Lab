@@ -1,4 +1,4 @@
-# Kronos Live Trading Dashboard
+# Live Trading Dashboard
 
 A standalone live signal dashboard for **Nifty 50** and **Bank Nifty** powered by the
 Kronos forecasting model. Shows a real candlestick chart (Candl Canvas Chart)
